@@ -1,0 +1,1043 @@
+Analyzing sayhelo...                                            
+
+   info • The import of 'package:chatnest/app/pages/setting_screen/screens/chat/clear_chat_select_screen.dart' is unnecessary because all of the used elements are also provided by the import of 'package:chatnest/app/pages/pages.dart' • lib/app/navigators/app_pages.dart:3:8 • unnecessary_import
+   info • The constant name 'BroadCastchat' isn't a lowerCamelCase identifier • lib/app/navigators/app_routes.dart:8:16 • constant_identifier_names
+   info • The constant name 'Groupcheatscreen' isn't a lowerCamelCase identifier • lib/app/navigators/app_routes.dart:10:16 • constant_identifier_names
+   info • The constant name 'ViewAllContact' isn't a lowerCamelCase identifier • lib/app/navigators/app_routes.dart:60:16 • constant_identifier_names
+   info • The constant name 'ViewAllContact' isn't a lowerCamelCase identifier • lib/app/navigators/app_routes.dart:175:16 • constant_identifier_names
+warning • Unused import: 'package:agora_rtc_engine/agora_rtc_engine.dart' • lib/app/pages/audio_call_screen/audio_call_controller.dart:7:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/app/pages/audio_call_screen/audio_call_controller.dart:254:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/audio_call_screen/audio_call_controller.dart:255:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/audio_call_screen/audio_call_controller.dart:256:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/audio_call_screen/audio_call_controller.dart:268:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/audio_call_screen/audio_call_controller.dart:318:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/audio_call_screen/audio_call_controller.dart:353:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/audio_call_screen/audio_call_controller.dart:486:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/audio_call_screen/audio_call_controller.dart:489:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/audio_call_screen/audio_call_controller.dart:755:7 • avoid_print
+   info • The import of 'package:chatnest/domain/models/agora_user_model.dart' is unnecessary because all of the used elements are also provided by the import of 'package:chatnest/domain/domain.dart' • lib/app/pages/audio_call_screen/audio_call_screen.dart:4:8 • unnecessary_import
+   info • 'onPopInvoked' is deprecated and shouldn't be used. Use onPopInvokedWithResult instead. This feature was deprecated after v3.22.0-12.0.pre • lib/app/pages/audio_call_screen/audio_call_screen.dart:196:7 • deprecated_member_use
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/audio_call_screen/audio_call_screen.dart:406:34 • prefer_const_constructors
+   info • Don't invoke 'print' in production code • lib/app/pages/authScreen/auth_controller.dart:34:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/authScreen/auth_controller.dart:88:7 • avoid_print
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/authScreen/screens/otp_screen.dart:151:48 • deprecated_member_use
+   info • The local variable '_debouncer' starts with an underscore • lib/app/pages/broadCastScreen/Screens/add_broadcast_screen.dart:14:11 • no_leading_underscores_for_local_identifiers
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/broadCastScreen/Screens/add_broadcast_screen.dart:219:28 • prefer_const_constructors
+   info • The local variable '_debouncer' starts with an underscore • lib/app/pages/broadCastScreen/Screens/broadcast_list_screen.dart:15:11 • no_leading_underscores_for_local_identifiers
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/broadCastScreen/Screens/broadcast_profile_screen.dart:342:59 • deprecated_member_use
+   info • Don't invoke 'print' in production code • lib/app/pages/broadCastScreen/Screens/broadcast_profile_screen.dart:475:65 • avoid_print
+   info • The file name 'broadCast_binding.dart' isn't a lower_case_with_underscores identifier • lib/app/pages/broadCastScreen/broadCast_binding.dart:1:1 • file_names
+   info • The file name 'broadCast_controller.dart' isn't a lower_case_with_underscores identifier • lib/app/pages/broadCastScreen/broadCast_controller.dart:1:1 • file_names
+   info • Don't invoke 'print' in production code • lib/app/pages/broadCastScreen/broadCast_controller.dart:78:9 • avoid_print
+   info • The file name 'broadCast_page.dart' isn't a lower_case_with_underscores identifier • lib/app/pages/broadCastScreen/broadCast_page.dart:1:1 • file_names
+   info • The file name 'broadCast_presenter.dart' isn't a lower_case_with_underscores identifier • lib/app/pages/broadCastScreen/broadCast_presenter.dart:1:1 • file_names
+   info • Don't use 'BuildContext's across async gaps • lib/app/pages/call_screen/screen/call_info_screen.dart:206:72 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/app/pages/call_screen/screen/call_info_screen.dart:373:52 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/app/pages/call_screen/screen/call_screen.dart:168:54 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/app/pages/call_screen/screen/call_screen.dart:196:52 • use_build_context_synchronously
+   info • The local variable '_debouncer' starts with an underscore • lib/app/pages/call_screen/screen/contact_list_screen.dart:15:11 • no_leading_underscores_for_local_identifiers
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/call_screen/screen/contact_list_screen.dart:389:99 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/call_screen/screen/contact_list_screen.dart:409:99 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/call_screen/screen/contact_list_screen.dart:429:99 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/call_screen/screen/contact_list_screen.dart:449:99 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/call_screen/screen/contact_list_screen.dart:469:99 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/call_screen/screen/contact_list_screen.dart:489:99 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/call_screen/screen/contact_list_screen.dart:509:99 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/call_screen/screen/contact_list_screen.dart:529:99 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/call_screen/screen/contact_list_screen.dart:549:99 • deprecated_member_use
+   info • The imported package 'http' isn't a dependency of the importing package • lib/app/pages/chat_screen/chat_controller.dart:26:8 • depend_on_referenced_packages
+warning • The left operand can't be null, so the right operand is never executed • lib/app/pages/chat_screen/chat_controller.dart:124:72 • dead_null_aware_expression
+warning • The member 'notifyListeners' can only be used within 'package:flutter/src/foundation/change_notifier.dart' or a test • lib/app/pages/chat_screen/chat_controller.dart:162:26 • invalid_use_of_visible_for_testing_member
+warning • The member 'notifyListeners' can only be used within instance members of subclasses of 'ChangeNotifier' • lib/app/pages/chat_screen/chat_controller.dart:162:26 • invalid_use_of_protected_member
+warning • The left operand can't be null, so the right operand is never executed • lib/app/pages/chat_screen/chat_controller.dart:791:53 • dead_null_aware_expression
+   info • Don't invoke 'print' in production code • lib/app/pages/chat_screen/chat_controller.dart:808:15 • avoid_print
+warning • The receiver can't be null, so the null-aware operator '?.' is unnecessary • lib/app/pages/chat_screen/chat_controller.dart:959:49 • invalid_null_aware_operator
+warning • The receiver can't be null, so the null-aware operator '?.' is unnecessary • lib/app/pages/chat_screen/chat_controller.dart:977:40 • invalid_null_aware_operator
+   info • Don't invoke 'print' in production code • lib/app/pages/chat_screen/chat_controller.dart:983:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/chat_screen/chat_controller.dart:991:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/chat_screen/chat_controller.dart:995:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/chat_screen/chat_controller.dart:1060:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/chat_screen/chat_controller.dart:1816:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/chat_screen/chat_controller.dart:1820:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/chat_screen/chat_controller.dart:1833:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/chat_screen/chat_controller.dart:1875:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/chat_screen/chat_controller.dart:1878:9 • avoid_print
+warning • The member 'notifyListeners' can only be used within 'package:flutter/src/foundation/change_notifier.dart' or a test • lib/app/pages/chat_screen/chat_controller.dart:2022:26 • invalid_use_of_visible_for_testing_member
+warning • The member 'notifyListeners' can only be used within instance members of subclasses of 'ChangeNotifier' • lib/app/pages/chat_screen/chat_controller.dart:2022:26 • invalid_use_of_protected_member
+   info • Don't invoke 'print' in production code • lib/app/pages/chat_screen/chat_controller.dart:2404:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/chat_screen/chat_controller.dart:2407:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/chat_screen/chat_controller.dart:2498:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/chat_screen/chat_controller.dart:2501:7 • avoid_print
+warning • The left operand can't be null, so the right operand is never executed • lib/app/pages/chat_screen/chat_controller.dart:2881:44 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/app/pages/chat_screen/chat_controller.dart:2928:44 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/app/pages/chat_screen/chat_controller.dart:3006:44 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/app/pages/chat_screen/chat_controller.dart:3053:44 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/app/pages/chat_screen/chat_controller.dart:3131:44 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/app/pages/chat_screen/chat_controller.dart:3178:44 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/app/pages/chat_screen/chat_controller.dart:4118:41 • dead_null_aware_expression
+   info • The file name 'attechScreen.dart' isn't a lower_case_with_underscores identifier • lib/app/pages/chat_screen/screen/attechPopup_screens/attechScreen.dart:1:1 • file_names
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/chat_screen/screen/chat_lock/chat_lock_screen.dart:22:39 • deprecated_member_use
+   info • The local variable '_debouncer' starts with an underscore • lib/app/pages/chat_screen/screen/chat_lock/pages/group_chat_list_lock_screen.dart:16:11 • no_leading_underscores_for_local_identifiers
+   info • The type of the right operand ('GroupFriendData?') isn't a subtype or a supertype of the left operand ('GroupChatDatum?') • lib/app/pages/chat_screen/screen/chat_lock/pages/group_chat_list_lock_screen.dart:246:64 • unrelated_type_equality_checks
+warning • Unused import: 'dart:math' • lib/app/pages/chat_screen/screen/chat_screen.dart:2:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/app/pages/chat_screen/screen/chat_screen.dart:62:9 • avoid_print
+   info • 'onPopInvoked' is deprecated and shouldn't be used. Use onPopInvokedWithResult instead. This feature was deprecated after v3.22.0-12.0.pre • lib/app/pages/chat_screen/screen/chat_screen.dart:92:11 • deprecated_member_use
+   info • The import of 'package:flutter/widgets.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/pages/chat_screen/screen/chat_user_profile/chat_user_profile_screen.dart:8:8 • unnecessary_import
+warning • Unused import: 'package:google_maps_flutter/google_maps_flutter.dart' • lib/app/pages/chat_screen/screen/chat_user_profile/chat_user_profile_screen.dart:11:8 • unused_import
+   info • Don't use 'BuildContext's across async gaps • lib/app/pages/chat_screen/screen/chat_user_profile/chat_user_profile_screen.dart:140:61 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/app/pages/chat_screen/screen/chat_user_profile/chat_user_profile_screen.dart:464:61 • use_build_context_synchronously
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/chat_screen/screen/chat_user_profile/pages/chat_business_info_screen.dart:257:35 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/chat_screen/screen/chat_user_profile/pages/chat_business_info_screen.dart:535:35 • prefer_const_constructors
+   info • The import of 'package:chatnest/domain/repositories/repository.dart' is unnecessary because all of the used elements are also provided by the import of 'package:chatnest/domain/repositories/repositories.dart' • lib/app/pages/chat_screen/screen/chat_user_profile/pages/chat_personal_info_screen.dart:6:8 • unnecessary_import
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/chat_screen/screen/chat_user_profile/pages/chat_personal_info_screen.dart:227:25 • prefer_const_constructors
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/chat_screen/screen/chat_user_profile/pages/chat_personal_info_screen.dart:420:51 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/chat_screen/screen/chat_user_profile/pages/chat_personal_info_screen.dart:451:51 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/chat_screen/screen/chat_user_profile/pages/chat_personal_info_screen.dart:481:51 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/chat_screen/screen/chat_user_profile/pages/chat_personal_info_screen.dart:511:51 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/chat_screen/screen/chat_user_profile/pages/chat_personal_info_screen.dart:541:51 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/chat_screen/screen/chat_user_profile/pages/chat_personal_info_screen.dart:571:51 • deprecated_member_use
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/chat_screen/screen/chat_user_profile/pages/chat_personal_info_screen.dart:595:64 • prefer_const_constructors
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/chat_screen/screen/chat_user_profile/pages/chat_personal_info_screen.dart:605:51 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/chat_screen/screen/chat_user_profile/pages/chat_personal_info_screen.dart:634:51 • deprecated_member_use
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/chat_screen/screen/chat_user_profile/pages/chat_personal_info_screen.dart:868:34 • prefer_const_constructors
+   info • Don't use 'BuildContext's across async gaps • lib/app/pages/chat_screen/screen/contact_pages/view_all_contect.dart:238:59 • use_build_context_synchronously
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/chat_screen/screen/contact_pages/view_all_select_contact_screen.dart:127:27 • prefer_const_constructors
+   info • The file name 'shareLocation_screen.dart' isn't a lower_case_with_underscores identifier • lib/app/pages/chat_screen/screen/location/shareLocation_screen.dart:1:1 • file_names
+   info • The local variable '_debouncer' starts with an underscore • lib/app/pages/chat_screen/screen/location/shareLocation_screen.dart:14:11 • no_leading_underscores_for_local_identifiers
+warning • The value of the local variable '_debouncer' isn't used • lib/app/pages/chat_screen/screen/location/shareLocation_screen.dart:14:11 • unused_local_variable
+   info • Don't invoke 'print' in production code • lib/app/pages/chat_screen/screen/location/shareLocation_screen.dart:185:25 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/chat_screen/screen/location/shareLocation_screen.dart:240:25 • avoid_print
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/chat_screen/screen/message_info_screen.dart:35:32 • prefer_const_constructors
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/chat_screen/screen/multipal_image/multipal_image_screen.dart:260:56 • deprecated_member_use
+   info • The import of 'package:flutter/widgets.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/cupertino.dart' • lib/app/pages/chat_screen/screen/poll_pages/create_poll_screen.dart:4:8 • unnecessary_import
+   info • Statements in an if should be enclosed in a block • lib/app/pages/chat_screen/screen/poll_pages/create_poll_screen.dart:107:33 • curly_braces_in_flow_control_structures
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/chat_screen/screen/poll_pages/create_poll_screen.dart:192:48 • prefer_const_constructors
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/chat_screen/screen/poll_pages/create_poll_screen.dart:220:27 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/chat_screen/screen/report_user_screen.dart:17:39 • deprecated_member_use
+   info • 'groupValue' is deprecated and shouldn't be used. Use a RadioGroup ancestor to manage group value instead. This feature was deprecated after v3.32.0-0.0.pre • lib/app/pages/chat_screen/screen/share_user_contact_screen.dart:137:31 • deprecated_member_use
+   info • 'onChanged' is deprecated and shouldn't be used. Use RadioGroup to handle value change instead. This feature was deprecated after v3.32.0-0.0.pre • lib/app/pages/chat_screen/screen/share_user_contact_screen.dart:139:31 • deprecated_member_use
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/chat_screen/screen/shared_media/screens/media_screen.dart:227:36 • prefer_const_constructors
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/chat_screen/screen/wallpaper/chat_wallpaper_preview_screen.dart:18:39 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/chat_screen/screen/wallpaper/chat_wallpaper_screen.dart:19:37 • deprecated_member_use
+   info • The file name 'findFriend_screen.dart' isn't a lower_case_with_underscores identifier • lib/app/pages/findFriendScreen/findFriend_screen.dart:1:1 • file_names
+   info • The file name 'findFriend_screen_binding.dart' isn't a lower_case_with_underscores identifier • lib/app/pages/findFriendScreen/findFriend_screen_binding.dart:1:1 • file_names
+   info • The file name 'findFriend_screen_controller.dart' isn't a lower_case_with_underscores identifier • lib/app/pages/findFriendScreen/findFriend_screen_controller.dart:1:1 • file_names
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/findFriendScreen/findFriend_screen_controller.dart:119:35 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/findFriendScreen/findFriend_screen_controller.dart:139:35 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/findFriendScreen/findFriend_screen_controller.dart:158:35 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/findFriendScreen/findFriend_screen_controller.dart:177:35 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/findFriendScreen/findFriend_screen_controller.dart:197:35 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/findFriendScreen/findFriend_screen_controller.dart:218:35 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/findFriendScreen/findFriend_screen_controller.dart:239:35 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/findFriendScreen/findFriend_screen_controller.dart:260:35 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/findFriendScreen/findFriend_screen_controller.dart:280:35 • deprecated_member_use
+   info • 'fromBytes' is deprecated and shouldn't be used. Use BitmapDescriptor.bytes method instead • lib/app/pages/findFriendScreen/findFriend_screen_controller.dart:736:29 • deprecated_member_use
+   info • 'fromBytes' is deprecated and shouldn't be used. Use BitmapDescriptor.bytes method instead • lib/app/pages/findFriendScreen/findFriend_screen_controller.dart:782:29 • deprecated_member_use
+warning • The value of the local variable 'shadowPaint' isn't used • lib/app/pages/findFriendScreen/findFriend_screen_controller.dart:794:17 • unused_local_variable
+warning • The value of the local variable 'borderPaint' isn't used • lib/app/pages/findFriendScreen/findFriend_screen_controller.dart:797:17 • unused_local_variable
+   info • 'fromBytes' is deprecated and shouldn't be used. Use BitmapDescriptor.bytes method instead • lib/app/pages/findFriendScreen/findFriend_screen_controller.dart:834:29 • deprecated_member_use
+   info • The file name 'findFriend_screen_page.dart' isn't a lower_case_with_underscores identifier • lib/app/pages/findFriendScreen/findFriend_screen_page.dart:1:1 • file_names
+   info • The file name 'findFriend_screen_presenter.dart' isn't a lower_case_with_underscores identifier • lib/app/pages/findFriendScreen/findFriend_screen_presenter.dart:1:1 • file_names
+   info • The local variable '_debouncer' starts with an underscore • lib/app/pages/findFriendScreen/screens/request_history_screen.dart:17:11 • no_leading_underscores_for_local_identifiers
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/findFriendScreen/screens/request_history_screen.dart:31:37 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/findFriendScreen/screens/request_history_screen.dart:377:91 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/findFriendScreen/screens/request_history_screen.dart:397:91 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/findFriendScreen/screens/request_history_screen.dart:417:91 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/findFriendScreen/screens/request_history_screen.dart:437:91 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/findFriendScreen/screens/request_history_screen.dart:457:91 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/findFriendScreen/screens/request_history_screen.dart:477:91 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/findFriendScreen/screens/request_history_screen.dart:503:91 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/findFriendScreen/screens/request_history_screen.dart:523:91 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/findFriendScreen/screens/request_history_screen.dart:543:91 • deprecated_member_use
+warning • The left operand can't be null, so the right operand is never executed • lib/app/pages/findFriendScreen/screens/request_history_screen.dart:895:70 • dead_null_aware_expression
+   info • Don't invoke 'print' in production code • lib/app/pages/group_chat_screen/group_chat_controller.dart:47:5 • avoid_print
+   info • Don't use 'BuildContext's across async gaps • lib/app/pages/group_chat_screen/group_chat_controller.dart:201:9 • use_build_context_synchronously
+   info • An uninitialized field should have an explicit type annotation • lib/app/pages/group_chat_screen/group_chat_controller.dart:245:7 • prefer_typing_uninitialized_variables
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/group_chat_screen/group_chat_controller.dart:523:25 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/group_chat_screen/group_chat_controller.dart:542:25 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/group_chat_screen/group_chat_controller.dart:561:25 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/group_chat_screen/group_chat_controller.dart:580:25 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/group_chat_screen/group_chat_controller.dart:599:25 • deprecated_member_use
+   info • The local variable '_debouncer' starts with an underscore • lib/app/pages/group_chat_screen/page/create_group_screen.dart:14:11 • no_leading_underscores_for_local_identifiers
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/group_chat_screen/page/create_group_title_screen.dart:131:47 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/group_chat_screen/page/create_group_title_screen.dart:156:47 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/group_chat_screen/page/create_group_title_screen.dart:183:47 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/group_chat_screen/page/create_group_title_screen.dart:207:47 • deprecated_member_use
+   info • The local variable '_debouncer' starts with an underscore • lib/app/pages/group_chat_screen/page/group_chat_list_screen.dart:16:11 • no_leading_underscores_for_local_identifiers
+   info • 'onPopInvoked' is deprecated and shouldn't be used. Use onPopInvokedWithResult instead. This feature was deprecated after v3.22.0-12.0.pre • lib/app/pages/group_chat_screen/page/group_chat_screen.dart:81:11 • deprecated_member_use
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/group_chat_screen/page/group_message_info_screen.dart:37:32 • prefer_const_constructors
+   info • Don't use 'BuildContext's across async gaps • lib/app/pages/group_chat_screen/page/group_profile_details_screen.dart:174:41 • use_build_context_synchronously
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/group_chat_screen/page/group_profile_details_screen.dart:197:50 • prefer_const_constructors
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/group_chat_screen/page/group_profile_details_screen.dart:613:62 • deprecated_member_use
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/group_chat_screen/page/group_profile_details_screen.dart:880:60 • prefer_const_constructors
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/group_chat_screen/page/group_profile_details_screen.dart:1189:105 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/group_chat_screen/page/group_profile_details_screen.dart:1209:105 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/group_chat_screen/page/group_profile_details_screen.dart:1229:105 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/group_chat_screen/page/group_profile_details_screen.dart:1249:105 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/group_chat_screen/page/group_profile_details_screen.dart:1269:105 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/group_chat_screen/page/group_profile_details_screen.dart:1289:105 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/group_chat_screen/page/group_profile_details_screen.dart:1309:105 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/group_chat_screen/page/group_profile_details_screen.dart:1329:105 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/group_chat_screen/page/group_profile_details_screen.dart:1349:105 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/group_chat_screen/report_group_screen.dart:16:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/hidechateScreen/hidechat_screen.dart:18:39 • deprecated_member_use
+   info • Unnecessary use of string interpolation • lib/app/pages/hidechateScreen/screens/forgot_hide_chat_pin_change.dart:55:17 • unnecessary_string_interpolations
+   info • The local variable '_debouncer' starts with an underscore • lib/app/pages/hidechateScreen/screens/group_chate_screen.dart:16:11 • no_leading_underscores_for_local_identifiers
+   info • The type of the right operand ('GroupFriendData?') isn't a subtype or a supertype of the left operand ('GroupChatDatum?') • lib/app/pages/hidechateScreen/screens/group_chate_screen.dart:255:64 • unrelated_type_equality_checks
+   info • The file name 'homeScreen_binding.dart' isn't a lower_case_with_underscores identifier • lib/app/pages/homeScreen/homeScreen_binding.dart:1:1 • file_names
+   info • The file name 'homeScreen_controller.dart' isn't a lower_case_with_underscores identifier • lib/app/pages/homeScreen/homeScreen_controller.dart:1:1 • file_names
+   info • Don't invoke 'print' in production code • lib/app/pages/homeScreen/homeScreen_controller.dart:100:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/homeScreen/homeScreen_controller.dart:106:7 • avoid_print
+   info • The file name 'homeScreen_page.dart' isn't a lower_case_with_underscores identifier • lib/app/pages/homeScreen/homeScreen_page.dart:1:1 • file_names
+   info • The file name 'homeScreen_presenter.dart' isn't a lower_case_with_underscores identifier • lib/app/pages/homeScreen/homeScreen_presenter.dart:1:1 • file_names
+   info • The file name 'homeScreen_screen.dart' isn't a lower_case_with_underscores identifier • lib/app/pages/homeScreen/homeScreen_screen.dart:1:1 • file_names
+warning • Unused import: 'package:chatnest/app/pages/status_screen/status_screen.dart' • lib/app/pages/homeScreen/homeScreen_screen.dart:4:8 • unused_import
+   info • The import of 'package:flutter/widgets.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/cupertino.dart' • lib/app/pages/homeScreen/homeScreen_screen.dart:10:8 • unnecessary_import
+   info • Don't invoke 'print' in production code • lib/app/pages/meeting_call_page/meeting_call_controller.dart:320:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/meeting_call_page/meeting_call_controller.dart:636:7 • avoid_print
+   info • The import of 'package:flutter/cupertino.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/pages/meeting_call_page/meeting_call_screen.dart:6:8 • unnecessary_import
+   info • 'onPopInvoked' is deprecated and shouldn't be used. Use onPopInvokedWithResult instead. This feature was deprecated after v3.22.0-12.0.pre • lib/app/pages/meeting_call_page/meeting_call_screen.dart:33:7 • deprecated_member_use
+   info • Don't use 'BuildContext's across async gaps • lib/app/pages/meeting_call_page/meeting_call_screen.dart:41:50 • use_build_context_synchronously
+   info • The import of 'package:chatnest/app/theme/styles.dart' is unnecessary because all of the used elements are also provided by the import of 'package:chatnest/app/app.dart' • lib/app/pages/meeting_screen/Screens/add_meeting_screen.dart:5:8 • unnecessary_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/meeting_screen/Screens/add_meeting_screen.dart:44:41 • deprecated_member_use
+   info • 'onBackground' is deprecated and shouldn't be used. Use onSurface instead. This feature was deprecated after v3.18.0-0.1.pre • lib/app/pages/meeting_screen/Screens/add_meeting_screen.dart:129:37 • deprecated_member_use
+   info • Don't invoke 'print' in production code • lib/app/pages/meeting_screen/Screens/add_meeting_screen.dart:158:29 • avoid_print
+   info • 'onBackground' is deprecated and shouldn't be used. Use onSurface instead. This feature was deprecated after v3.18.0-0.1.pre • lib/app/pages/meeting_screen/Screens/add_meeting_screen.dart:304:39 • deprecated_member_use
+warning • Unused import: 'package:chatnest/domain/domain.dart' • lib/app/pages/meeting_screen/Screens/add_member_screen.dart:4:8 • unused_import
+warning • Unused import: 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart' • lib/app/pages/meeting_screen/Screens/add_member_screen.dart:8:8 • unused_import
+   info • The local variable '_debouncer' starts with an underscore • lib/app/pages/meeting_screen/Screens/add_member_screen.dart:15:11 • no_leading_underscores_for_local_identifiers
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/meeting_screen/Screens/host_meeting_detail_screen.dart:32:39 • deprecated_member_use
+warning • The receiver can't be null, so the null-aware operator '?.' is unnecessary • lib/app/pages/meeting_screen/Screens/host_meeting_detail_screen.dart:271:39 • invalid_null_aware_operator
+warning • The receiver can't be null, so the null-aware operator '?.' is unnecessary • lib/app/pages/meeting_screen/Screens/host_meeting_detail_screen.dart:272:45 • invalid_null_aware_operator
+warning • The receiver can't be null, so the null-aware operator '?.' is unnecessary • lib/app/pages/meeting_screen/Screens/host_meeting_detail_screen.dart:273:45 • invalid_null_aware_operator
+warning • The receiver can't be null, so the null-aware operator '?.' is unnecessary • lib/app/pages/meeting_screen/Screens/host_meeting_detail_screen.dart:277:39 • invalid_null_aware_operator
+warning • The receiver can't be null, so the null-aware operator '?.' is unnecessary • lib/app/pages/meeting_screen/Screens/host_meeting_detail_screen.dart:297:48 • invalid_null_aware_operator
+   info • Don't use 'BuildContext's across async gaps • lib/app/pages/meeting_screen/Screens/host_meeting_detail_screen.dart:334:55 • use_build_context_synchronously
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/meeting_screen/Screens/host_meeting_detail_screen.dart:345:64 • deprecated_member_use
+   info • Unnecessary 'const' keyword • lib/app/pages/meeting_screen/Screens/host_meeting_detail_screen.dart:371:26 • unnecessary_const
+   info • The import of 'instant_meeting_dialog.dart' is unnecessary because all of the used elements are also provided by the import of 'package:chatnest/app/app.dart' • lib/app/pages/meeting_screen/Screens/host_meeting_screen.dart:8:8 • unnecessary_import
+   info • The local variable '_debouncer' starts with an underscore • lib/app/pages/meeting_screen/Screens/host_meeting_screen.dart:15:11 • no_leading_underscores_for_local_identifiers
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/meeting_screen/Screens/host_meeting_screen.dart:69:57 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/meeting_screen/Screens/host_meeting_screen.dart:114:57 • deprecated_member_use
+   info • Don't use 'BuildContext's across async gaps • lib/app/pages/meeting_screen/Screens/host_meeting_screen.dart:264:57 • use_build_context_synchronously
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/meeting_screen/Screens/host_meeting_screen.dart:278:50 • deprecated_member_use
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/meeting_screen/Screens/instant_meeting_dialog.dart:118:45 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/meeting_screen/Screens/instant_meeting_dialog.dart:120:45 • prefer_const_constructors
+   info • Don't use 'BuildContext's across async gaps • lib/app/pages/meeting_screen/Screens/instant_meeting_dialog.dart:185:64 • use_build_context_synchronously
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/meeting_screen/Screens/join_metting_detail_screen.dart:23:37 • deprecated_member_use
+   info • Don't use 'BuildContext's across async gaps • lib/app/pages/meeting_screen/Screens/join_metting_detail_screen.dart:250:43 • use_build_context_synchronously
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/meeting_screen/Screens/join_metting_detail_screen.dart:262:56 • deprecated_member_use
+   info • Unnecessary 'const' keyword • lib/app/pages/meeting_screen/Screens/join_metting_detail_screen.dart:270:24 • unnecessary_const
+   info • The local variable '_debouncer' starts with an underscore • lib/app/pages/meeting_screen/Screens/join_metting_screen.dart:14:11 • no_leading_underscores_for_local_identifiers
+   info • Don't use 'BuildContext's across async gaps • lib/app/pages/meeting_screen/Screens/join_metting_screen.dart:132:53 • use_build_context_synchronously
+   info • The local variable '_debouncer' starts with an underscore • lib/app/pages/meeting_screen/Screens/pending_meeting_screen.dart:13:11 • no_leading_underscores_for_local_identifiers
+   info • Don't invoke 'print' in production code • lib/app/pages/meeting_screen/meeting_controller.dart:359:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/meeting_screen/meeting_controller.dart:360:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/meeting_screen/meeting_controller.dart:361:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/meeting_screen/meeting_controller.dart:362:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/meeting_screen/meeting_controller.dart:363:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/meeting_screen/meeting_controller.dart:364:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/meeting_screen/meeting_controller.dart:365:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/meeting_screen/meeting_controller.dart:366:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/meeting_screen/meeting_controller.dart:367:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/meeting_screen/meeting_controller.dart:368:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/meeting_screen/meeting_controller.dart:369:5 • avoid_print
+   info • The import of 'package:chatnest/domain/usecases/meeting_usecases.dart' is unnecessary because all of the used elements are also provided by the import of 'package:chatnest/domain/domain.dart' • lib/app/pages/meeting_screen/meeting_presenter.dart:2:8 • unnecessary_import
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/product_screen/screens/filter_screen.dart:40:21 • prefer_const_constructors
+warning • Unused import: 'package:flutter_rating_bar/flutter_rating_bar.dart' • lib/app/pages/product_screen/screens/product_screen.dart:7:8 • unused_import
+   info • The local variable '_debouncer' starts with an underscore • lib/app/pages/product_screen/screens/product_screen.dart:16:11 • no_leading_underscores_for_local_identifiers
+   info • The imported package 'http' isn't a dependency of the importing package • lib/app/pages/profileScreen/profile_controller.dart:17:8 • depend_on_referenced_packages
+   info • Unnecessary constructor invocation • lib/app/pages/profileScreen/profile_controller.dart:37:31 • prefer_collection_literals
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/profileScreen/profile_controller.dart:62:24 • prefer_const_constructors
+   info • An uninitialized field should have an explicit type annotation • lib/app/pages/profileScreen/profile_controller.dart:168:7 • prefer_typing_uninitialized_variables
+   info • Unnecessary braces in a string interpolation • lib/app/pages/profileScreen/profile_controller.dart:285:67 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • lib/app/pages/profileScreen/profile_controller.dart:285:74 • unnecessary_brace_in_string_interps
+   info • Don't invoke 'print' in production code • lib/app/pages/profileScreen/profile_controller.dart:566:7 • avoid_print
+   info • The local variable '_selectedBusinessCategory' starts with an underscore • lib/app/pages/profileScreen/profile_controller.dart:651:9 • no_leading_underscores_for_local_identifiers
+   info • The local variable '_selectedIntrestedBusinessCategory' starts with an underscore • lib/app/pages/profileScreen/profile_controller.dart:652:9 • no_leading_underscores_for_local_identifiers
+   info • Unnecessary constructor invocation • lib/app/pages/profileScreen/profile_controller.dart:805:38 • prefer_collection_literals
+   info • Unnecessary 'this.' qualifier • lib/app/pages/profileScreen/profile_controller.dart:816:5 • unnecessary_this
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/profileScreen/profile_controller.dart:836:19 • prefer_const_constructors
+   info • Don't invoke 'print' in production code • lib/app/pages/profileScreen/profile_controller.dart:880:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/profileScreen/profile_controller.dart:884:7 • avoid_print
+   info • Use a 'SizedBox' to add whitespace to a layout • lib/app/pages/profileScreen/profile_controller.dart:933:25 • sized_box_for_whitespace
+   info • Don't use 'BuildContext's across async gaps • lib/app/pages/profileScreen/profile_controller.dart:979:9 • use_build_context_synchronously
+   info • The local variable '_selectedProductCategory' starts with an underscore • lib/app/pages/profileScreen/profile_controller.dart:1119:9 • no_leading_underscores_for_local_identifiers
+   info • The local variable '_selectedProductCategory' starts with an underscore • lib/app/pages/profileScreen/profile_controller.dart:1180:9 • no_leading_underscores_for_local_identifiers
+   info • Don't invoke 'print' in production code • lib/app/pages/profileScreen/profile_controller.dart:1205:7 • avoid_print
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/profileScreen/screens/busine_info.dart:261:33 • prefer_const_constructors
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/profileScreen/screens/change_business_hours_screen.dart:17:37 • deprecated_member_use
+warning • The left operand can't be null, so the right operand is never executed • lib/app/pages/profileScreen/screens/change_business_hours_screen.dart:207:74 • dead_null_aware_expression
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/profileScreen/screens/create_business_profile_screen.dart:40:41 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/profileScreen/screens/create_business_profile_screen.dart:1100:52 • deprecated_member_use
+warning • Unused import: 'package:intl/intl.dart' • lib/app/pages/profileScreen/screens/create_profile_screen.dart:9:8 • unused_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/profileScreen/screens/create_profile_screen.dart:28:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/profileScreen/screens/create_profile_screen.dart:696:64 • deprecated_member_use
+   info • Don't invoke 'print' in production code • lib/app/pages/profileScreen/screens/create_profile_screen.dart:927:35 • avoid_print
+   info • The import of 'package:chatnest/app/pages/pages.dart' is unnecessary because all of the used elements are also provided by the import of 'package:chatnest/app/app.dart' • lib/app/pages/profileScreen/screens/location_screen.dart:2:8 • unnecessary_import
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/profileScreen/screens/location_screen.dart:20:50 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/profileScreen/screens/location_screen.dart:28:29 • prefer_const_constructors
+   info • Don't invoke 'print' in production code • lib/app/pages/profileScreen/screens/location_screen.dart:41:21 • avoid_print
+   info • The import of 'package:flutter/cupertino.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/pages/profileScreen/screens/personal_profile_screen.dart:2:8 • unnecessary_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/profileScreen/screens/product_screen/add_business_product.dart:28:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/profileScreen/screens/product_screen/business_product_detail_screen.dart:23:37 • deprecated_member_use
+   info • The local variable '_debouncer' starts with an underscore • lib/app/pages/profileScreen/screens/product_screen/product_screen.dart:16:11 • no_leading_underscores_for_local_identifiers
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/profileScreen/screens/product_screen/product_screen.dart:31:37 • deprecated_member_use
+warning • Unused import: 'package:cached_network_image/cached_network_image.dart' • lib/app/pages/profileScreen/screens/product_screen/show_all_product.dart:1:8 • unused_import
+warning • Unused import: 'package:chatnest/app/navigators/navigators.dart' • lib/app/pages/profileScreen/screens/product_screen/show_all_product.dart:3:8 • unused_import
+warning • Unused import: 'package:chatnest/data/data.dart' • lib/app/pages/profileScreen/screens/product_screen/show_all_product.dart:4:8 • unused_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/profileScreen/screens/product_screen/show_all_product.dart:19:37 • deprecated_member_use
+   info • The local variable '_controller' starts with an underscore • lib/app/pages/request_screen/request_screen.dart:16:13 • no_leading_underscores_for_local_identifiers
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/request_screen/screens/received_request.dart:535:83 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/request_screen/screens/received_request.dart:555:83 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/request_screen/screens/received_request.dart:575:83 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/request_screen/screens/received_request.dart:595:83 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/request_screen/screens/received_request.dart:615:83 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/request_screen/screens/received_request.dart:635:83 • deprecated_member_use
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/request_screen/screens/received_request.dart:654:96 • prefer_const_constructors
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/request_screen/screens/received_request.dart:661:83 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/request_screen/screens/received_request.dart:681:83 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/request_screen/screens/received_request.dart:701:83 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/setting_screen/screens/chat/chat_setting_screen.dart:17:37 • deprecated_member_use
+warning • The left operand can't be null, so the right operand is never executed • lib/app/pages/setting_screen/screens/chat/clear_chat_select_screen.dart:227:66 • dead_null_aware_expression
+   info • The import of 'package:flutter/cupertino.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/pages/setting_screen/screens/help_screen.dart:2:8 • unnecessary_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/setting_screen/screens/help_screen.dart:17:37 • deprecated_member_use
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/setting_screen/screens/help_screen.dart:41:20 • prefer_const_constructors
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/setting_screen/screens/my_acount/change_number_screen.dart:23:39 • deprecated_member_use
+   info • The local variable '_debouncer' starts with an underscore • lib/app/pages/setting_screen/screens/my_acount/multi_user/assign_chat_screen.dart:12:11 • no_leading_underscores_for_local_identifiers
+   info • The local variable '_debouncer' starts with an underscore • lib/app/pages/setting_screen/screens/my_acount/multi_user/assign_group_chat_screen.dart:12:11 • no_leading_underscores_for_local_identifiers
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/setting_screen/screens/my_acount/multi_user/assign_user_screen.dart:16:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/setting_screen/screens/my_acount/multi_user/create_multi_user_screen.dart:21:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/setting_screen/screens/my_acount/multi_user/multi_user_screen.dart:27:37 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/setting_screen/screens/my_acount/multi_user/multi_user_screen.dart:144:33 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/setting_screen/screens/my_acount/multi_user/subuser_change_password_screen.dart:19:37 • deprecated_member_use
+   info • The import of 'package:flutter/cupertino.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/pages/setting_screen/screens/my_acount/my_account_screen.dart:3:8 • unnecessary_import
+   info • The import of 'package:flutter/widgets.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/pages/setting_screen/screens/my_acount/my_account_screen.dart:5:8 • unnecessary_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/setting_screen/screens/my_acount/my_account_screen.dart:19:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/setting_screen/screens/my_acount/recovey_email_screen.dart:19:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/setting_screen/screens/my_acount/report/get_one_report_screen.dart:25:39 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/setting_screen/screens/my_acount/report/report_user_group_list_screen.dart:16:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/setting_screen/screens/notification/all_notification_screen.dart:17:37 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/setting_screen/screens/notification/all_notification_screen.dart:50:17 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/setting_screen/screens/notification/all_notification_screen.dart:70:17 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/setting_screen/screens/notification/all_notification_screen.dart:90:17 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/setting_screen/screens/notification/notification_screen.dart:19:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/setting_screen/screens/privacy_policy_screen.dart:16:37 • deprecated_member_use
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/setting_screen/screens/privacy_policy_screen.dart:40:20 • prefer_const_constructors
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/setting_screen/screens/privacy_security_screen.dart:17:37 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/app/pages/setting_screen/screens/privacy_security_screen.dart:50:17 • deprecated_member_use
+warning • Unused import: 'package:chatnest/app/navigators/navigators.dart' • lib/app/pages/setting_screen/screens/ringtone_screen.dart:2:8 • unused_import
+warning • Unused import: 'package:flutter_phoenix/flutter_phoenix.dart' • lib/app/pages/setting_screen/screens/ringtone_screen.dart:5:8 • unused_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/setting_screen/screens/ringtone_screen.dart:29:37 • deprecated_member_use
+   info • 'groupValue' is deprecated and shouldn't be used. Use a RadioGroup ancestor to manage group value instead. This feature was deprecated after v3.32.0-0.0.pre • lib/app/pages/setting_screen/screens/ringtone_screen.dart:107:23 • deprecated_member_use
+   info • 'onChanged' is deprecated and shouldn't be used. Use RadioGroup to handle value change instead. This feature was deprecated after v3.32.0-0.0.pre • lib/app/pages/setting_screen/screens/ringtone_screen.dart:109:23 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/setting_screen/screens/storage_screen.dart:20:37 • deprecated_member_use
+   info • The import of 'package:flutter/cupertino.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/pages/setting_screen/screens/term_condition_screen.dart:2:8 • unnecessary_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/setting_screen/screens/term_condition_screen.dart:17:37 • deprecated_member_use
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/setting_screen/screens/term_condition_screen.dart:41:20 • prefer_const_constructors
+   info • Don't invoke 'print' in production code • lib/app/pages/setting_screen/setting_controller.dart:169:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/setting_screen/setting_controller.dart:424:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/setting_screen/setting_controller.dart:531:7 • avoid_print
+warning • The left operand can't be null, so the right operand is never executed • lib/app/pages/setting_screen/setting_controller.dart:542:55 • dead_null_aware_expression
+   info • Function literals shouldn't be passed to 'forEach' • lib/app/pages/setting_screen/setting_controller.dart:687:18 • avoid_function_literals_in_foreach_calls
+   info • The variable name 'country_code' isn't a lowerCamelCase identifier • lib/app/pages/setting_screen/setting_presenter.dart:72:21 • non_constant_identifier_names
+   info • The variable name 'oldcountry_code' isn't a lowerCamelCase identifier • lib/app/pages/setting_screen/setting_presenter.dart:187:21 • non_constant_identifier_names
+   info • The variable name 'newcountry_code' isn't a lowerCamelCase identifier • lib/app/pages/setting_screen/setting_presenter.dart:189:21 • non_constant_identifier_names
+   info • Empty catch block • lib/app/pages/status_screen/controllers/status_controller.dart:32:17 • empty_catches
+   info • Don't invoke 'print' in production code • lib/app/pages/status_screen/controllers/status_controller.dart:101:7 • avoid_print
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:189:32 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:273:17 • prefer_const_constructors
+   info • Use interpolation to compose strings and values • lib/app/pages/status_screen/status_screen.dart:307:34 • prefer_interpolation_to_compose_strings
+   info • Use interpolation to compose strings and values • lib/app/pages/status_screen/status_screen.dart:511:36 • prefer_interpolation_to_compose_strings
+   info • Don't use 'BuildContext's across async gaps • lib/app/pages/status_screen/status_screen.dart:657:37 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/app/pages/status_screen/status_screen.dart:670:37 • use_build_context_synchronously
+   info • Use interpolation to compose strings and values • lib/app/pages/status_screen/status_screen.dart:743:36 • prefer_interpolation_to_compose_strings
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:782:42 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:785:48 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:792:37 • prefer_const_constructors
+   info • 'VideoPlayerController.network' is deprecated and shouldn't be used. Use VideoPlayerController.networkUrl instead • lib/app/pages/status_screen/status_screen.dart:888:24 • deprecated_member_use
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:969:45 • prefer_const_constructors
+warning • The declaration '_showUpdateDialog' isn't referenced • lib/app/pages/status_screen/status_screen.dart:1006:16 • unused_element
+   info • Use 'const' for final variables initialized to a constant value • lib/app/pages/status_screen/status_screen.dart:1011:5 • prefer_const_declarations
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1043:33 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1047:23 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1050:32 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1052:23 • prefer_const_constructors
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/app/pages/status_screen/status_screen.dart:1107:52 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/app/pages/status_screen/status_screen.dart:1122:43 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/app/pages/status_screen/status_screen.dart:1123:50 • use_build_context_synchronously
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1153:25 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1154:22 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1155:23 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1161:24 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1166:28 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1172:19 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1175:28 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1180:13 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1183:21 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1184:30 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1224:39 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1230:40 • prefer_const_constructors
+   info • Use interpolation to compose strings and values • lib/app/pages/status_screen/status_screen.dart:1235:39 • prefer_interpolation_to_compose_strings
+   info • Use interpolation to compose strings and values • lib/app/pages/status_screen/status_screen.dart:1256:14 • prefer_interpolation_to_compose_strings
+   info • Use interpolation to compose strings and values • lib/app/pages/status_screen/status_screen.dart:1259:14 • prefer_interpolation_to_compose_strings
+   info • Use interpolation to compose strings and values • lib/app/pages/status_screen/status_screen.dart:1261:12 • prefer_interpolation_to_compose_strings
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1272:20 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1305:24 • prefer_const_constructors
+   info • Use 'const' literals as arguments to constructors of '@immutable' classes • lib/app/pages/status_screen/status_screen.dart:1308:28 • prefer_const_literals_to_create_immutables
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1309:21 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1333:19 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1347:24 • prefer_const_constructors
+   info • Use 'const' literals as arguments to constructors of '@immutable' classes • lib/app/pages/status_screen/status_screen.dart:1350:28 • prefer_const_literals_to_create_immutables
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1351:21 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1374:18 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1378:18 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1410:19 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1441:28 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1448:35 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1462:23 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1466:31 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1472:34 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1496:35 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1497:35 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1516:35 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1518:35 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1520:46 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1526:31 • prefer_const_constructors
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/status_screen/status_screen.dart:1609:32 • deprecated_member_use
+   info • Don't use 'BuildContext's across async gaps • lib/app/pages/status_screen/status_screen.dart:1658:28 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/app/pages/status_screen/status_screen.dart:1666:28 • use_build_context_synchronously
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1686:21 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1688:19 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/pages/status_screen/status_screen.dart:1689:18 • prefer_const_constructors
+   info • Don't invoke 'print' in production code • lib/app/pages/video_call_screen/video_call_controller.dart:291:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/video_call_screen/video_call_controller.dart:292:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/video_call_screen/video_call_controller.dart:293:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/video_call_screen/video_call_controller.dart:297:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/video_call_screen/video_call_controller.dart:308:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/video_call_screen/video_call_controller.dart:332:17 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/video_call_screen/video_call_controller.dart:340:17 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/video_call_screen/video_call_controller.dart:350:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/video_call_screen/video_call_controller.dart:354:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/video_call_screen/video_call_controller.dart:357:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/video_call_screen/video_call_controller.dart:383:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/video_call_screen/video_call_controller.dart:386:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/video_call_screen/video_call_controller.dart:401:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/video_call_screen/video_call_controller.dart:469:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/video_call_screen/video_call_controller.dart:502:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/video_call_screen/video_call_controller.dart:515:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/video_call_screen/video_call_controller.dart:518:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/video_call_screen/video_call_controller.dart:546:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/video_call_screen/video_call_controller.dart:555:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/video_call_screen/video_call_controller.dart:576:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/video_call_screen/video_call_controller.dart:609:13 • avoid_print
+   info • Unnecessary braces in a string interpolation • lib/app/pages/video_call_screen/video_call_controller.dart:632:45 • unnecessary_brace_in_string_interps
+   info • Don't invoke 'print' in production code • lib/app/pages/video_call_screen/video_call_controller.dart:634:13 • avoid_print
+   info • Unnecessary braces in a string interpolation • lib/app/pages/video_call_screen/video_call_controller.dart:649:50 • unnecessary_brace_in_string_interps
+   info • Don't invoke 'print' in production code • lib/app/pages/video_call_screen/video_call_controller.dart:651:13 • avoid_print
+   info • Unnecessary braces in a string interpolation • lib/app/pages/video_call_screen/video_call_controller.dart:662:41 • unnecessary_brace_in_string_interps
+   info • Don't invoke 'print' in production code • lib/app/pages/video_call_screen/video_call_controller.dart:664:13 • avoid_print
+   info • Unnecessary braces in a string interpolation • lib/app/pages/video_call_screen/video_call_controller.dart:684:48 • unnecessary_brace_in_string_interps
+   info • Don't invoke 'print' in production code • lib/app/pages/video_call_screen/video_call_controller.dart:686:13 • avoid_print
+   info • Unnecessary braces in a string interpolation • lib/app/pages/video_call_screen/video_call_controller.dart:699:48 • unnecessary_brace_in_string_interps
+   info • Don't invoke 'print' in production code • lib/app/pages/video_call_screen/video_call_controller.dart:701:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/pages/video_call_screen/video_call_controller.dart:812:7 • avoid_print
+   info • 'onPopInvoked' is deprecated and shouldn't be used. Use onPopInvokedWithResult instead. This feature was deprecated after v3.22.0-12.0.pre • lib/app/pages/video_call_screen/video_call_screen.dart:105:7 • deprecated_member_use
+   info • Don't use 'BuildContext's across async gaps • lib/app/pages/video_call_screen/video_call_screen.dart:113:50 • use_build_context_synchronously
+   info • Use 'const' with the constructor to improve performance • lib/app/screen_demo.dart:20:13 • prefer_const_constructors
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/theme/app_theme.dart:107:38 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/theme/app_theme.dart:180:31 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/theme/app_theme.dart:186:38 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/theme/colors_value.dart:20:62 • deprecated_member_use
+   info • Use 'const' with the constructor to improve performance • lib/app/theme/colors_value.dart:347:29 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/theme/styles.dart:486:15 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/theme/styles.dart:486:30 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/theme/styles.dart:494:22 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/theme/styles.dart:496:7 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/theme/styles.dart:496:22 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/theme/styles.dart:496:44 • prefer_const_constructors
+   info • The constant name 'ic_calender' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:30:23 • constant_identifier_names
+   info • The constant name 'ic_clock' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:31:23 • constant_identifier_names
+   info • The constant name 'ic_promotion' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:113:23 • constant_identifier_names
+   info • The constant name 'ic_down_arrow' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:123:23 • constant_identifier_names
+   info • The constant name 'ic_info' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:124:23 • constant_identifier_names
+   info • The constant name 'ic_remove' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:125:23 • constant_identifier_names
+   info • The constant name 'ic_image' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:126:23 • constant_identifier_names
+   info • The constant name 'ic_video' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:127:23 • constant_identifier_names
+   info • The constant name 'ic_pdf' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:132:23 • constant_identifier_names
+   info • The constant name 'ic_bookmark' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:135:23 • constant_identifier_names
+   info • The constant name 'ic_broadcast' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:136:23 • constant_identifier_names
+   info • The constant name 'ic_chat_lock' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:137:23 • constant_identifier_names
+   info • The constant name 'ic_contact_list' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:138:23 • constant_identifier_names
+   info • The constant name 'ic_meeting' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:139:23 • constant_identifier_names
+   info • The constant name 'ic_products' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:140:23 • constant_identifier_names
+   info • The constant name 'ic_request' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:141:23 • constant_identifier_names
+   info • The constant name 'ic_setting' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:142:23 • constant_identifier_names
+   info • The constant name 'ic_up_arrow' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:143:23 • constant_identifier_names
+   info • The constant name 'ic_reels' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:144:23 • constant_identifier_names
+   info • The constant name 'ic_notification' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:145:23 • constant_identifier_names
+   info • The constant name 'ic_incoming_call' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:146:23 • constant_identifier_names
+   info • The constant name 'ic_outcoming_call' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:147:23 • constant_identifier_names
+   info • The constant name 'ic_call' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:148:23 • constant_identifier_names
+   info • The constant name 'ic_user_add' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:149:23 • constant_identifier_names
+   info • The constant name 'ic_user_remove' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:150:23 • constant_identifier_names
+   info • The constant name 'ic_chat_png' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:151:23 • constant_identifier_names
+   info • The constant name 'ic_right_arrow' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:152:23 • constant_identifier_names
+   info • The constant name 'ic_share' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:153:23 • constant_identifier_names
+   info • The constant name 'ic_mute_noti' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:158:23 • constant_identifier_names
+   info • The constant name 'ic_upload_excel' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:160:23 • constant_identifier_names
+   info • The constant name 'ic_sign_out' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:161:23 • constant_identifier_names
+   info • The constant name 'ic_help' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:163:23 • constant_identifier_names
+   info • The constant name 'ic_delete' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:164:23 • constant_identifier_names
+   info • The constant name 'ic_dark_mode' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:165:23 • constant_identifier_names
+   info • The constant name 'ic_chat_backcup' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:166:23 • constant_identifier_names
+   info • The constant name 'ic_change_num' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:167:23 • constant_identifier_names
+   info • The constant name 'ic_block' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:168:23 • constant_identifier_names
+   info • The constant name 'ic_outline_noti' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:169:23 • constant_identifier_names
+   info • The constant name 'ic_conversation' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:170:23 • constant_identifier_names
+   info • The constant name 'ic_right_side_arrow' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:171:23 • constant_identifier_names
+   info • The constant name 'ic_outline_edit' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:173:23 • constant_identifier_names
+   info • The constant name 'ic_select_camera' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:175:23 • constant_identifier_names
+   info • The constant name 'ic_select_gallery' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:176:23 • constant_identifier_names
+   info • The constant name 'ic_exit' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:177:23 • constant_identifier_names
+   info • The constant name 'ic_exit_group' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:178:23 • constant_identifier_names
+   info • The constant name 'ic_user_permission' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:179:23 • constant_identifier_names
+   info • The constant name 'ic_user_des' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:181:23 • constant_identifier_names
+   info • The constant name 'ic_report' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:182:23 • constant_identifier_names
+   info • The constant name 'ic_group_chat_empty' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:183:23 • constant_identifier_names
+   info • The constant name 'ic_outline_rising_star' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:186:23 • constant_identifier_names
+   info • The constant name 'ic_outline_star' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:188:23 • constant_identifier_names
+   info • The constant name 'authorize_permission' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:190:23 • constant_identifier_names
+   info • The constant name 'ic_info_outline' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:192:23 • constant_identifier_names
+   info • The constant name 'business_category' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:193:23 • constant_identifier_names
+   info • The constant name 'ic_website' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:194:23 • constant_identifier_names
+   info • The constant name 'chat_empty' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:195:23 • constant_identifier_names
+   info • The constant name 'ic_drwer' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:196:23 • constant_identifier_names
+   info • The constant name 'ic_send_request_empty' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:197:23 • constant_identifier_names
+   info • The constant name 'ic_recive_request_empty' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:199:23 • constant_identifier_names
+   info • The constant name 'ic_block_user_empty' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:201:23 • constant_identifier_names
+   info • The constant name 'ic_image_add' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:203:23 • constant_identifier_names
+   info • The constant name 'ic_document' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:204:23 • constant_identifier_names
+   info • The constant name 'ic_video_play' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:205:23 • constant_identifier_names
+   info • The constant name 'ic_headphone' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:206:23 • constant_identifier_names
+   info • The constant name 'ic_poll_reply' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:207:23 • constant_identifier_names
+   info • The constant name 'product_svg' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:208:23 • constant_identifier_names
+   info • The constant name 'ic_product_empty' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:209:23 • constant_identifier_names
+   info • The constant name 'ic_delete_message' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:210:23 • constant_identifier_names
+   info • The constant name 'ic_csv' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:213:23 • constant_identifier_names
+   info • The constant name 'ic_doc' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:214:23 • constant_identifier_names
+   info • The constant name 'ic_docx' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:215:23 • constant_identifier_names
+   info • The constant name 'ic_odp' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:216:23 • constant_identifier_names
+   info • The constant name 'ic_odt' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:217:23 • constant_identifier_names
+   info • The constant name 'ic_pdf_icon' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:218:23 • constant_identifier_names
+   info • The constant name 'ic_ppt' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:219:23 • constant_identifier_names
+   info • The constant name 'ic_pptx' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:220:23 • constant_identifier_names
+   info • The constant name 'ic_rar' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:221:23 • constant_identifier_names
+   info • The constant name 'ic_tar_gz' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:222:23 • constant_identifier_names
+   info • The constant name 'ic_tar' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:223:23 • constant_identifier_names
+   info • The constant name 'ic_txt' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:224:23 • constant_identifier_names
+   info • The constant name 'ic_xsl' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:225:23 • constant_identifier_names
+   info • The constant name 'ic_xslx' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:226:23 • constant_identifier_names
+   info • The constant name 'ic_zip' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:227:23 • constant_identifier_names
+   info • The constant name 'ic_ods' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:228:23 • constant_identifier_names
+   info • The constant name 'ic_unpin' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:229:23 • constant_identifier_names
+   info • The constant name 'ic_volume' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:230:23 • constant_identifier_names
+   info • The constant name 'ic_mp3' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:231:23 • constant_identifier_names
+   info • The constant name 'ic_outline_brodcast' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:232:23 • constant_identifier_names
+   info • The constant name 'ic_empty_bookmark' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:234:23 • constant_identifier_names
+   info • The constant name 'ic_single_poll' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:235:23 • constant_identifier_names
+   info • The constant name 'ic_multipal_poll' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:236:23 • constant_identifier_names
+   info • The constant name 'user_add' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:237:23 • constant_identifier_names
+   info • The constant name 'ic_end_call' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:238:23 • constant_identifier_names
+   info • The constant name 'ic_mic_off' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:239:23 • constant_identifier_names
+   info • The constant name 'ic_mic_on' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:240:23 • constant_identifier_names
+   info • The constant name 'ic_video_off' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:241:23 • constant_identifier_names
+   info • The constant name 'ic_video_on' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:242:23 • constant_identifier_names
+   info • The constant name 'ic_camera_switch' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:243:23 • constant_identifier_names
+   info • The constant name 'ic_call_history_empty' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:244:23 • constant_identifier_names
+   info • The constant name 'ic_brodcast_empty' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:246:23 • constant_identifier_names
+   info • The constant name 'ic_chat_setting' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:248:23 • constant_identifier_names
+   info • The constant name 'ic_notification_svg' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:249:23 • constant_identifier_names
+   info • The constant name 'ic_storage' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:251:23 • constant_identifier_names
+   info • The constant name 'ic_term_condition' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:252:23 • constant_identifier_names
+   info • The constant name 'my_account_svg' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:253:23 • constant_identifier_names
+   info • The constant name 'privarcy_security' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:254:23 • constant_identifier_names
+   info • The constant name 'setting_right_arrow' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:255:23 • constant_identifier_names
+   info • The constant name 'ic_select_star' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:257:23 • constant_identifier_names
+   info • The constant name 'ic_unselect_star' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:258:23 • constant_identifier_names
+   info • The constant name 'ic_show' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:259:23 • constant_identifier_names
+   info • The constant name 'ic_hide' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:260:23 • constant_identifier_names
+   info • The constant name 'ic_change_number' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:261:23 • constant_identifier_names
+   info • The constant name 'ic_user_delete' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:262:23 • constant_identifier_names
+   info • The constant name 'ic_edit_detalis' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:263:23 • constant_identifier_names
+   info • The constant name 'ic_multi_user_svg' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:264:23 • constant_identifier_names
+   info • The constant name 'ic_forgot_vector' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:265:23 • constant_identifier_names
+   info • The constant name 'ic_lock' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:266:23 • constant_identifier_names
+   info • The constant name 'ic_password_png' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:267:23 • constant_identifier_names
+   info • The constant name 'mark_read' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:269:23 • constant_identifier_names
+   info • The constant name 'mark_unread' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:270:23 • constant_identifier_names
+   info • The constant name 'remove_user' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:271:23 • constant_identifier_names
+   info • The constant name 'ic_more' isn't a lowerCamelCase identifier • lib/app/utils/asset_constants.dart:272:23 • constant_identifier_names
+   info • Unnecessary use of string interpolation • lib/app/utils/exception/data_exception.dart:13:24 • unnecessary_string_interpolations
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/app/utils/linkyfy_text.dart:11:3 • prefer_const_constructors_in_immutables
+   info • 'required' is deprecated and shouldn't be used. In Dart 2.12 and later, use the built-in `required` keyword to mark a named parameter as required • lib/app/utils/linkyfy_text.dart:13:6 • deprecated_member_use
+   info • 'required' is deprecated and shouldn't be used. In Dart 2.12 and later, use the built-in `required` keyword to mark a named parameter as required • lib/app/utils/linkyfy_text.dart:14:6 • deprecated_member_use
+   info • 'required' is deprecated and shouldn't be used. In Dart 2.12 and later, use the built-in `required` keyword to mark a named parameter as required • lib/app/utils/linkyfy_text.dart:15:6 • deprecated_member_use
+warning • Two keys in a map literal shouldn't be equal • lib/app/utils/strings/translations_file.dart:257:11 • equal_keys_in_map
+warning • Two keys in a map literal shouldn't be equal • lib/app/utils/strings/translations_file.dart:546:11 • equal_keys_in_map
+warning • Two keys in a map literal shouldn't be equal • lib/app/utils/strings/translations_file.dart:547:11 • equal_keys_in_map
+warning • Two keys in a map literal shouldn't be equal • lib/app/utils/strings/translations_file.dart:573:11 • equal_keys_in_map
+warning • Two keys in a map literal shouldn't be equal • lib/app/utils/strings/translations_file.dart:580:11 • equal_keys_in_map
+warning • Two keys in a map literal shouldn't be equal • lib/app/utils/strings/translations_file.dart:581:11 • equal_keys_in_map
+warning • Two keys in a map literal shouldn't be equal • lib/app/utils/strings/translations_file.dart:582:11 • equal_keys_in_map
+warning • Two keys in a map literal shouldn't be equal • lib/app/utils/strings/translations_file.dart:583:11 • equal_keys_in_map
+warning • Two keys in a map literal shouldn't be equal • lib/app/utils/strings/translations_file.dart:587:11 • equal_keys_in_map
+   info • The imported package 'http' isn't a dependency of the importing package • lib/app/utils/utility.dart:22:8 • depend_on_referenced_packages
+   info • Don't invoke 'print' in production code • lib/app/utils/utility.dart:267:9 • avoid_print
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/utils/utility.dart:309:40 • deprecated_member_use
+warning • This default clause is covered by the previous cases • lib/app/utils/utility.dart:314:7 • unreachable_switch_default
+   info • Unnecessary 'new' keyword • lib/app/utils/utility.dart:505:17 • unnecessary_new
+   info • Unnecessary 'new' keyword • lib/app/utils/utility.dart:512:17 • unnecessary_new
+   info • Unnecessary 'new' keyword • lib/app/utils/utility.dart:519:17 • unnecessary_new
+warning • The declaration '_requestPermission' isn't referenced • lib/app/utils/utility.dart:1230:23 • unused_element
+   info • Unnecessary use of string interpolation • lib/app/utils/utility.dart:1330:15 • unnecessary_string_interpolations
+   info • Use 'const' with the constructor to improve performance • lib/app/utils/utility.dart:1348:49 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/utils/utility.dart:1349:49 • prefer_const_constructors
+   info • Don't invoke 'print' in production code • lib/app/utils/utility.dart:1352:5 • avoid_print
+   info • An uninitialized variable should have an explicit type annotation • lib/app/utils/utility.dart:1515:11 • prefer_typing_uninitialized_variables
+   info • An uninitialized variable should have an explicit type annotation • lib/app/utils/utility.dart:1516:9 • prefer_typing_uninitialized_variables
+   info • An uninitialized variable should have an explicit type annotation • lib/app/utils/utility.dart:1605:11 • prefer_typing_uninitialized_variables
+   info • An uninitialized variable should have an explicit type annotation • lib/app/utils/utility.dart:1606:9 • prefer_typing_uninitialized_variables
+   info • An uninitialized variable should have an explicit type annotation • lib/app/utils/utility.dart:1710:11 • prefer_typing_uninitialized_variables
+   info • An uninitialized variable should have an explicit type annotation • lib/app/utils/utility.dart:1711:9 • prefer_typing_uninitialized_variables
+   info • An uninitialized variable should have an explicit type annotation • lib/app/utils/utility.dart:1823:11 • prefer_typing_uninitialized_variables
+   info • An uninitialized variable should have an explicit type annotation • lib/app/utils/utility.dart:1824:9 • prefer_typing_uninitialized_variables
+   info • An uninitialized variable should have an explicit type annotation • lib/app/utils/utility.dart:2272:9 • prefer_typing_uninitialized_variables
+   info • An uninitialized variable should have an explicit type annotation • lib/app/utils/utility.dart:2291:9 • prefer_typing_uninitialized_variables
+   info • 'launch' is deprecated and shouldn't be used. Use launchUrl instead • lib/app/utils/utility.dart:2317:12 • deprecated_member_use
+   info • 'launch' is deprecated and shouldn't be used. Use launchUrl instead • lib/app/utils/utility.dart:2324:12 • deprecated_member_use
+   info • Invalid use of a private type in a public API • lib/app/widgets/animated_collapse.dart:30:3 • library_private_types_in_public_api
+   info • The imported package 'percent_indicator' isn't a dependency of the importing package • lib/app/widgets/better_poll.dart:5:8 • depend_on_referenced_packages
+   info • The imported package 'collection' isn't a dependency of the importing package • lib/app/widgets/better_poll.dart:7:8 • depend_on_referenced_packages
+   info • Don't invoke 'print' in production code • lib/app/widgets/better_poll.dart:309:13 • avoid_print
+   info • Use a 'SizedBox' to add whitespace to a layout • lib/app/widgets/better_poll.dart:365:31 • sized_box_for_whitespace
+   info • Use a 'SizedBox' to add whitespace to a layout • lib/app/widgets/better_poll.dart:386:31 • sized_box_for_whitespace
+   info • The type of the right operand ('int') isn't a subtype or a supertype of the left operand ('List<int>?') • lib/app/widgets/better_poll.dart:609:56 • unrelated_type_equality_checks
+   info • Use a 'SizedBox' to add whitespace to a layout • lib/app/widgets/better_poll.dart:626:27 • sized_box_for_whitespace
+   info • Use 'const' with the constructor to improve performance • lib/app/widgets/better_poll.dart:628:36 • prefer_const_constructors
+   info • Use 'const' literals as arguments to constructors of '@immutable' classes • lib/app/widgets/better_poll.dart:629:41 • prefer_const_literals_to_create_immutables
+   info • Use 'const' with the constructor to improve performance • lib/app/widgets/better_poll.dart:630:33 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/widgets/better_poll.dart:634:33 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/widgets/better_poll.dart:636:42 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/widgets/better_poll.dart:644:27 • prefer_const_constructors
+   info • The import of 'package:flutter/cupertino.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/audio/audio_with_links.dart:3:8 • unnecessary_import
+   info • The import of 'package:flutter/widgets.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/audio/audio_with_links.dart:5:8 • unnecessary_import
+   info • The import of 'package:flutter/widgets.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/audio/audio_with_text.dart:4:8 • unnecessary_import
+   info • The file name 'musicPlayer.dart' isn't a lower_case_with_underscores identifier • lib/app/widgets/chat_component/audio/musicPlayer.dart:1:1 • file_names
+   info • Don't invoke 'print' in production code • lib/app/widgets/chat_component/audio/musicPlayer.dart:50:5 • avoid_print
+   info • Assignment to a variable of type 'void' • lib/app/widgets/chat_component/audio/musicPlayer.dart:72:9 • void_checks
+warning • The value of the local variable 'playerss' isn't used • lib/app/widgets/chat_component/audio/musicPlayer.dart:87:11 • unused_local_variable
+warning • The value of the local variable 'dur' isn't used • lib/app/widgets/chat_component/audio/musicPlayer.dart:89:9 • unused_local_variable
+   info • Don't invoke 'print' in production code • lib/app/widgets/chat_component/audio/musicPlayer.dart:90:5 • avoid_print
+   info • Use 'const' with the constructor to improve performance • lib/app/widgets/chat_component/audio/musicPlayer.dart:174:53 • prefer_const_constructors
+   info • An uninitialized variable should have an explicit type annotation • lib/app/widgets/chat_component/audio_call/audio_call.dart:209:11 • prefer_typing_uninitialized_variables
+   info • An uninitialized variable should have an explicit type annotation • lib/app/widgets/chat_component/audio_call/audio_call.dart:210:11 • prefer_typing_uninitialized_variables
+   info • Don't invoke 'print' in production code • lib/app/widgets/chat_component/audio_call/audio_call.dart:228:7 • avoid_print
+   info • The import of 'package:chatnest/app/pages/chat_screen/chat_controller.dart' is unnecessary because all of the used elements are also provided by the import of 'package:chatnest/app/app.dart' • lib/app/widgets/chat_component/chat_screen_utility.dart:1:8 • unnecessary_import
+   info • Don't invoke 'print' in production code • lib/app/widgets/chat_component/chat_screen_utility.dart:278:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/widgets/chat_component/chat_screen_utility.dart:336:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/widgets/chat_component/chat_screen_utility.dart:398:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/widgets/chat_component/chat_screen_utility.dart:827:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app/widgets/chat_component/chat_screen_utility.dart:884:13 • avoid_print
+   info • Use 'const' with the constructor to improve performance • lib/app/widgets/chat_component/chat_screen_utility.dart:1075:30 • prefer_const_constructors
+   info • Unnecessary cascade expression • lib/app/widgets/chat_component/chat_screen_utility.dart:1202:35 • avoid_single_cascade_in_expression_statements
+   info • Use 'const' with the constructor to improve performance • lib/app/widgets/chat_component/chat_screen_utility.dart:1323:30 • prefer_const_constructors
+   info • Don't invoke 'print' in production code • lib/app/widgets/chat_component/chat_screen_utility.dart:1625:13 • avoid_print
+   info • Use 'const' with the constructor to improve performance • lib/app/widgets/chat_component/chat_screen_utility.dart:2032:21 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/widgets/chat_component/chat_screen_utility.dart:2126:21 • prefer_const_constructors
+   info • The variable name 'ArchiveRemoveGroupChat' isn't a lowerCamelCase identifier • lib/app/widgets/chat_component/chat_screen_utility.dart:2217:15 • non_constant_identifier_names
+   info • The import of 'package:flutter/cupertino.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/contact/contact_with_links.dart:5:8 • unnecessary_import
+   info • The import of 'package:flutter/widgets.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/contact/contact_with_links.dart:7:8 • unnecessary_import
+   info • Unnecessary braces in a string interpolation • lib/app/widgets/chat_component/contact/contact_with_links.dart:144:64 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • lib/app/widgets/chat_component/contact/contact_with_links.dart:434:64 • unnecessary_brace_in_string_interps
+   info • The import of 'package:flutter/cupertino.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/contact/contact_with_text.dart:5:8 • unnecessary_import
+   info • The import of 'package:flutter/widgets.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/contact/contact_with_text.dart:7:8 • unnecessary_import
+   info • Unnecessary braces in a string interpolation • lib/app/widgets/chat_component/contact/contact_with_text.dart:145:64 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • lib/app/widgets/chat_component/contact/contact_with_text.dart:439:64 • unnecessary_brace_in_string_interps
+   info • The import of 'package:flutter/widgets.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/contact/multi_contact_with_links.dart:4:8 • unnecessary_import
+   info • Unnecessary braces in a string interpolation • lib/app/widgets/chat_component/contact/multi_contact_with_links.dart:150:50 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • lib/app/widgets/chat_component/contact/multi_contact_with_links.dart:395:50 • unnecessary_brace_in_string_interps
+   info • The import of 'package:flutter/widgets.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/contact/multi_contact_with_text.dart:4:8 • unnecessary_import
+   info • Unnecessary braces in a string interpolation • lib/app/widgets/chat_component/contact/multi_contact_with_text.dart:136:50 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • lib/app/widgets/chat_component/contact/multi_contact_with_text.dart:378:50 • unnecessary_brace_in_string_interps
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/app/widgets/chat_component/delete_message.dart:7:3 • prefer_const_constructors_in_immutables
+   info • The import of 'package:flutter/widgets.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/docs/docs_message.dart:4:8 • unnecessary_import
+   info • The import of 'package:flutter/widgets.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/docs/docs_with_links.dart:4:8 • unnecessary_import
+   info • The import of 'package:flutter/widgets.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/images/image_with_links.dart:7:8 • unnecessary_import
+   info • The import of 'package:flutter/widgets.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/links/link_message.dart:4:8 • unnecessary_import
+warning • Unused import: 'package:flutter_svg/svg.dart' • lib/app/widgets/chat_component/links/link_with_photowithlinks.dart:6:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/app/widgets/chat_component/links/meeting_link_card.dart:29:5 • avoid_print
+   info • Don't use 'BuildContext's across async gaps • lib/app/widgets/chat_component/links/meeting_link_card.dart:84:50 • use_build_context_synchronously
+   info • Don't invoke 'print' in production code • lib/app/widgets/chat_component/links/meeting_link_card.dart:127:7 • avoid_print
+   info • The import of 'package:flutter/widgets.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/links/replay_links.dart:4:8 • unnecessary_import
+   info • The file name 'locationMsg.dart' isn't a lower_case_with_underscores identifier • lib/app/widgets/chat_component/locationMsg/locationMsg.dart:1:1 • file_names
+   info • The import of 'package:flutter/widgets.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/locationMsg/location_with_links.dart:6:8 • unnecessary_import
+   info • The import of 'package:flutter/cupertino.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/locationMsg/location_with_text.dart:3:8 • unnecessary_import
+   info • The import of 'package:flutter/widgets.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/locationMsg/location_with_text.dart:5:8 • unnecessary_import
+   info • Use 'const' with the constructor to improve performance • lib/app/widgets/chat_component/multipal_img/multipal_image.dart:37:18 • prefer_const_constructors
+   info • The import of 'package:flutter/widgets.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/multipal_img/multipal_imagewithlinks.dart:7:8 • unnecessary_import
+   info • Use 'const' with the constructor to improve performance • lib/app/widgets/chat_component/multipal_img/multipal_imagewithlinks.dart:38:18 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/widgets/chat_component/multipal_img/multipal_imagewithtext.dart:37:18 • prefer_const_constructors
+warning • The left operand can't be null, so the right operand is never executed • lib/app/widgets/chat_component/phonecontact/phone_contact.dart:100:48 • dead_null_aware_expression
+warning • Unused import: 'package:cached_network_image/cached_network_image.dart' • lib/app/widgets/chat_component/phonecontact/phone_contact_links.dart:1:8 • unused_import
+warning • Unused import: 'package:chatnest/data/data.dart' • lib/app/widgets/chat_component/phonecontact/phone_contact_links.dart:3:8 • unused_import
+   info • The import of 'package:flutter/cupertino.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/phonecontact/phone_contact_links.dart:5:8 • unnecessary_import
+   info • The import of 'package:flutter/widgets.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/phonecontact/phone_contact_links.dart:7:8 • unnecessary_import
+   info • Unnecessary braces in a string interpolation • lib/app/widgets/chat_component/phonecontact/phone_contact_links.dart:144:69 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • lib/app/widgets/chat_component/phonecontact/phone_contact_links.dart:391:69 • unnecessary_brace_in_string_interps
+   info • The import of 'package:flutter/cupertino.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/phonecontact/phone_contact_text.dart:3:8 • unnecessary_import
+   info • The import of 'package:flutter/widgets.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/phonecontact/phone_contact_text.dart:5:8 • unnecessary_import
+   info • Unnecessary braces in a string interpolation • lib/app/widgets/chat_component/phonecontact/phone_contact_text.dart:390:69 • unnecessary_brace_in_string_interps
+   info • Unnecessary use of string interpolation • lib/app/widgets/chat_component/poll/poll_msg.dart:140:27 • unnecessary_string_interpolations
+   info • The import of 'package:flutter/cupertino.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/product/product_with_message.dart:5:8 • unnecessary_import
+   info • The import of 'package:flutter/widgets.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/product/product_with_message.dart:7:8 • unnecessary_import
+   info • The import of 'package:flutter/cupertino.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/text_msg/all_types_reply_message.dart:6:8 • unnecessary_import
+   info • The import of 'package:flutter/widgets.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/text_msg/all_types_reply_message.dart:8:8 • unnecessary_import
+   info • Unnecessary braces in a string interpolation • lib/app/widgets/chat_component/text_msg/all_types_reply_message.dart:1016:28 • unnecessary_brace_in_string_interps
+warning • This class (or a class that this class inherits from) is marked as '@immutable', but one or more of its instance fields aren't final: ReplyPhoneContactWithTextMsg.message, ReplyPhoneContactWithTextMsg.userName, ReplyPhoneContactWithTextMsg.onTap, ReplyPhoneContactWithTextMsg.image • lib/app/widgets/chat_component/text_msg/all_types_reply_message.dart:1034:7 • must_be_immutable
+   info • Unnecessary braces in a string interpolation • lib/app/widgets/chat_component/text_msg/all_types_reply_message.dart:1515:46 • unnecessary_brace_in_string_interps
+   info • The import of 'package:flutter/cupertino.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/text_msg/text_with_link.dart:3:8 • unnecessary_import
+   info • The import of 'package:flutter/widgets.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/text_msg/text_with_link.dart:5:8 • unnecessary_import
+   info • The import of 'package:flutter/widgets.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/text_msg/text_with_photowithtext.dart:6:8 • unnecessary_import
+   info • The import of 'package:flutter/widgets.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/text_msg/text_with_videowithtext.dart:8:8 • unnecessary_import
+   info • The import of 'package:flutter/widgets.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/widgets/chat_component/video/video_with_links.dart:6:8 • unnecessary_import
+   info • An uninitialized variable should have an explicit type annotation • lib/app/widgets/chat_component/videocall/video_call.dart:209:11 • prefer_typing_uninitialized_variables
+   info • An uninitialized variable should have an explicit type annotation • lib/app/widgets/chat_component/videocall/video_call.dart:210:11 • prefer_typing_uninitialized_variables
+   info • Don't invoke 'print' in production code • lib/app/widgets/chat_component/videocall/video_call.dart:228:7 • avoid_print
+   info • Use 'const' with the constructor to improve performance • lib/app/widgets/custom_business_profile.dart:15:19 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/widgets/custom_business_profile.dart:18:29 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/app/widgets/custom_business_profile.dart:18:46 • prefer_const_constructors
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/widgets/custom_business_profile.dart:22:39 • deprecated_member_use
+   info • Use 'const' with the constructor to improve performance • lib/app/widgets/custom_business_profile.dart:23:27 • prefer_const_constructors
+   info • Unnecessary braces in a string interpolation • lib/app/widgets/custom_business_profile.dart:30:39 • unnecessary_brace_in_string_interps
+   info • Use the '??' operator rather than '?:' when testing for 'null' • lib/app/widgets/custom_button.dart:34:26 • prefer_if_null_operators
+   info • Use the '??' operator rather than '?:' when testing for 'null' • lib/app/widgets/custom_button.dart:37:33 • prefer_if_null_operators
+   info • Use the '??' operator rather than '?:' when testing for 'null' • lib/app/widgets/custom_button.dart:43:30 • prefer_if_null_operators
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/app/widgets/custom_dropdown_search.dart:9:3 • prefer_const_constructors_in_immutables
+   info • The local variable '_list' starts with an underscore • lib/app/widgets/custom_dropdown_search.dart:283:29 • no_leading_underscores_for_local_identifiers
+   info • Unnecessary 'this.' qualifier • lib/app/widgets/custom_multibutton.dart:54:22 • unnecessary_this
+   info • Use the '??' operator rather than '?:' when testing for 'null' • lib/app/widgets/custom_multibutton.dart:69:19 • prefer_if_null_operators
+   info • Unnecessary 'this.' qualifier • lib/app/widgets/custom_multibutton.dart:79:22 • unnecessary_this
+   info • Use 'const' with the constructor to improve performance • lib/app/widgets/custom_outline_button.dart:33:25 • prefer_const_constructors
+warning • This class (or a class that this class inherits from) is marked as '@immutable', but one or more of its instance fields aren't final: CustomInternationalPhoneFild.keyboardAction • lib/app/widgets/custom_phonetextfild.dart:5:7 • must_be_immutable
+   info • Don't invoke 'print' in production code • lib/app/widgets/custom_profile_view.dart:140:5 • avoid_print
+   info • Use the '??' operator rather than '?:' when testing for 'null' • lib/app/widgets/custom_textfild.dart:199:27 • prefer_if_null_operators
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/app/widgets/dropdown_multiple_tree_widget.dart:10:3 • prefer_const_constructors_in_immutables
+   info • Unnecessary use of string interpolation • lib/app/widgets/dropdown_multiple_tree_widget.dart:252:51 • unnecessary_string_interpolations
+   info • Unnecessary instance of 'Container' • lib/app/widgets/dropdown_multiple_tree_widget.dart:385:60 • avoid_unnecessary_containers
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/widgets/floating_call_widget.dart:39:44 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/widgets/floating_call_widget.dart:47:51 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/widgets/floating_call_widget.dart:83:45 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/widgets/floating_call_widget.dart:109:48 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/widgets/pdf_view_widget.dart:17:35 • deprecated_member_use
+   info • Unnecessary use of string interpolation • lib/app/widgets/replay_chat_componet.dart/replay_audio_message.dart:902:39 • unnecessary_string_interpolations
+   info • Unnecessary use of string interpolation • lib/app/widgets/replay_chat_componet.dart/replay_audio_message.dart:972:39 • unnecessary_string_interpolations
+   info • Use 'const' with the constructor to improve performance • lib/app/widgets/replay_chat_componet.dart/replay_audio_message.dart:1358:53 • prefer_const_constructors
+   info • Unnecessary use of string interpolation • lib/app/widgets/replay_chat_componet.dart/replay_contact_message.dart:959:39 • unnecessary_string_interpolations
+   info • Unnecessary use of string interpolation • lib/app/widgets/replay_chat_componet.dart/replay_contact_message.dart:1029:39 • unnecessary_string_interpolations
+   info • Unnecessary use of string interpolation • lib/app/widgets/replay_chat_componet.dart/replay_docs_message.dart:875:39 • unnecessary_string_interpolations
+   info • Unnecessary use of string interpolation • lib/app/widgets/replay_chat_componet.dart/replay_docs_message.dart:945:39 • unnecessary_string_interpolations
+   info • Unnecessary use of string interpolation • lib/app/widgets/replay_chat_componet.dart/replay_phonecontact_message.dart:875:39 • unnecessary_string_interpolations
+   info • Unnecessary use of string interpolation • lib/app/widgets/replay_chat_componet.dart/replay_phonecontact_message.dart:945:39 • unnecessary_string_interpolations
+   info • Unnecessary use of string interpolation • lib/app/widgets/replay_chat_componet.dart/replay_photo_message.dart:952:39 • unnecessary_string_interpolations
+   info • Unnecessary use of string interpolation • lib/app/widgets/replay_chat_componet.dart/replay_poll_message.dart:888:39 • unnecessary_string_interpolations
+   info • Unnecessary use of string interpolation • lib/app/widgets/replay_chat_componet.dart/replay_poll_message.dart:958:39 • unnecessary_string_interpolations
+   info • Unnecessary use of string interpolation • lib/app/widgets/replay_chat_componet.dart/replay_poll_message.dart:1366:31 • unnecessary_string_interpolations
+   info • Unnecessary use of string interpolation • lib/app/widgets/replay_chat_componet.dart/replay_video_message.dart:875:39 • unnecessary_string_interpolations
+   info • Unnecessary use of string interpolation • lib/app/widgets/replay_chat_componet.dart/replay_video_message.dart:945:39 • unnecessary_string_interpolations
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/app/widgets/show_full_scareen_image.dart:14:3 • prefer_const_constructors_in_immutables
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/widgets/show_full_scareen_image.dart:22:37 • deprecated_member_use
+   info • Invalid use of a private type in a public API • lib/app/widgets/show_full_scareen_image.dart:94:3 • library_private_types_in_public_api
+   info • 'VideoPlayerController.network' is deprecated and shouldn't be used. Use VideoPlayerController.networkUrl instead • lib/app/widgets/show_full_scareen_image.dart:104:19 • deprecated_member_use
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/app/widgets/single_video_screen.dart:15:3 • prefer_const_constructors_in_immutables
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/widgets/single_video_screen.dart:23:37 • deprecated_member_use
+   info • Invalid use of a private type in a public API • lib/app/widgets/single_video_screen.dart:94:3 • library_private_types_in_public_api
+   info • Invalid use of a private type in a public API • lib/app/widgets/single_video_screen.dart:204:3 • library_private_types_in_public_api
+   info • The file name 'thumbnail_Image_Fullpage.dart' isn't a lower_case_with_underscores identifier • lib/app/widgets/thumbnail_Image_Fullpage.dart:1:1 • file_names
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/widgets/view_all_image.dart:23:37 • deprecated_member_use
+   info • Use 'const' with the constructor to improve performance • lib/app/widgets/view_all_image.dart:49:27 • prefer_const_constructors
+   info • Import of a library in the 'lib/src' directory of another package • lib/data/helpers/api_wrapper.dart:9:8 • implementation_imports
+   info • The imported package 'http' isn't a dependency of the importing package • lib/data/helpers/api_wrapper.dart:10:8 • depend_on_referenced_packages
+warning • The left operand can't be null, so the right operand is never executed • lib/data/helpers/api_wrapper.dart:300:27 • dead_null_aware_expression
+warning • Unused import: 'dart:math' • lib/data/helpers/connect_helper.dart:3:8 • unused_import
+   info • Import of a library in the 'lib/src' directory of another package • lib/data/helpers/connect_helper.dart:11:8 • implementation_imports
+   info • The prefix 'mediaType' isn't a lower_case_with_underscores identifier • lib/data/helpers/connect_helper.dart:11:53 • library_prefixes
+   info • Unnecessary braces in a string interpolation • lib/data/helpers/connect_helper.dart:97:43 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • lib/data/helpers/connect_helper.dart:98:33 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • lib/data/helpers/connect_helper.dart:98:48 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • lib/data/helpers/connect_helper.dart:99:29 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • lib/data/helpers/connect_helper.dart:300:43 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • lib/data/helpers/connect_helper.dart:301:33 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • lib/data/helpers/connect_helper.dart:301:54 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • lib/data/helpers/connect_helper.dart:302:29 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • lib/data/helpers/connect_helper.dart:310:45 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • lib/data/helpers/connect_helper.dart:311:33 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • lib/data/helpers/connect_helper.dart:311:56 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • lib/data/helpers/connect_helper.dart:312:29 • unnecessary_brace_in_string_interps
+   info • Don't invoke 'print' in production code • lib/data/helpers/connect_helper.dart:951:5 • avoid_print
+warning • The operand can't be 'null', so the condition is always 'true' • lib/data/helpers/connect_helper.dart:1146:88 • unnecessary_null_comparison
+   info • Use 'const' for final variables initialized to a constant value • lib/data/helpers/connect_helper.dart:2169:5 • prefer_const_declarations
+   info • The variable name 'country_code' isn't a lowerCamelCase identifier • lib/data/helpers/connect_helper.dart:3366:21 • non_constant_identifier_names
+   info • Unnecessary braces in a string interpolation • lib/data/helpers/connect_helper.dart:3380:43 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • lib/data/helpers/connect_helper.dart:3381:33 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • lib/data/helpers/connect_helper.dart:3381:49 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • lib/data/helpers/connect_helper.dart:3382:29 • unnecessary_brace_in_string_interps
+   info • The variable name 'oldcountry_code' isn't a lowerCamelCase identifier • lib/data/helpers/connect_helper.dart:3541:21 • non_constant_identifier_names
+   info • The variable name 'newcountry_code' isn't a lowerCamelCase identifier • lib/data/helpers/connect_helper.dart:3543:21 • non_constant_identifier_names
+warning • The method doesn't override an inherited method • lib/data/repositories/data_repositories.dart:33:7 • override_on_non_overriding_member
+warning • The operand can't be 'null', so the condition is always 'true' • lib/data/repositories/data_repositories.dart:687:76 • unnecessary_null_comparison
+   info • The variable name 'country_code' isn't a lowerCamelCase identifier • lib/data/repositories/data_repositories.dart:1958:21 • non_constant_identifier_names
+   info • The variable name 'oldcountry_code' isn't a lowerCamelCase identifier • lib/data/repositories/data_repositories.dart:2057:21 • non_constant_identifier_names
+   info • The variable name 'newcountry_code' isn't a lowerCamelCase identifier • lib/data/repositories/data_repositories.dart:2059:21 • non_constant_identifier_names
+warning • Unused import: 'package:chatnest/domain/domain.dart' • lib/debug/notification_debug_screen.dart:1:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/debug/notification_debug_screen.dart:31:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/debug/notification_debug_screen.dart:84:27 • avoid_print
+warning • Unused import: 'dart:typed_data' • lib/device/repositories/device_repositories.dart:2:8 • unused_import
+   info • The import of '../../domain/repositories/domain_repository.dart' is unnecessary because all of the used elements are also provided by the import of 'package:chatnest/domain/domain.dart' • lib/device/repositories/device_repositories.dart:10:8 • unnecessary_import
+warning • The method doesn't override an inherited method • lib/device/repositories/device_repositories.dart:57:7 • override_on_non_overriding_member
+   info • Use the generic function type syntax in 'typedef's • lib/domain/entities/dropdown_search/dropdown_search.dart:27:25 • prefer_generic_function_type_aliases
+   info • Use the generic function type syntax in 'typedef's • lib/domain/entities/dropdown_search/dropdown_search.dart:28:16 • prefer_generic_function_type_aliases
+   info • Use the generic function type syntax in 'typedef's • lib/domain/entities/dropdown_search/dropdown_search.dart:29:14 • prefer_generic_function_type_aliases
+   info • Use the generic function type syntax in 'typedef's • lib/domain/entities/dropdown_search/dropdown_search.dart:30:14 • prefer_generic_function_type_aliases
+   info • Use the generic function type syntax in 'typedef's • lib/domain/entities/dropdown_search/dropdown_search.dart:31:16 • prefer_generic_function_type_aliases
+   info • Use the generic function type syntax in 'typedef's • lib/domain/entities/dropdown_search/dropdown_search.dart:32:16 • prefer_generic_function_type_aliases
+   info • Use the generic function type syntax in 'typedef's • lib/domain/entities/dropdown_search/dropdown_search.dart:36:16 • prefer_generic_function_type_aliases
+   info • Use the generic function type syntax in 'typedef's • lib/domain/entities/dropdown_search/dropdown_search.dart:41:14 • prefer_generic_function_type_aliases
+   info • Use the generic function type syntax in 'typedef's • lib/domain/entities/dropdown_search/dropdown_search.dart:42:16 • prefer_generic_function_type_aliases
+   info • Use the generic function type syntax in 'typedef's • lib/domain/entities/dropdown_search/dropdown_search.dart:47:16 • prefer_generic_function_type_aliases
+   info • Use the generic function type syntax in 'typedef's • lib/domain/entities/dropdown_search/dropdown_search.dart:48:16 • prefer_generic_function_type_aliases
+   info • Use the generic function type syntax in 'typedef's • lib/domain/entities/dropdown_search/dropdown_search.dart:49:23 • prefer_generic_function_type_aliases
+   info • Use the generic function type syntax in 'typedef's • lib/domain/entities/dropdown_search/dropdown_search.dart:50:23 • prefer_generic_function_type_aliases
+   info • Use the generic function type syntax in 'typedef's • lib/domain/entities/dropdown_search/dropdown_search.dart:51:23 • prefer_generic_function_type_aliases
+   info • Use the generic function type syntax in 'typedef's • lib/domain/entities/dropdown_search/dropdown_search.dart:52:23 • prefer_generic_function_type_aliases
+   info • Use the generic function type syntax in 'typedef's • lib/domain/entities/dropdown_search/dropdown_search.dart:56:16 • prefer_generic_function_type_aliases
+   info • Use the generic function type syntax in 'typedef's • lib/domain/entities/dropdown_search/dropdown_search.dart:61:16 • prefer_generic_function_type_aliases
+   info • Use the generic function type syntax in 'typedef's • lib/domain/entities/dropdown_search/dropdown_search.dart:66:22 • prefer_generic_function_type_aliases
+   info • Use the generic function type syntax in 'typedef's • lib/domain/entities/dropdown_search/dropdown_search.dart:71:14 • prefer_generic_function_type_aliases
+   info • Use the generic function type syntax in 'typedef's • lib/domain/entities/dropdown_search/dropdown_search.dart:72:14 • prefer_generic_function_type_aliases
+   info • Use the generic function type syntax in 'typedef's • lib/domain/entities/dropdown_search/dropdown_search.dart:73:16 • prefer_generic_function_type_aliases
+   info • Use the generic function type syntax in 'typedef's • lib/domain/entities/dropdown_search/dropdown_search.dart:76:17 • prefer_generic_function_type_aliases
+   info • The constant name 'DIALOG' isn't a lowerCamelCase identifier • lib/domain/entities/dropdown_search/dropdown_search.dart:78:13 • constant_identifier_names
+   info • The constant name 'MODAL_BOTTOM_SHEET' isn't a lowerCamelCase identifier • lib/domain/entities/dropdown_search/dropdown_search.dart:78:21 • constant_identifier_names
+   info • The constant name 'MENU' isn't a lowerCamelCase identifier • lib/domain/entities/dropdown_search/dropdown_search.dart:78:41 • constant_identifier_names
+   info • The constant name 'BOTTOM_SHEET' isn't a lowerCamelCase identifier • lib/domain/entities/dropdown_search/dropdown_search.dart:78:47 • constant_identifier_names
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/dropdown_search.dart:186:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/dropdown_search.dart:187:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/dropdown_search.dart:188:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/dropdown_search.dart:189:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/dropdown_search.dart:190:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/dropdown_search.dart:191:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/dropdown_search.dart:192:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/dropdown_search.dart:193:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/dropdown_search.dart:194:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/dropdown_search.dart:220:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/dropdown_search.dart:221:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/dropdown_search.dart:222:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/dropdown_search.dart:223:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/dropdown_search.dart:224:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/dropdown_search.dart:225:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/dropdown_search.dart:226:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/dropdown_search.dart:227:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/dropdown_search.dart:228:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/dropdown_search.dart:229:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/dropdown_search.dart:230:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/dropdown_search.dart:231:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/dropdown_search.dart:232:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/dropdown_search.dart:233:9 • unnecessary_this
+   info • Use 'const' with the constructor to improve performance • lib/domain/entities/dropdown_search/dropdown_search.dart:304:18 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/domain/entities/dropdown_search/dropdown_search.dart:305:17 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/domain/entities/dropdown_search/dropdown_search.dart:329:22 • prefer_const_constructors
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/dropdown_search.dart:346:9 • curly_braces_in_flow_control_structures
+   info • Use a function declaration rather than a variable assignment to bind a function to a name • lib/domain/entities/dropdown_search/dropdown_search.dart:469:11 • prefer_function_declarations_over_variables
+   info • Use a function declaration rather than a variable assignment to bind a function to a name • lib/domain/entities/dropdown_search/dropdown_search.dart:470:11 • prefer_function_declarations_over_variables
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/dropdown_search.dart:668:48 • curly_braces_in_flow_control_structures
+   info • Use a function declaration rather than a variable assignment to bind a function to a name • lib/domain/entities/dropdown_search/dropdown_search.dart:673:11 • prefer_function_declarations_over_variables
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/dropdown_search.dart:676:9 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/dropdown_search.dart:678:9 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/dropdown_search.dart:706:7 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/dropdown_search.dart:708:7 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/dropdown_search.dart:721:18 • curly_braces_in_flow_control_structures
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/src/properties/popup_props.dart:130:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/src/properties/popup_props.dart:131:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/src/properties/popup_props.dart:132:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/src/properties/popup_props.dart:133:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/src/properties/popup_props.dart:160:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/src/properties/popup_props.dart:161:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/src/properties/popup_props.dart:162:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/src/properties/popup_props.dart:163:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/src/properties/popup_props.dart:186:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/src/properties/popup_props.dart:187:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/src/properties/popup_props.dart:188:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/src/properties/popup_props.dart:189:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/src/properties/popup_props.dart:212:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/src/properties/popup_props.dart:213:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/src/properties/popup_props.dart:214:9 • unnecessary_this
+   info • Unnecessary 'this.' qualifier • lib/domain/entities/dropdown_search/src/properties/popup_props.dart:215:9 • unnecessary_this
+   info • Use the generic function type syntax in 'typedef's • lib/domain/entities/dropdown_search/src/widgets/checkbox_widget.dart:3:16 • prefer_generic_function_type_aliases
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/domain/entities/dropdown_search/src/widgets/checkbox_widget.dart:14:3 • prefer_const_constructors_in_immutables
+   info • Invalid use of a private type in a public API • lib/domain/entities/dropdown_search/src/widgets/checkbox_widget.dart:26:3 • library_private_types_in_public_api
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/src/widgets/checkbox_widget.dart:42:7 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/src/widgets/checkbox_widget.dart:66:13 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/src/widgets/checkbox_widget.dart:68:13 • curly_braces_in_flow_control_structures
+   info • Use 'const' with the constructor to improve performance • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:238:46 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:241:16 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:246:18 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:265:18 • prefer_const_constructors
+   info • Unnecessary 'new' keyword • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:269:22 • unnecessary_new
+   info • Use 'const' with the constructor to improve performance • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:269:22 • prefer_const_constructors
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:282:7 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:287:7 • curly_braces_in_flow_control_structures
+   info • Use 'const' with the constructor to improve performance • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:290:16 • prefer_const_constructors
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:296:7 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:302:7 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:316:15 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:321:15 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:341:11 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:343:11 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:379:11 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:381:11 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:421:9 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:423:9 • curly_braces_in_flow_control_structures
+   info • The 'child' argument should be last in widget constructor invocations • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:425:11 • sort_child_properties_last
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:442:7 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:454:7 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:483:7 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:485:7 • curly_braces_in_flow_control_structures
+   info • Use 'const' with the constructor to improve performance • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:607:16 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:622:35 • prefer_const_constructors
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:649:11 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:654:11 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:659:9 • curly_braces_in_flow_control_structures
+   info • Use 'const' with the constructor to improve performance • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:665:16 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:676:11 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:676:28 • prefer_const_constructors
+   info • The 'child' argument should be last in widget constructor invocations • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:678:13 • sort_child_properties_last
+   info • Use 'const' with the constructor to improve performance • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:678:20 • prefer_const_constructors
+   info • Function literals shouldn't be passed to 'forEach' • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:699:19 • avoid_function_literals_in_foreach_calls
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:704:11 • curly_braces_in_flow_control_structures
+   info • Function literals shouldn't be passed to 'forEach' • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:716:21 • avoid_function_literals_in_foreach_calls
+   info • Statements in an if should be enclosed in a block • lib/domain/entities/dropdown_search/src/widgets/selection_widget.dart:721:11 • curly_braces_in_flow_control_structures
+   info • The constant name 'Connected' isn't a lowerCamelCase identifier • lib/domain/entities/enums.dart:21:3 • constant_identifier_names
+   info • The constant name 'CAMERA' isn't a lowerCamelCase identifier • lib/domain/entities/enums.dart:63:3 • constant_identifier_names
+   info • The constant name 'IMAGE' isn't a lowerCamelCase identifier • lib/domain/entities/enums.dart:64:3 • constant_identifier_names
+   info • The constant name 'VIDEO' isn't a lowerCamelCase identifier • lib/domain/entities/enums.dart:65:3 • constant_identifier_names
+   info • The constant name 'PHONE' isn't a lowerCamelCase identifier • lib/domain/entities/enums.dart:69:3 • constant_identifier_names
+   info • The constant name 'EMAIL' isn't a lowerCamelCase identifier • lib/domain/entities/enums.dart:70:3 • constant_identifier_names
+   info • The constant name 'FILE' isn't a lowerCamelCase identifier • lib/domain/entities/enums.dart:74:3 • constant_identifier_names
+   info • The constant name 'BASE64' isn't a lowerCamelCase identifier • lib/domain/entities/enums.dart:75:3 • constant_identifier_names
+   info • The constant name 'IMAGE' isn't a lowerCamelCase identifier • lib/domain/entities/enums.dart:79:3 • constant_identifier_names
+   info • The constant name 'VIDEO' isn't a lowerCamelCase identifier • lib/domain/entities/enums.dart:80:3 • constant_identifier_names
+   info • The constant name 'OTHER' isn't a lowerCamelCase identifier • lib/domain/entities/enums.dart:81:3 • constant_identifier_names
+   info • The constant name 'ALL' isn't a lowerCamelCase identifier • lib/domain/entities/enums.dart:91:3 • constant_identifier_names
+   info • The constant name 'CREDIT' isn't a lowerCamelCase identifier • lib/domain/entities/enums.dart:92:3 • constant_identifier_names
+   info • The constant name 'DEBIT' isn't a lowerCamelCase identifier • lib/domain/entities/enums.dart:93:3 • constant_identifier_names
+   info • The file name 'getProduct_category_model.dart' isn't a lower_case_with_underscores identifier • lib/domain/models/getProduct_category_model.dart:1:1 • file_names
+   info • The file name 'get_oneProduct_model.dart' isn't a lower_case_with_underscores identifier • lib/domain/models/get_oneProduct_model.dart:1:1 • file_names
+   info • The import of 'package:chatnest/domain/models/group_user_list_model.dart' is unnecessary because all of the used elements are also provided by the import of 'package:chatnest/domain/models/models.dart' • lib/domain/models/get_one_group_model.dart:3:8 • unnecessary_import
+   info • Import of a library in the 'lib/src' directory of another package • lib/domain/models/image_form_data_model.dart:1:8 • implementation_imports
+   info • The file name 'saveProduct_model.dart' isn't a lower_case_with_underscores identifier • lib/domain/models/saveProduct_model.dart:1:1 • file_names
+   info • The type name 'acceptRequest' isn't an UpperCamelCase identifier • lib/domain/models/social_media_links_model.dart:94:7 • camel_case_types
+   info • Don't invoke 'print' in production code • lib/domain/repositories/repository.dart:1162:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/repositories/repository.dart:1163:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/repositories/repository.dart:1166:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/repositories/repository.dart:1172:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/repositories/repository.dart:1175:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/repositories/repository.dart:1176:9 • avoid_print
+warning • The receiver can't be null, so the null-aware operator '?.' is unnecessary • lib/domain/repositories/repository.dart:1178:34 • invalid_null_aware_operator
+   info • Use interpolation to compose strings and values • lib/domain/repositories/repository.dart:1180:32 • prefer_interpolation_to_compose_strings
+   info • Don't invoke 'print' in production code • lib/domain/repositories/repository.dart:1181:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/repositories/repository.dart:1183:11 • avoid_print
+warning • The operand can't be 'null', so the condition is always 'true' • lib/domain/repositories/repository.dart:1189:26 • unnecessary_null_comparison
+warning • The operand can't be 'null', so the condition is always 'true' • lib/domain/repositories/repository.dart:1191:33 • unnecessary_null_comparison
+   info • Don't invoke 'print' in production code • lib/domain/repositories/repository.dart:2565:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/repositories/repository.dart:2612:7 • avoid_print
+   info • The variable name 'country_code' isn't a lowerCamelCase identifier • lib/domain/repositories/repository.dart:3978:21 • non_constant_identifier_names
+   info • The variable name 'oldcountry_code' isn't a lowerCamelCase identifier • lib/domain/repositories/repository.dart:4174:21 • non_constant_identifier_names
+   info • The variable name 'newcountry_code' isn't a lowerCamelCase identifier • lib/domain/repositories/repository.dart:4176:21 • non_constant_identifier_names
+   info • The variable name 'GroupUserListModel' isn't a lowerCamelCase identifier • lib/domain/repositories/repository.dart:4343:11 • non_constant_identifier_names
+   info • The imported package 'http' isn't a dependency of the importing package • lib/domain/services/firebase_access_token.dart:2:8 • depend_on_referenced_packages
+warning • Unused import: '../models/models.dart' • lib/domain/services/firebase_api.dart:11:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:108:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:137:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:337:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:340:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:341:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:342:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:343:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:344:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:345:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:353:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:472:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:532:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:572:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:657:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:658:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:665:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:694:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:699:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:708:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:719:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:738:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:741:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:752:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:755:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:766:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:769:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:795:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:824:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:940:3 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:946:3 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:947:3 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:948:3 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:970:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/firebase_api.dart:1079:9 • avoid_print
+   info • The import of 'firebase_api.dart' is unnecessary because all of the used elements are also provided by the import of 'package:chatnest/domain/domain.dart' • lib/domain/services/socket_connection.dart:6:8 • unnecessary_import
+   info • The prefix 'IO' isn't a lower_case_with_underscores identifier • lib/domain/services/socket_connection.dart:8:60 • library_prefixes
+   info • The imported package 'uuid' isn't a dependency of the importing package • lib/domain/services/socket_connection.dart:10:8 • depend_on_referenced_packages
+   info • Don't invoke 'print' in production code • lib/domain/services/socket_connection.dart:59:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/socket_connection.dart:115:33 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/socket_connection.dart:116:32 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/socket_connection.dart:147:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/socket_connection.dart:454:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/socket_connection.dart:476:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/socket_connection.dart:533:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/socket_connection.dart:565:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/socket_connection.dart:591:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/socket_connection.dart:647:33 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/socket_connection.dart:648:37 • avoid_print
+   info • Don't invoke 'print' in production code • lib/domain/services/socket_connection.dart:649:30 • avoid_print
+warning • Unused import: '../entities/entities.dart' • lib/domain/usecases/audio_call_usecases.dart:3:8 • unused_import
+   info • The file name 'broadCast_usecase.dart' isn't a lower_case_with_underscores identifier • lib/domain/usecases/broadCast_usecase.dart:1:1 • file_names
+warning • Unused import: '../entities/entities.dart' • lib/domain/usecases/broadCast_usecase.dart:3:8 • unused_import
+warning • Unused import: '../entities/entities.dart' • lib/domain/usecases/call_usecases.dart:3:8 • unused_import
+warning • Unused import: '../entities/entities.dart' • lib/domain/usecases/chat_usecases.dart:4:8 • unused_import
+warning • Unused import: '../entities/entities.dart' • lib/domain/usecases/common_usecases.dart:3:8 • unused_import
+   info • The file name 'findFriend_usecases.dart' isn't a lower_case_with_underscores identifier • lib/domain/usecases/findFriend_usecases.dart:1:1 • file_names
+warning • Unused import: '../entities/entities.dart' • lib/domain/usecases/findFriend_usecases.dart:3:8 • unused_import
+warning • Unused import: '../entities/entities.dart' • lib/domain/usecases/group_chat_usecases.dart:3:8 • unused_import
+warning • Unused import: '../entities/entities.dart' • lib/domain/usecases/hidechate_usercases.dart:3:8 • unused_import
+warning • Unused import: '../entities/entities.dart' • lib/domain/usecases/home_usecases.dart:3:8 • unused_import
+warning • Unused import: '../entities/entities.dart' • lib/domain/usecases/meeting_call_usecases.dart:3:8 • unused_import
+warning • Unused import: '../entities/entities.dart' • lib/domain/usecases/meeting_usecases.dart:3:8 • unused_import
+warning • Unused import: '../models/models.dart' • lib/domain/usecases/product_usecases.dart:2:8 • unused_import
+warning • Unused import: '../entities/entities.dart' • lib/domain/usecases/product_usecases.dart:3:8 • unused_import
+warning • Unused import: '../entities/entities.dart' • lib/domain/usecases/request_usecases.dart:3:8 • unused_import
+warning • Unused import: '../entities/entities.dart' • lib/domain/usecases/setting_usecases.dart:3:8 • unused_import
+   info • The variable name 'country_code' isn't a lowerCamelCase identifier • lib/domain/usecases/setting_usecases.dart:59:21 • non_constant_identifier_names
+   info • The variable name 'oldcountry_code' isn't a lowerCamelCase identifier • lib/domain/usecases/setting_usecases.dart:136:21 • non_constant_identifier_names
+   info • The variable name 'newcountry_code' isn't a lowerCamelCase identifier • lib/domain/usecases/setting_usecases.dart:138:21 • non_constant_identifier_names
+   info • The import of 'package:chatnest/app/theme/colors_value.dart' is unnecessary because all of the used elements are also provided by the import of 'package:chatnest/app/app.dart' • lib/main.dart:4:8 • unnecessary_import
+   info • The import of 'package:chatnest/data/helpers/api_wrapper.dart' is unnecessary because all of the used elements are also provided by the import of 'package:chatnest/data/data.dart' • lib/main.dart:5:8 • unnecessary_import
+   info • The import of 'package:chatnest/data/repositories/data_repositories.dart' is unnecessary because all of the used elements are also provided by the import of 'package:chatnest/data/data.dart' • lib/main.dart:6:8 • unnecessary_import
+   info • The imported package 'path' isn't a dependency of the importing package • lib/sqflite_model/database_helper.dart:2:8 • depend_on_referenced_packages
+

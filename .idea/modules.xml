@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/festom_field_flutter.iml" filepath="$PROJECT_DIR$/festom_field_flutter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/android/festom_field_flutter_android.iml" filepath="$PROJECT_DIR$/android/festom_field_flutter_android.iml" />
+    </modules>
+  </component>
+</project>

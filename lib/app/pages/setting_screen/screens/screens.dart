@@ -1,0 +1,10 @@
+export 'setting_screen.dart';
+export 'my_acount/my_account.dart';
+export 'notification/notification.dart';
+export 'storage_screen.dart';
+export 'privacy_security_screen.dart';
+export 'help_screen.dart';
+export 'privacy_policy_screen.dart';
+export 'term_condition_screen.dart';
+export 'chat/chat.dart';
+export 'ringtone_screen.dart';

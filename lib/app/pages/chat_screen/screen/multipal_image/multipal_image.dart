@@ -1,0 +1,1 @@
+export 'multipal_image_screen.dart';

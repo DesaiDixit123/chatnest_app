@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "852697551916",
+    "project_id": "co-chat-36393",
+    "storage_bucket": "co-chat-36393.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:852697551916:android:e4b80eb56f19b84ff22d89",
+        "android_client_info": {
+          "package_name": "com.festumevento.cochat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCvW3Ud64vIqYcsjf7LiZHY3-SFmbfrIys"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
