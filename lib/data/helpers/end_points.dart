@@ -4,6 +4,7 @@ class EndPoints {
 
   static String setProfile = 'profile';
   static String setProfilePic = 'profile/profilepic';
+  static String updateFcmToken = 'profile/fcmtoken';
   static String getProfile = 'profile';
   static String setBusinessProfile = 'business';
   static String setBusinessProfilePic = 'business/setprofilepic';

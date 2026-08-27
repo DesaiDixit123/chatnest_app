@@ -20,8 +20,7 @@ class ChatPersonalInfoScreen extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              if (controller.getOneFriendsData?.latestmedias?.isNotEmpty ??
-                  false) ...[
+              if (controller.shredMediaList.isNotEmpty) ...[
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -60,49 +59,64 @@ class ChatPersonalInfoScreen extends StatelessWidget {
                       var item = controller.shredMediaList[index];
                       return Padding(
                         padding: Dimens.edgeInsets5_0_5_0,
-                        child: Container(
-                          height: Dimens.seventyFive,
-                          width: Dimens.seventyFive,
-                          decoration: BoxDecoration(
-                            color: ColorsValue.white,
-                            borderRadius: BorderRadius.circular(
-                              Dimens.six,
+                        child: InkWell(
+                          onTap: () {
+                            if (item.url != null && item.url!.isNotEmpty) {
+                              RouteManagement.goToShowFullScareenImage(
+                                item.url!,
+                                item.isVideo ?? false ? "Video" : "Image",
+                              );
+                            }
+                          },
+                          child: Container(
+                            height: Dimens.seventyFive,
+                            width: Dimens.seventyFive,
+                            decoration: BoxDecoration(
+                              color: ColorsValue.white,
+                              borderRadius: BorderRadius.circular(
+                                Dimens.six,
+                              ),
                             ),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(
-                              Dimens.six,
-                            ),
-                            child: item.isVideo ?? false
-                                ? Stack(
-                                    children: [
-                                      ThumbNailImageFullpage(
-                                        url: (item.url ?? ""),
-                                      ),
-                                      Center(
-                                        child: SvgPicture.asset(
-                                          AssetConstants.ic_video_play,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(
+                                Dimens.six,
+                              ),
+                              child: item.isVideo ?? false
+                                  ? Stack(
+                                      children: [
+                                        ThumbNailImageFullpage(
+                                          url: (item.url ?? ""),
                                         ),
-                                      ),
-                                    ],
-                                  )
-                                : CachedNetworkImage(
-                                    imageUrl:
-                                        ApiWrapper.imageUrl + (item.url ?? ""),
-                                    fit: BoxFit.cover,
-                                    placeholder: (context, url) {
-                                      return Image.asset(
-                                        AssetConstants.placeholder,
-                                        fit: BoxFit.cover,
-                                      );
-                                    },
-                                    errorWidget: (context, url, error) {
-                                      return Image.asset(
-                                        AssetConstants.placeholder,
-                                        fit: BoxFit.cover,
-                                      );
-                                    },
-                                  ),
+                                        Center(
+                                          child: SvgPicture.asset(
+                                            AssetConstants.ic_video_play,
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : ApiWrapper.isValidImageUrl(item.url)
+                                      ? CachedNetworkImage(
+                                          imageUrl: ApiWrapper.imageUrl +
+                                              item.url!,
+                                          fit: BoxFit.cover,
+                                          placeholder: (context, url) {
+                                            return Image.asset(
+                                              AssetConstants.placeholder,
+                                              fit: BoxFit.cover,
+                                            );
+                                          },
+                                          errorWidget: (context, url, error) {
+                                            return Image.asset(
+                                              AssetConstants.placeholder,
+                                              fit: BoxFit.cover,
+                                            );
+                                          },
+                                        )
+                                      : Image.asset(
+                                          AssetConstants.placeholder,
+                                          fit: BoxFit.cover,
+                                        ),
+                            ),
                           ),
                         ),
                       );

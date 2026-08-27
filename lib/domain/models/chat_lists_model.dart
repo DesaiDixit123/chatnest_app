@@ -13,6 +13,20 @@ bool _parseBool(dynamic value) {
   return false;
 }
 
+double? _parseDouble(dynamic value) {
+  if (value == null) return null;
+  if (value is num) return value.toDouble();
+  if (value is String) return double.tryParse(value.trim());
+  return null;
+}
+
+num _parseNum(dynamic value) {
+  if (value == null) return 0;
+  if (value is num) return value;
+  if (value is String) return num.tryParse(value.trim()) ?? 0;
+  return 0;
+}
+
 ChatListsModel chatListsModelFromJson(String str) =>
     ChatListsModel.fromJson(json.decode(str));
 
@@ -168,60 +182,74 @@ class ChatListsDoc {
 
   factory ChatListsDoc.fromJson(Map<String, dynamic> json) => ChatListsDoc(
         id: json["_id"] ?? "",
-        from:
-            json["from"] == null ? null : ChatListsFrom.fromJson(json["from"]),
-        to: json["to"] == null ? null : ChatListsFrom.fromJson(json["to"]),
-        subuser:
-            json["subuser"] == null ? null : Subuser.fromJson(json["subuser"]),
+        from: json["from"] is Map<String, dynamic>
+            ? ChatListsFrom.fromJson(json["from"])
+            : (json["from"] != null
+                ? ChatListsFrom(id: json["from"].toString())
+                : null),
+        to: json["to"] is Map<String, dynamic>
+            ? ChatListsFrom.fromJson(json["to"])
+            : (json["to"] != null
+                ? ChatListsFrom(id: json["to"].toString())
+                : null),
+        subuser: json["subuser"] is Map<String, dynamic>
+            ? Subuser.fromJson(json["subuser"])
+            : null,
         status: json["status"] ?? "",
-        context: json["context"] == null
-            ? null
-            : ChatConatextDoc.fromJson(json["context"]),
+        context: json["context"] is Map<String, dynamic>
+            ? ChatConatextDoc.fromJson(json["context"])
+            : null,
         contentType: json["contentType"] ?? "",
-        content: json["content"] == null
-            ? null
-            : ChatListsContent.fromJson(json["content"]),
+        content: json["content"] is Map<String, dynamic>
+            ? ChatListsContent.fromJson(json["content"])
+            : null,
         callid: json["callid"] is Map<String, dynamic>
             ? ChatListsCallid.fromJson(json["callid"])
             : null,
         isforwarded: json["isforwarded"] ?? false,
-        favorites: json["favorites"] == null
-            ? []
-            : List<ChatListDeletedfor>.from(
-                json["favorites"]!.map((x) => ChatListDeletedfor.fromJson(x))),
-        bookmarks: json["bookmarks"] == null
-            ? []
-            : List<ChatListDeletedfor>.from(
-                json["bookmarks"]!.map((x) => ChatListDeletedfor.fromJson(x))),
-        reactions: json["reactions"] == null
-            ? []
-            : List<ChatReaction>.from(
-                json["reactions"]!.map((x) => ChatReaction.fromJson(x))),
-        deletedfor: json["deletedfor"] == null
-            ? []
-            : List<ChatListDeletedfor>.from(
-                json["deletedfor"]!.map((x) => ChatListDeletedfor.fromJson(x))),
-        senttimestamp: json["senttimestamp"] ?? 0,
-        deliveredtimestamp: json["deliveredtimestamp"] ?? 0,
-        seentimestamp: json["seentimestamp"] ?? 0,
+        favorites: json["favorites"] is List
+            ? List<ChatListDeletedfor>.from((json["favorites"] as List)
+                .where((x) => x is Map<String, dynamic>)
+                .map((x) => ChatListDeletedfor.fromJson(x)))
+            : [],
+        bookmarks: json["bookmarks"] is List
+            ? List<ChatListDeletedfor>.from((json["bookmarks"] as List)
+                .where((x) => x is Map<String, dynamic>)
+                .map((x) => ChatListDeletedfor.fromJson(x)))
+            : [],
+        reactions: json["reactions"] is List
+            ? List<ChatReaction>.from((json["reactions"] as List)
+                .where((x) => x is Map<String, dynamic>)
+                .map((x) => ChatReaction.fromJson(x)))
+            : [],
+        deletedfor: json["deletedfor"] is List
+            ? List<ChatListDeletedfor>.from((json["deletedfor"] as List)
+                .where((x) => x is Map<String, dynamic>)
+                .map((x) => ChatListDeletedfor.fromJson(x)))
+            : [],
+        senttimestamp: _parseNum(json["senttimestamp"]).toInt(),
+        deliveredtimestamp: _parseNum(json["deliveredtimestamp"]).toInt(),
+        seentimestamp: _parseNum(json["seentimestamp"]).toInt(),
         isedited: json["isedited"] ?? false,
-        createdAt: json["createdAt"] ?? "",
-        updatedAt: json["updatedAt"] ?? "",
-        v: json["__v"],
-        docId: json["id"],
-        statuses: json["statuses"] == null
-            ? []
-            : List<GroypChatListStatus>.from(
-                json["statuses"]!.map((x) => GroypChatListStatus.fromJson(x))),
-        timestamp: json["timestamp"] ?? 0,
+        createdAt: json["createdAt"]?.toString() ?? "",
+        updatedAt: json["updatedAt"]?.toString() ?? "",
+        v: _parseNum(json["__v"]).toInt(),
+        docId: json["id"]?.toString(),
+        statuses: json["statuses"] is List
+            ? List<GroypChatListStatus>.from((json["statuses"] as List)
+                .where((x) => x is Map<String, dynamic>)
+                .map((x) => GroypChatListStatus.fromJson(x)))
+            : [],
+        timestamp: _parseNum(json["timestamp"]).toInt(),
         isGroupMessage: json["isGroupMessage"],
-        groupId: json["groupId"] ?? "",
-        tomessage: json["tomessage"] ?? "",
-        type: json["type"] ?? "",
-        members: json["members"] == null
-            ? []
-            : List<Member>.from(
-                json["members"]!.map((x) => Member.fromJson(x))),
+        groupId: json["groupId"]?.toString() ?? "",
+        tomessage: json["tomessage"]?.toString() ?? "",
+        type: json["type"]?.toString() ?? "",
+        members: json["members"] is List
+            ? List<Member>.from((json["members"] as List)
+                .where((x) => x is Map<String, dynamic>)
+                .map((x) => Member.fromJson(x)))
+            : [],
         isbroadcasted: json["isbroadcasted"],
       );
 
@@ -307,11 +335,11 @@ class ChatReaction {
   });
 
   factory ChatReaction.fromJson(Map<String, dynamic> json) => ChatReaction(
-        userid: json["userid"] == null
-            ? null
-            : ChatListsFrom.fromJson(json["userid"]),
-        reaction: json["reaction"],
-        timestamp: json["timestamp"],
+        userid: json["userid"] is Map<String, dynamic>
+            ? ChatListsFrom.fromJson(json["userid"])
+            : (json["userid"] != null ? ChatListsFrom(id: json["userid"].toString()) : null),
+        reaction: json["reaction"]?.toString() ?? "",
+        timestamp: _parseNum(json["timestamp"]).toInt(),
       );
 
   Map<String, dynamic> toJson() => {
@@ -360,36 +388,38 @@ class ChatListsCallid {
 
   factory ChatListsCallid.fromJson(Map<String, dynamic> json) =>
       ChatListsCallid(
-        id: json["_id"],
-        from:
-            json["from"] == null ? null : ChatListsFrom.fromJson(json["from"]),
-        touser: json["touser"] == null
-            ? null
-            : ChatListsFrom.fromJson(json["touser"]),
+        id: json["_id"]?.toString(),
+        from: json["from"] is Map<String, dynamic>
+            ? ChatListsFrom.fromJson(json["from"])
+            : null,
+        touser: json["touser"] is Map<String, dynamic>
+            ? ChatListsFrom.fromJson(json["touser"])
+            : null,
         togroup: json["togroup"],
         isvideocall: _parseBool(json["isvideocall"]),
         isaudiocall: _parseBool(json["isaudiocall"]),
         isgroupcall: _parseBool(json["isgroupcall"]),
-        status: json["status"],
-        initiatedby: json["initiatedby"] == null
-            ? null
-            : ChatListsFrom.fromJson(json["initiatedby"]),
-        members: json["members"] == null
-            ? []
-            : List<CallHistoryMember>.from(
-                json["members"]!.map((x) => CallHistoryMember.fromJson(x))),
-        agorameta: json["agorameta"] == null
-            ? null
-            : CallHistoryAgorameta.fromJson(json["agorameta"]),
-        timestamp: json["timestamp"],
-        callingfrom: json["callingfrom"],
+        status: json["status"]?.toString(),
+        initiatedby: json["initiatedby"] is Map<String, dynamic>
+            ? ChatListsFrom.fromJson(json["initiatedby"])
+            : null,
+        members: json["members"] is List
+            ? List<CallHistoryMember>.from((json["members"] as List)
+                .where((x) => x is Map<String, dynamic>)
+                .map((x) => CallHistoryMember.fromJson(x)))
+            : [],
+        agorameta: json["agorameta"] is Map<String, dynamic>
+            ? CallHistoryAgorameta.fromJson(json["agorameta"])
+            : null,
+        timestamp: _parseNum(json["timestamp"]).toInt(),
+        callingfrom: json["callingfrom"]?.toString(),
         createdAt: json["createdAt"] == null
             ? null
-            : DateTime.parse(json["createdAt"]),
+            : DateTime.tryParse(json["createdAt"].toString()),
         updatedAt: json["updatedAt"] == null
             ? null
-            : DateTime.parse(json["updatedAt"]),
-        v: json["__v"],
+            : DateTime.tryParse(json["updatedAt"].toString()),
+        v: _parseNum(json["__v"]).toInt(),
       );
 
   Map<String, dynamic> toJson() => {
@@ -425,10 +455,10 @@ class ChatListDeletedfor {
 
   factory ChatListDeletedfor.fromJson(Map<String, dynamic> json) =>
       ChatListDeletedfor(
-        userid: json["userid"] == null
-            ? null
-            : ChatListsFrom.fromJson(json["userid"]),
-        timestamp: json["timestamp"],
+        userid: json["userid"] is Map<String, dynamic>
+            ? ChatListsFrom.fromJson(json["userid"])
+            : (json["userid"] != null ? ChatListsFrom(id: json["userid"].toString()) : null),
+        timestamp: _parseNum(json["timestamp"]).toInt(),
       );
 
   Map<String, dynamic> toJson() => {
@@ -462,40 +492,42 @@ class ChatListsContent {
 
   factory ChatListsContent.fromJson(Map<String, dynamic> json) =>
       ChatListsContent(
-        text: json["text"] == null
-            ? ChatListsText(message: "")
-            : ChatListsText.fromJson(json["text"]),
-        media: json["media"] == null
-            ? ChatListsMedia(
+        text: json["text"] is Map<String, dynamic>
+            ? ChatListsText.fromJson(json["text"])
+            : ChatListsText(message: ""),
+        media: json["media"] is Map<String, dynamic>
+            ? ChatListsMedia.fromJson(json["media"])
+            : ChatListsMedia(
                 path: "",
                 type: "",
                 mime: "",
                 name: "",
-              )
-            : ChatListsMedia.fromJson(json["media"]),
-        multimedias: json["multimedias"] == null
-            ? []
-            : List<ChatListMultiMedia>.from(json["multimedias"]!
-                .map((x) => ChatListMultiMedia.fromJson(x))),
-        product: json["product"] == null
-            ? ChatListsProduct(productid: null)
-            : ChatListsProduct.fromJson(json["product"]),
-        location: json["location"] == null
-            ? ChatListsLocation(coordinates: [])
-            : ChatListsLocation.fromJson(json["location"]),
-        contact: json["contact"] == null
-            ? []
-            : List<ContactContent>.from(
-                json["contact"]!.map((x) => ContactContent.fromJson(x))),
-        poll: json["poll"] == null
-            ? ChatListsPoll(pollid: null)
-            : ChatListsPoll.fromJson(json["poll"]),
-        phonecontact: json["phonecontact"] == null
-            ? null
-            : PhoneContact.fromJson(json["phonecontact"]),
-        statusreply: json["statusreply"] == null
-            ? null
-            : StatusReply.fromJson(json["statusreply"]),
+              ),
+        multimedias: json["multimedias"] is List
+            ? List<ChatListMultiMedia>.from((json["multimedias"] as List)
+                .where((x) => x is Map<String, dynamic>)
+                .map((x) => ChatListMultiMedia.fromJson(x)))
+            : [],
+        product: json["product"] is Map<String, dynamic>
+            ? ChatListsProduct.fromJson(json["product"])
+            : ChatListsProduct(productid: null),
+        location: json["location"] is Map<String, dynamic>
+            ? ChatListsLocation.fromJson(json["location"])
+            : ChatListsLocation(coordinates: []),
+        contact: json["contact"] is List
+            ? List<ContactContent>.from((json["contact"] as List)
+                .where((x) => x is Map<String, dynamic>)
+                .map((x) => ContactContent.fromJson(x)))
+            : [],
+        poll: json["poll"] is Map<String, dynamic>
+            ? ChatListsPoll.fromJson(json["poll"])
+            : ChatListsPoll(pollid: null),
+        phonecontact: json["phonecontact"] is Map<String, dynamic>
+            ? PhoneContact.fromJson(json["phonecontact"])
+            : null,
+        statusreply: json["statusreply"] is Map<String, dynamic>
+            ? StatusReply.fromJson(json["statusreply"])
+            : null,
       );
 
   Map<String, dynamic> toJson() => {
@@ -581,12 +613,12 @@ class ChatListsMedia {
   });
 
   factory ChatListsMedia.fromJson(Map<String, dynamic> json) => ChatListsMedia(
-        path: json["path"],
-        type: json["type"],
-        mime: json["mime"],
-        name: json["name"],
+        path: json["path"] ?? "",
+        type: json["type"] ?? "",
+        mime: json["mime"] ?? "",
+        name: json["name"] ?? "",
         fileext: json["fileext"] ?? "",
-        filesizeinmb: json["filesizeinmb"]?.toDouble(),
+        filesizeinmb: _parseDouble(json["filesizeinmb"]),
       );
 
   Map<String, dynamic> toJson() => {
@@ -618,12 +650,12 @@ class ChatListMultiMedia {
 
   factory ChatListMultiMedia.fromJson(Map<String, dynamic> json) =>
       ChatListMultiMedia(
-        path: json["path"],
-        type: json["type"],
-        mime: json["mime"],
-        name: json["name"],
-        fileext: json["fileext"],
-        filesizeinmb: json["filesizeinmb"],
+        path: json["path"] ?? "",
+        type: json["type"] ?? "",
+        mime: json["mime"] ?? "",
+        name: json["name"] ?? "",
+        fileext: json["fileext"] ?? "",
+        filesizeinmb: _parseNum(json["filesizeinmb"]),
       );
 
   Map<String, dynamic> toJson() => {
@@ -644,7 +676,9 @@ class ChatListsPoll {
   });
 
   factory ChatListsPoll.fromJson(Map<String, dynamic> json) => ChatListsPoll(
-        pollid: json["pollid"] == null ? null : Pollid.fromJson(json["pollid"]),
+        pollid: json["pollid"] is Map<String, dynamic>
+            ? Pollid.fromJson(json["pollid"])
+            : null,
       );
 
   Map<String, dynamic> toJson() => {
@@ -778,9 +812,9 @@ class ChatListsProduct {
 
   factory ChatListsProduct.fromJson(Map<String, dynamic> json) =>
       ChatListsProduct(
-        productid: json["productid"] == null
-            ? null
-            : Productid.fromJson(json["productid"]),
+        productid: json["productid"] is Map<String, dynamic>
+            ? Productid.fromJson(json["productid"])
+            : null,
       );
 
   Map<String, dynamic> toJson() => {

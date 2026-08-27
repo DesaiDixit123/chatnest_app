@@ -9,6 +9,7 @@ import 'package:chatnest/app/navigators/navigators.dart';
 import 'package:chatnest/app/theme/gradient_app_bar.dart';
 import 'package:chatnest/data/data.dart';
 import 'package:chatnest/domain/repositories/repositories.dart';
+import 'package:chatnest/domain/models/models.dart';
 import 'package:chatnest/domain/services/user_safety_service.dart';
 import 'package:chatnest/domain/entities/enums.dart';
 import 'package:flutter/cupertino.dart';
@@ -31,6 +32,22 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final controller = Get.find<ChatController>();
+      final String targetUserId = (Get.arguments != null && Get.arguments is List && Get.arguments.isNotEmpty)
+          ? (Get.arguments[0] ?? "").toString()
+          : "";
+      if (targetUserId.isNotEmpty) {
+        controller.getOneFriends(targetUserId);
+        controller.getChatLists(1, targetUserId);
+      }
+    });
+  }
+
+  @override
   void dispose() {
     Utility.currentChatPageId = '';
     super.dispose();
@@ -40,7 +57,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     final debouncer = Debouncer(milliseconds: 500);
     return GetBuilder<ChatController>(
-      initState: (state) async {
+      initState: (state) {
         var controller = Get.find<ChatController>();
         if (!Get.arguments[1]) {
           controller.isReplyChat = false;
@@ -51,6 +68,44 @@ class _ChatScreenState extends State<ChatScreen> {
             Get.find<Repository>().getStringValue(LocalKeys.chatWallpaper);
         controller.userId = Get.arguments[0] ?? "";
         Utility.currentChatPageId = Get.arguments[0] ?? "";
+        controller.chatSearchController.clear();
+
+        // Instant local populate of friend data from cache so top bar is never empty and never shows previous user
+        final cachedFriend = controller.allFriends
+                .firstWhereOrNull((e) => e.userid == controller.userId) ??
+            controller.chatPagingController.itemList
+                ?.firstWhereOrNull((e) => e.userid == controller.userId);
+        if (cachedFriend != null) {
+          controller.getOneFriendsData = GetOneFriendsData(
+            userid: cachedFriend.userid,
+            fullname: cachedFriend.fullname,
+            nickname: cachedFriend.nickname,
+            profileimage: cachedFriend.profileimage,
+            isOnline: cachedFriend.isOnline ?? false,
+            mobile: cachedFriend.mobile,
+            countryCode: cachedFriend.countryCode,
+            email: cachedFriend.email,
+            channelID: cachedFriend.channelID,
+            isBlocked: cachedFriend.isBlocked,
+            friendrequestid: cachedFriend.friendrequestid,
+          );
+        } else {
+          controller.getOneFriendsData = null;
+          if (Get.isRegistered<CallController>()) {
+            final contact = Get.find<CallController>().contactsList.firstWhereOrNull(
+                (c) => c.userid == controller.userId || c.chatNestUser?.id == controller.userId);
+            if (contact != null) {
+              controller.getOneFriendsData = GetOneFriendsData(
+                userid: contact.userid,
+                fullname: contact.name,
+                nickname: contact.chatNestUser?.username ?? contact.name,
+                profileimage: contact.chatNestUser?.profileImage,
+                mobile: contact.mobile,
+              );
+            }
+          }
+        }
+
         var index = Get.find<ChatController>()
             .chatPagingController
             .itemList
@@ -61,11 +116,19 @@ class _ChatScreenState extends State<ChatScreen> {
               .itemList?[index!]
               .unreadmessageCount = 0;
         }
-        controller.chatMessageList.clear();
-        print(Get.arguments[0]);
-        await controller.getOneFriends(controller.userId);
+        // If cache has full history, use it initially
+        if (ChatController.userChatCache.containsKey(controller.userId) &&
+            ChatController.userChatCache[controller.userId]!.isNotEmpty) {
+          controller.chatMessageList =
+              List.from(ChatController.userChatCache[controller.userId]!);
+        } else {
+          controller.chatMessageList = [];
+        }
 
-        await controller.getChatLists(1, controller.userId);
+        // Fetch full chat history and user info immediately
+        controller.getOneFriends(controller.userId);
+        controller.getChatLists(1, controller.userId);
+
         controller.scrollController.addListener(() async {
           if (controller.scrollController.position.pixels ==
               controller.scrollController.position.maxScrollExtent) {
@@ -124,7 +187,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     child: SvgPicture.asset(
                       AssetConstants.appbarbackarrowicon,
                       colorFilter: const ColorFilter.mode(
-                        ColorsValue.maincolor1,
+                        Colors.black,
                         BlendMode.srcIn,
                       ),
                     ),
@@ -138,74 +201,142 @@ class _ChatScreenState extends State<ChatScreen> {
                   },
                   child: Row(
                     children: [
-                      Flexible(
-                        child: Container(
-                          height: Dimens.fourty,
-                          width: Dimens.fourty,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(
-                              Dimens.hundred,
-                            ),
+                      Container(
+                        height: Dimens.fourty,
+                        width: Dimens.fourty,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(
+                            Dimens.hundred,
                           ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(Dimens.hundred),
-                            child: CachedNetworkImage(
-                              imageUrl: ApiWrapper.imageUrl +
-                                  (controller.getOneFriendsData?.profileimage ??
-                                      ""),
-                              fit: BoxFit.cover,
-                              maxHeightDiskCache: 300,
-                              maxWidthDiskCache: 300,
-                              width: Dimens.fifty,
-                              height: Dimens.fifty,
-                              placeholder: (context, url) => Center(
-                                child: Image.asset(
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(Dimens.hundred),
+                          child: (controller.userId ==
+                                      Get.find<Repository>()
+                                          .getStringValue(LocalKeys.userIds) &&
+                                  !(Get.find<HomeScreenController>().isProfile ??
+                                      false))
+                              ? Image.asset(
                                   AssetConstants.usera,
-                                  height: Dimens.fifty,
-                                ),
-                              ),
-                              errorWidget: (context, url, error) =>
-                                  Image.asset(AssetConstants.usera),
-                            ),
-                          ),
+                                  height: Dimens.fourty,
+                                  width: Dimens.fourty,
+                                  fit: BoxFit.cover,
+                                )
+                              : ApiWrapper.isValidImageUrl(
+                                  (controller.userId ==
+                                              Get.find<Repository>()
+                                                  .getStringValue(
+                                                      LocalKeys.userIds))
+                                      ? Get.find<HomeScreenController>()
+                                          .profilePic
+                                      : (controller.getOneFriendsData
+                                              ?.profileimage ??
+                                          controller.allFriends
+                                              .firstWhereOrNull((e) =>
+                                                  e.userid ==
+                                                  controller.userId)
+                                              ?.profileimage ??
+                                          controller
+                                              .chatPagingController.itemList
+                                              ?.firstWhereOrNull((e) =>
+                                                  e.userid ==
+                                                  controller.userId)
+                                              ?.profileimage),
+                                )
+                                  ? CachedNetworkImage(
+                                      imageUrl: ApiWrapper.getFullImageUrl(
+                                        (controller.userId ==
+                                                Get.find<Repository>()
+                                                    .getStringValue(
+                                                        LocalKeys.userIds))
+                                            ? Get.find<HomeScreenController>()
+                                                .profilePic
+                                            : (controller.getOneFriendsData
+                                                    ?.profileimage ??
+                                                controller.allFriends
+                                                    .firstWhereOrNull((e) =>
+                                                        e.userid ==
+                                                        controller.userId)
+                                                    ?.profileimage ??
+                                                controller
+                                                    .chatPagingController.itemList
+                                                    ?.firstWhereOrNull((e) =>
+                                                        e.userid ==
+                                                        controller.userId)
+                                                    ?.profileimage ??
+                                                ""),
+                                      ),
+                                      fit: BoxFit.cover,
+                                      maxHeightDiskCache: 120,
+                                      maxWidthDiskCache: 120,
+                                      width: Dimens.fourty,
+                                      height: Dimens.fourty,
+                                      placeholder: (context, url) => Center(
+                                        child: Image.asset(
+                                          AssetConstants.usera,
+                                          height: Dimens.fourty,
+                                          width: Dimens.fourty,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      errorWidget: (context, url, error) =>
+                                          Image.asset(
+                                        AssetConstants.usera,
+                                        height: Dimens.fourty,
+                                        width: Dimens.fourty,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    )
+                                  : Image.asset(
+                                      AssetConstants.usera,
+                                      height: Dimens.fourty,
+                                      width: Dimens.fourty,
+                                      fit: BoxFit.cover,
+                                    ),
                         ),
                       ),
                       Dimens.boxWidth10,
-                      Flexible(
+                      Expanded(
                         child: Text(
-                          controller.getOneFriendsData?.fullname?.isNotEmpty ??
-                                  false
-                              ? controller.getOneFriendsData?.fullname ?? ""
-                              : controller.getOneFriendsData?.nickname ?? "",
+                          (controller.userId ==
+                                  Get.find<Repository>()
+                                      .getStringValue(LocalKeys.userIds))
+                              ? "Me".tr
+                              : (controller.getOneFriendsData?.displayName.isNotEmpty ?? false) &&
+                                      controller.getOneFriendsData?.displayName != "User"
+                                  ? controller.getOneFriendsData!.displayName
+                                  : (controller.allFriends
+                                              .firstWhereOrNull((e) =>
+                                                  e.userid == controller.userId)
+                                              ?.displayName
+                                              .isNotEmpty ??
+                                          false)
+                                      ? controller.allFriends
+                                          .firstWhereOrNull((e) =>
+                                              e.userid == controller.userId)!
+                                          .displayName
+                                      : (controller.chatPagingController.itemList
+                                                  ?.firstWhereOrNull((e) =>
+                                                      e.userid ==
+                                                      controller.userId)
+                                                  ?.displayName
+                                                  .isNotEmpty ??
+                                              false)
+                                          ? controller
+                                              .chatPagingController.itemList!
+                                              .firstWhereOrNull((e) =>
+                                                  e.userid == controller.userId)!
+                                              .displayName
+                                          : (controller.getOneFriendsData?.fullname?.isNotEmpty ?? false)
+                                              ? controller.getOneFriendsData!.fullname!
+                                              : (controller.getOneFriendsData?.nickname?.isNotEmpty ?? false)
+                                                  ? controller.getOneFriendsData!.nickname!
+                                                  : "User",
                           style: Styles.black70016,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      // Flexible(
-                      //   child: Column(
-                      //     crossAxisAlignment: CrossAxisAlignment.start,
-                      //     children: [
-                      //       Text(
-                      //         controller.getOneFriendsData?.fullname
-                      //                     ?.isNotEmpty ??
-                      //                 false
-                      //             ? controller.getOneFriendsData?.fullname ?? ""
-                      //             : controller.getOneFriendsData?.nickname ?? "",
-                      //         style: Styles.black70016,
-                      //         maxLines: 1,
-                      //         overflow: TextOverflow.ellipsis,
-                      //       ),
-                      //       Dimens.boxHeight5,
-                      //       Text(
-                      //         controller.getOneFriendsData?.isOnline ?? false
-                      //             ? "Online".tr
-                      //             : "Offline",
-                      //         style: Styles.main40012,
-                      //       ),
-                      //     ],
-                      //   ),
-                      // ),
                     ],
                   ),
                 ),
@@ -242,7 +373,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         if (await Utility.cameraPermissionCheack(context) &&
                             await Utility.microphonePermissionCheack(context)) {
                           controller.postCallInitaite(
-                            isLoading: true,
+                            isLoading: false,
                             receiverId: controller.userId ?? '',
                             isAudioCall: false,
                             isGroupCall: false,
@@ -270,7 +401,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       onTap: () async {
                         if (await Utility.microphonePermissionCheack(context)) {
                           controller.postCallInitaite(
-                            isLoading: true,
+                            isLoading: false,
                             receiverId: controller.userId ?? '',
                             isAudioCall: true,
                             isGroupCall: false,
@@ -519,7 +650,8 @@ class _ChatScreenState extends State<ChatScreen> {
                                   controller.getChatLists(1, controller.userId),
                             ),
                             color: ColorsValue.appColor,
-                            child: controller.chatMessageList.isEmpty
+                            child: (controller.isChatLoading &&
+                                    controller.chatMessageList.isEmpty)
                                 ? Center(
                                     child: CircularProgressIndicator(
                                       color: ColorsValue.appColor,
@@ -527,6 +659,8 @@ class _ChatScreenState extends State<ChatScreen> {
                                   )
                                 : ListView.builder(
                                     reverse: true,
+                                    physics:
+                                        const AlwaysScrollableScrollPhysics(),
                                     controller: controller.scrollController,
                                     itemCount:
                                         controller.chatMessageList.length,
@@ -9213,13 +9347,13 @@ class _ChatScreenState extends State<ChatScreen> {
                             ),
                             Dimens.boxWidth10,
                             InkWell(
-                              onTap: () {
+                              onTap: () async {
                                 if (controller
                                     .sendMessageController.text.isNotEmpty) {
                                   if (!controller.isChatMessageEdit) {
-                                    controller.sendMessage("", false, false);
+                                    await controller.sendMessage("", false, false);
                                   } else {
-                                    controller.postChatMessageEdit(
+                                    await controller.postChatMessageEdit(
                                         controller.sendMessageController.text);
                                   }
                                   controller.isReplyChat = false;

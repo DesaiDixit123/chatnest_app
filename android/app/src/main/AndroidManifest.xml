@@ -42,6 +42,7 @@
         android:label="ChatNest"
         android:name="${applicationName}"
         android:enableOnBackInvokedCallback="true"
+        android:usesCleartextTraffic="true"
         android:icon="@mipmap/ic_launcher">
 
         <meta-data android:name="com.google.android.geo.API_KEY"

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:chatnest/app/utils/utility.dart';
 import 'package:chatnest/domain/models/models.dart';
 
 FriendsListModel friendsListModelFromJson(String str) =>
@@ -163,4 +164,43 @@ class FriendsListDatum {
             List<dynamic>.from(socialmedialinks!.map((x) => x.toJson())),
         "lastseen": lastseen,
       };
+
+  String get displayName {
+    final contactName = Utility.getContactNameForPhone(mobile) ??
+        Utility.getContactNameForPhone(lastchatmessage?.from?.mobile) ??
+        Utility.getContactNameForPhone(lastchatmessage?.to?.mobile);
+    if (contactName != null && contactName.trim().isNotEmpty) {
+      return contactName.trim();
+    }
+
+    final fn = (fullname ?? "").trim();
+    if (fn.isNotEmpty) return fn;
+    final nn = (nickname ?? "").trim();
+    if (nn.isNotEmpty) return nn;
+
+    if (lastchatmessage != null) {
+      if (lastchatmessage?.from != null &&
+          lastchatmessage?.from?.id == userid) {
+        final ffn = (lastchatmessage?.from?.fullname ?? "").trim();
+        if (ffn.isNotEmpty) return ffn;
+        final fnn = (lastchatmessage?.from?.nickname ?? "").trim();
+        if (fnn.isNotEmpty) return fnn;
+      }
+      if (lastchatmessage?.to != null &&
+          lastchatmessage?.to?.id == userid) {
+        final tfn = (lastchatmessage?.to?.fullname ?? "").trim();
+        if (tfn.isNotEmpty) return tfn;
+        final tnn = (lastchatmessage?.to?.nickname ?? "").trim();
+        if (tnn.isNotEmpty) return tnn;
+      }
+    }
+
+    final mob = (mobile ?? "").trim();
+    if (mob.isNotEmpty) {
+      final code = (countryCode ?? "").trim();
+      return code.isNotEmpty ? "$code $mob" : mob;
+    }
+
+    return "User";
+  }
 }

@@ -72,27 +72,41 @@ class ChatUserProfilescreen extends StatelessWidget {
                                         borderRadius: BorderRadius.circular(
                                           Dimens.hundredFifty,
                                         ),
-                                        child: CachedNetworkImage(
-                                          imageUrl: ApiWrapper.imageUrl +
-                                              (controller.getOneFriendsData
-                                                      ?.profileimage ??
-                                                  ""),
-                                          fit: BoxFit.cover,
-                                          maxHeightDiskCache: 300,
-                                          maxWidthDiskCache: 300,
-                                          width: Dimens.hundredFifty,
-                                          height: Dimens.hundredFifty,
-                                          placeholder: (context, url) => Center(
-                                            child: Image.asset(
-                                              AssetConstants.usera,
-                                              height: Dimens.hundredFifty,
-                                            ),
-                                          ),
-                                          errorWidget: (context, url, error) =>
-                                              Image.asset(
-                                            AssetConstants.usera,
-                                          ),
-                                        ),
+                                        child: ApiWrapper.isValidImageUrl(controller.getOneFriendsData?.profileimage)
+                                            ? CachedNetworkImage(
+                                                imageUrl: ApiWrapper.imageUrl +
+                                                    controller
+                                                        .getOneFriendsData!
+                                                        .profileimage!,
+                                                fit: BoxFit.cover,
+                                                maxHeightDiskCache: 300,
+                                                maxWidthDiskCache: 300,
+                                                width: Dimens.hundredFifty,
+                                                height: Dimens.hundredFifty,
+                                                placeholder: (context, url) =>
+                                                    Center(
+                                                  child: Image.asset(
+                                                    AssetConstants.usera,
+                                                    height: Dimens.hundredFifty,
+                                                    width: Dimens.hundredFifty,
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                ),
+                                                errorWidget:
+                                                    (context, url, error) =>
+                                                        Image.asset(
+                                                  AssetConstants.usera,
+                                                  height: Dimens.hundredFifty,
+                                                  width: Dimens.hundredFifty,
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              )
+                                            : Image.asset(
+                                                AssetConstants.usera,
+                                                height: Dimens.hundredFifty,
+                                                width: Dimens.hundredFifty,
+                                                fit: BoxFit.cover,
+                                              ),
                                       ),
                                     ),
                                   ),
@@ -139,7 +153,7 @@ class ChatUserProfilescreen extends StatelessWidget {
                                                         .microphonePermissionCheack(
                                                             context)) {
                                                   controller.postCallInitaite(
-                                                    isLoading: true,
+                                                    isLoading: false,
                                                     receiverId:
                                                         controller.userId ?? '',
                                                     isAudioCall: false,
@@ -180,7 +194,7 @@ class ChatUserProfilescreen extends StatelessWidget {
                                       ],
                                       Dimens.boxWidth15,
                                       if (controller.getOneFriendsData
-                                              ?.usersPermissions?.videocall ??
+                                              ?.usersPermissions?.audiocall ??
                                           false) ...[
                                         Column(
                                           children: [
@@ -190,7 +204,7 @@ class ChatUserProfilescreen extends StatelessWidget {
                                                     .microphonePermissionCheack(
                                                         context)) {
                                                   controller.postCallInitaite(
-                                                    isLoading: true,
+                                                    isLoading: false,
                                                     receiverId:
                                                         controller.userId ?? '',
                                                     isAudioCall: true,

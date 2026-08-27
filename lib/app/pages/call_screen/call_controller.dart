@@ -53,6 +53,21 @@ class CallController extends GetxController {
           withProperties: true,
         );
         contactsData = contacts;
+        for (var contact in contacts) {
+          final name = contact.displayName.trim();
+          if (name.isNotEmpty) {
+            for (var phone in contact.phones) {
+              final norm = Utility.normalizePhoneNumber(phone.number);
+              if (norm.isNotEmpty) {
+                Utility.deviceContactsMap[norm] = name;
+              }
+            }
+          }
+        }
+        if (Get.isRegistered<ChatController>()) {
+          Get.find<ChatController>().applyLocalFilter();
+          Get.find<ChatController>().update();
+        }
         debugPrint('📞 CallController: fetchContacts loaded ${contacts.length} raw contacts');
       }
     } catch (e) {

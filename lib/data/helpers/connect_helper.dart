@@ -139,7 +139,7 @@ class ConnectHelper {
     bool isLoading = false,
     required String filePath,
   }) async {
-    var type = lookupMimeType(filePath)!.split('/');
+    var type = (lookupMimeType(filePath) ?? 'application/octet-stream').split('/');
     var response = await apiWrapper.makeRequest(
       EndPoints.uploadBrochure,
       Request.awsUpload,
@@ -392,7 +392,7 @@ class ConnectHelper {
     bool isLoading = false,
     required String filePath,
   }) async {
-    var type = lookupMimeType(filePath)!.split('/');
+    var type = (lookupMimeType(filePath) ?? 'video/mp4').split('/');
     var response = await apiWrapper.makeRequest(
       EndPoints.productVideos,
       Request.awsUpload,
@@ -408,7 +408,7 @@ class ConnectHelper {
     bool isLoading = false,
     required String filePath,
   }) async {
-    var type = lookupMimeType(filePath)!.split('/');
+    var type = (lookupMimeType(filePath) ?? 'video/mp4').split('/');
     var response = await apiWrapper.makeRequest(
       EndPoints.productVideos,
       Request.awsUpload,
@@ -550,7 +550,7 @@ class ConnectHelper {
     bool isLoading = false,
     required String filePath,
   }) async {
-    var type = lookupMimeType(filePath)!.split('/');
+    var type = (lookupMimeType(filePath) ?? 'video/mp4').split('/');
     var response = await apiWrapper.makeRequest(
       EndPoints.uploadBusinessVideo,
       Request.awsUpload,
@@ -2210,27 +2210,19 @@ class ConnectHelper {
     var data = {
       "message": {
         "token": registrationToken,
-        "notification": {
-          "title": title,
-          "body": body,
-        },
         "data": payloadData,
         "apns": {
           "headers": {
-            "apns-push-type": "alert",
+            "apns-push-type": "background",
             "apns-priority": "10",
           },
           "payload": {
-            "aps": {"content-available": 1, "sound": "default"}
+            "aps": {"content-available": 1}
           }
         },
         "android": {
           "priority": "high",
           "ttl": "30s",
-          "notification": {
-            "channel_id": "high_importance_channel",
-            "sound": "default",
-          }
         }
       }
     };
@@ -4084,6 +4076,23 @@ class ConnectHelper {
     };
     var response = await apiWrapper.makeRequest(
       EndPoints.postMeetingCancle,
+      Request.post,
+      data,
+      isLoading,
+      Utility.commonHeader(),
+    );
+    return response;
+  }
+
+  Future<ResponseModel> updateFcmToken({
+    bool isLoading = false,
+    required String fcmToken,
+  }) async {
+    var data = {
+      'fcm_token': fcmToken,
+    };
+    var response = await apiWrapper.makeRequest(
+      EndPoints.updateFcmToken,
       Request.post,
       data,
       isLoading,

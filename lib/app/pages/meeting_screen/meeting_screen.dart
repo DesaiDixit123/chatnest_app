@@ -33,27 +33,35 @@ class MeetingScreen extends StatelessWidget {
                   onTap: () {
                     Get.back();
                   },
-                  child: SvgPicture.asset(AssetConstants.appbarbackarrowicon),
+                  child: SvgPicture.asset(
+                    AssetConstants.appbarbackarrowicon,
+                    colorFilter: const ColorFilter.mode(
+                      Colors.black,
+                      BlendMode.srcIn,
+                    ),
+                  ),
                 ),
               ),
               bottom: TabBar(
                 controller: controller.meetingTabController,
-                indicatorColor: ColorsValue.maincolor1,
+                indicatorColor: Colors.black,
                 indicatorSize: TabBarIndicatorSize.tab,
                 indicatorPadding: Dimens.edgeInsets20_0_20_0,
                 indicator: const UnderlineTabIndicator(
                   borderSide: BorderSide(
                     width: 3,
-                    color: ColorsValue.maincolor1,
+                    color: Colors.black,
                   ),
                 ),
+                labelColor: Colors.black,
+                unselectedLabelColor: Colors.black54,
                 tabs: <Widget>[
                   Tab(
                     child: Text(
                       "host_meeting".tr,
                       style: controller.meetingTabController.index == 0
-                          ? Styles.main50014
-                          : Styles.greyColor888850014,
+                          ? Styles.black70014
+                          : Styles.black50014,
                       maxLines: 1,
                       softWrap: true,
                       overflow: TextOverflow.ellipsis,
@@ -63,16 +71,16 @@ class MeetingScreen extends StatelessWidget {
                     child: Text(
                       'join_meeting'.tr,
                       style: controller.meetingTabController.index == 1
-                          ? Styles.main50014
-                          : Styles.greyColor888850014,
+                          ? Styles.black70014
+                          : Styles.black50014,
                     ),
                   ),
                   Tab(
                     child: Text(
                       'past_meeting'.tr,
                       style: controller.meetingTabController.index == 2
-                          ? Styles.main50014
-                          : Styles.greyColor888850014,
+                          ? Styles.black70014
+                          : Styles.black50014,
                     ),
                   )
                 ],

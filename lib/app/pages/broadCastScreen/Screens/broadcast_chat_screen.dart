@@ -27,6 +27,7 @@ class BroadCastChatScreen extends StatelessWidget {
             Get.find<Repository>().getStringValue(LocalKeys.chatWallpaper);
         controller.broadcastid = Get.arguments ?? "";
         controller.chatBrodcastMessageList.clear();
+        controller.isBrodcastChatLoading = true;
         await controller.getOneBroadcast(Get.arguments ?? "");
         await controller.postChatListBroadcast(1);
         Get.find<BroadCastController>().friendsWithoutPaginationList();
@@ -66,7 +67,7 @@ class BroadCastChatScreen extends StatelessWidget {
                 child: SvgPicture.asset(
                   AssetConstants.appbarbackarrowicon,
                   colorFilter: const ColorFilter.mode(
-                    ColorsValue.maincolor1,
+                    Colors.black,
                     BlendMode.srcIn,
                   ),
                 ),
@@ -136,17 +137,12 @@ class BroadCastChatScreen extends StatelessWidget {
                           () => controller.postChatListBroadcast(1),
                         ),
                         color: ColorsValue.appColor,
-                        child: controller.chatBrodcastMessageList.isEmpty
-                            ? Center(
-                                child: SvgPicture.asset(
-                                  AssetConstants.chat_empty,
-                                ),
-                              )
-                            : ListView.builder(
-                                reverse: true,
-                                controller: controller.scrollBrodcastController,
-                                itemCount:
-                                    controller.chatBrodcastMessageList.length,
+                        child: ListView.builder(
+                          reverse: true,
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          controller: controller.scrollBrodcastController,
+                          itemCount:
+                              controller.chatBrodcastMessageList.length,
                                 itemBuilder: (context, index) {
                                   bool isSameDate = false;
                                   String? newDate = '';
@@ -7096,10 +7092,10 @@ class BroadCastChatScreen extends StatelessWidget {
                         ),
                         Dimens.boxWidth10,
                         InkWell(
-                          onTap: () {
+                          onTap: () async {
                             if (controller
                                 .sendBrodcastMsgController.text.isNotEmpty) {
-                              controller.postSendMessageBroadcast("", false);
+                              await controller.postSendMessageBroadcast("", false);
 
                               controller.isReplyChat = false;
                               controller.isProductSend = false;

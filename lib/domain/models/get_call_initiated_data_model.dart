@@ -135,7 +135,7 @@ class Calldata {
   });
 
   factory Calldata.fromJson(Map<String, dynamic> json) => Calldata(
-        id: json["_id"] ?? "",
+        id: (json["_id"] ?? "").toString(),
         from:
             json["from"] == null ? null : ChatListsFrom.fromJson(json["from"]),
         touser: json["touser"] == null
@@ -143,21 +143,25 @@ class Calldata {
             : ChatListsFrom.fromJson(json["touser"]),
         togroup:
             json["togroup"] == null ? null : Togroup.fromJson(json["togroup"]),
-        isvideocall: json["isvideocall"] ?? false,
-        isaudiocall: json["isaudiocall"] ?? false,
-        isgroupcall: json["isgroupcall"] ?? false,
-        status: json["status"] ?? "",
+        isvideocall: json["isvideocall"] == true || json["isvideocall"] == "true" || json["isvideocall"] == "yes",
+        isaudiocall: json["isaudiocall"] == true || json["isaudiocall"] == "true" || json["isaudiocall"] == "yes",
+        isgroupcall: json["isgroupcall"] == true || json["isgroupcall"] == "true" || json["isgroupcall"] == "yes",
+        status: (json["status"] ?? "").toString(),
         initiatedby: json["initiatedby"] == null
             ? null
             : ChatListsFrom.fromJson(json["initiatedby"]),
         agorameta: json["agorameta"] == null
             ? null
             : AgorametaDataModel.fromJson(json["agorameta"]),
-        timestamp: json["timestamp"] ?? 0,
-        callingfrom: json["callingfrom"] ?? "",
-        createdAt: DateTime.parse(json["createdAt"]),
-        updatedAt: DateTime.parse(json["updatedAt"]),
-        v: json["__v"] ?? 0,
+        timestamp: int.tryParse(json["timestamp"]?.toString() ?? "0") ?? 0,
+        callingfrom: (json["callingfrom"] ?? "").toString(),
+        createdAt: json["createdAt"] != null
+            ? DateTime.tryParse(json["createdAt"].toString())
+            : null,
+        updatedAt: json["updatedAt"] != null
+            ? DateTime.tryParse(json["updatedAt"].toString())
+            : null,
+        v: int.tryParse(json["__v"]?.toString() ?? "0") ?? 0,
       );
 
   Map<String, dynamic> toJson() => {
@@ -198,12 +202,12 @@ class AgorametaDataModel {
 
   factory AgorametaDataModel.fromJson(Map<String, dynamic> json) =>
       AgorametaDataModel(
-        token: json["token"],
-        channelName: json["channelName"],
-        uid: json["uid"],
-        role: json["role"],
-        expirationTimeInSeconds: json["expirationTimeInSeconds"],
-        privilegeExpiredTs: json["privilegeExpiredTs"],
+        token: (json["token"] ?? "").toString(),
+        channelName: (json["channelName"] ?? "").toString(),
+        uid: (json["uid"] ?? "").toString(),
+        role: (json["role"] ?? "").toString(),
+        expirationTimeInSeconds: int.tryParse(json["expirationTimeInSeconds"]?.toString() ?? "0") ?? 0,
+        privilegeExpiredTs: int.tryParse(json["privilegeExpiredTs"]?.toString() ?? "0") ?? 0,
       );
 
   Map<String, dynamic> toJson() => {

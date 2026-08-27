@@ -31,7 +31,13 @@ class SettingScreen extends StatelessWidget {
               onTap: () {
                 Get.back();
               },
-              child: SvgPicture.asset(AssetConstants.appbarbackarrowicon),
+              child: SvgPicture.asset(
+                AssetConstants.appbarbackarrowicon,
+                colorFilter: const ColorFilter.mode(
+                  Colors.black,
+                  BlendMode.srcIn,
+                ),
+              ),
             ),
           ),
         ),

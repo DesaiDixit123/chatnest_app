@@ -60,9 +60,30 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
 
     postArchiveChatList();
 
-    // await getCurrentPosition();
+    Utility.loadDeviceContacts().then((_) {
+      applyLocalFilter();
+      update();
+    });
 
     super.onInit();
+  }
+
+  String getSelfDisplayName() {
+    final profile = Utility.profileData;
+    if (profile?.fullname != null && profile!.fullname!.trim().isNotEmpty) {
+      return "${profile.fullname!.trim()} (You)";
+    }
+    if (profile?.mobile != null && profile!.mobile!.trim().isNotEmpty) {
+      final code = (profile.countryCode ?? "").trim();
+      final mob = profile.mobile!.trim();
+      return code.isNotEmpty ? "$code $mob (You)" : "$mob (You)";
+    }
+    final storedFullName =
+        Get.find<Repository>().getStringValue(LocalKeys.fullName).trim();
+    if (storedFullName.isNotEmpty) {
+      return "$storedFullName (You)";
+    }
+    return "(You)";
   }
 
   late TextEditingController serchController = TextEditingController();
@@ -110,10 +131,12 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
         final profile = Utility.profileData;
         final self = MyFriendDatum(
           userid: currentUserId,
-          fullname: "${profile?.fullname ?? ""} (You)",
+          fullname: getSelfDisplayName(),
           nickname: profile?.nickname,
           profileimage: profile?.profileimage,
           channelID: profile?.channelId,
+          mobile: profile?.mobile,
+          countryCode: profile?.countryCode,
         );
         filteredFriends.insert(0, self);
       }
@@ -133,10 +156,12 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
           final self = selfEntryInAll ??
               MyFriendDatum(
                 userid: currentUserId,
-                fullname: "${profile?.fullname ?? ""} (You)",
+                fullname: getSelfDisplayName(),
                 nickname: profile?.nickname,
                 profileimage: profile?.profileimage,
                 channelID: profile?.channelId,
+                mobile: profile?.mobile,
+                countryCode: profile?.countryCode,
               );
           // Only add if not unread filter is on, or if we want self to bypass it (usually self doesn't have unread)
           if (!isUnread) {
@@ -151,12 +176,25 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
         filteredFriends.indexWhere((user) => user.userid == currentUserId);
     if (selfIndex != -1) {
       final self = filteredFriends.removeAt(selfIndex);
-      // Ensure (You) suffix is there if it was found in allFriends without it
-      if (!(self.fullname ?? "").contains("(You)")) {
-        self.fullname = "${self.fullname ?? ""} (You)";
-      }
+      self.fullname = getSelfDisplayName();
       filteredFriends.insert(0, self);
     }
+
+    // Deduplicate filteredFriends by userid to guarantee no duplicate cards
+    final seen = <String>{};
+    final uniqueFiltered = <MyFriendDatum>[];
+    for (var f in filteredFriends) {
+      final uid = f.userid ?? "";
+      if (uid.isNotEmpty) {
+        if (!seen.contains(uid)) {
+          seen.add(uid);
+          uniqueFiltered.add(f);
+        }
+      } else {
+        uniqueFiltered.add(f);
+      }
+    }
+    filteredFriends = uniqueFiltered;
 
     chatPagingController.itemList = filteredFriends;
     chatPagingController.notifyListeners();
@@ -189,7 +227,20 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
             element.toLowerCase() == (data.channelID ?? "").toLowerCase());
       }
 
-      allFriends.addAll(fetchedList);
+      // Deduplicate before adding to allFriends
+      for (var item in fetchedList) {
+        if (item.userid != null && item.userid!.isNotEmpty) {
+          final existingIdx =
+              allFriends.indexWhere((e) => e.userid == item.userid);
+          if (existingIdx != -1) {
+            allFriends[existingIdx] = item;
+          } else {
+            allFriends.add(item);
+          }
+        } else {
+          allFriends.add(item);
+        }
+      }
 
 // Apply local filter
       applyLocalFilter();
@@ -542,7 +593,14 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
   bool isReplyChat = false;
 
   Future<void> sendMessage(
-      String? pollId, isLocation, bool isPersonalContact) async {
+      String? pollId, isLocation, bool isPersonalContact,
+      {String? textMessage}) async {
+    String msgToSend =
+        (textMessage != null && textMessage.isNotEmpty)
+            ? textMessage
+            : sendMessageController.text;
+    sendMessageController.clear();
+
     List<String> userSelectList = [];
 
     for (var data in contactSelectList) {
@@ -554,7 +612,7 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
     var response = await chatPresenter.sendMessage(
       isLoading: false,
       receiverid: userId ?? "",
-      message: sendMessageController.text,
+      message: msgToSend,
       product: friendProductDoc?.id ?? "",
       latitude: isLocation ? selectedLocationLatLag?.latitude.toString() : "",
       longitude: isLocation ? selectedLocationLatLag?.longitude.toString() : "",
@@ -572,11 +630,20 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
           : null,
       mediaFileList: sentImageMsgLists
           .map(
-            (e) => ImageFormData(
-              fieldName: "file",
-              filePath: e.url ?? "",
-              mediaType: MediaType.parse(lookupMimeType(e.url ?? "")!),
-            ),
+            (e) {
+              final mime = lookupMimeType(e.url ?? "") ?? (e.isVideo == true ? "video/mp4" : "image/jpeg");
+              MediaType parsedType;
+              try {
+                parsedType = MediaType.parse(mime);
+              } catch (_) {
+                parsedType = MediaType("application", "octet-stream");
+              }
+              return ImageFormData(
+                fieldName: "file",
+                filePath: e.url ?? "",
+                mediaType: parsedType,
+              );
+            },
           )
           .toList(),
     );
@@ -584,60 +651,72 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
       isReplyChat = false;
       chatListsDoc = null;
       sentImageMsgLists.clear();
-      getChatLists(1, userId);
+      if (chatMessageList.indexWhere((e) => e.id == response.id) == -1) {
+        chatMessageList.insert(0, response);
+        if (userId != null && userId.toString().isNotEmpty) {
+          userChatCache[userId.toString()] = List.from(chatMessageList);
+        }
+        update();
+      }
+      await getChatLists(1, userId);
 
-      // Update allFriends to keep the source of truth in sync
+      // Update allFriends to keep the source of truth in sync and move to top
       var friendIndex =
           allFriends.indexWhere((element) => element.userid == userId);
       if (friendIndex != -1) {
         var friendData = allFriends.removeAt(friendIndex);
         friendData.lastchatmessage = response;
         allFriends.insert(0, friendData);
+      } else {
+        final friendProfile = getOneFriendsData;
+        var newFriend = MyFriendDatum(
+          userid: userId,
+          fullname:
+              friendProfile?.fullname ?? friendProfile?.nickname ?? "User",
+          nickname: friendProfile?.nickname,
+          profileimage: friendProfile?.profileimage,
+          mobile: friendProfile?.mobile,
+          countryCode: friendProfile?.countryCode,
+          lastchatmessage: response,
+          unreadmessageCount: 0,
+        );
+        allFriends.insert(0, newFriend);
       }
-
-      var index = Get.find<ChatController>()
-          .chatPagingController
-          .itemList
-          ?.indexWhere((element) => element.userid == userId);
-      if (index?.isNegative == false) {
-        Get.find<ChatController>()
-            .chatPagingController
-            .itemList?[index!]
-            .lastchatmessage = null;
-        Get.find<ChatController>()
-            .chatPagingController
-            .itemList?[index!]
-            .lastchatmessage = response;
-
-        var data =
-            Get.find<ChatController>().chatPagingController.itemList![index!];
-        Get.find<ChatController>()
-            .chatPagingController
-            .itemList
-            ?.removeAt(index);
-        Get.find<ChatController>()
-            .chatPagingController
-            .itemList
-            ?.insert(0, data);
-      }
+      applyLocalFilter();
       questionList.map((e) => e.textController?.clear()).toList();
       update();
     }
   }
 
-  Future<void> postChatSendBulkMessage(String? pollId, isLocation) async {
+  Future<void> postChatSendBulkMessage(String? pollId, isLocation,
+      {String? textMessage}) async {
+    String msgToSend =
+        (textMessage != null && textMessage.isNotEmpty)
+            ? textMessage
+            : sendMessageController.text;
+    sendMessageController.clear();
+
     var response = await chatPresenter.postChatSendBulkMessage(
       isLoading: false,
       receiverid: userId ?? "",
-      message: sendMessageController.text,
+      message: msgToSend,
       context: isReplyChat ? chatListsDoc?.id : "",
       mediaFileList: sentImageMsgLists
           .map(
-            (e) => ImageFormData(
-              fieldName: "file[${sentImageMsgLists.indexOf(e)}]",
-              filePath: e.url ?? "",
-              mediaType: MediaType.parse(lookupMimeType(e.url ?? "")!),
-            ),
+            (e) {
+              final mime = lookupMimeType(e.url ?? "") ?? (e.isVideo == true ? "video/mp4" : "image/jpeg");
+              MediaType parsedType;
+              try {
+                parsedType = MediaType.parse(mime);
+              } catch (_) {
+                parsedType = MediaType("application", "octet-stream");
+              }
+              return ImageFormData(
+                fieldName: "file[${sentImageMsgLists.indexOf(e)}]",
+                filePath: e.url ?? "",
+                mediaType: parsedType,
+              );
+            },
           )
           .toList(),
     );
@@ -645,42 +724,32 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
       isReplyChat = false;
       chatListsDoc = null;
       sentImageMsgLists.clear();
-      getChatLists(1, userId);
+      await getChatLists(1, userId);
 
-      // Update allFriends to keep the source of truth in sync
+      // Update allFriends to keep the source of truth in sync and move to top
       var friendIndex =
           allFriends.indexWhere((element) => element.userid == userId);
       if (friendIndex != -1) {
         var friendData = allFriends.removeAt(friendIndex);
         friendData.lastchatmessage = response;
         allFriends.insert(0, friendData);
+      } else {
+        final friendProfile = getOneFriendsData;
+        var newFriend = MyFriendDatum(
+          userid: userId,
+          fullname:
+              friendProfile?.fullname ?? friendProfile?.nickname ?? "User",
+          nickname: friendProfile?.nickname,
+          profileimage: friendProfile?.profileimage,
+          mobile: friendProfile?.mobile,
+          countryCode: friendProfile?.countryCode,
+          lastchatmessage: response,
+          unreadmessageCount: 0,
+        );
+        allFriends.insert(0, newFriend);
       }
-
-      var index = Get.find<ChatController>()
-          .chatPagingController
-          .itemList
-          ?.indexWhere((element) => element.userid == userId);
-      if (index?.isNegative == false) {
-        Get.find<ChatController>()
-            .chatPagingController
-            .itemList?[index!]
-            .lastchatmessage = null;
-        Get.find<ChatController>()
-            .chatPagingController
-            .itemList?[index!]
-            .lastchatmessage = response;
-
-        var data =
-            Get.find<ChatController>().chatPagingController.itemList![index!];
-        Get.find<ChatController>()
-            .chatPagingController
-            .itemList
-            ?.removeAt(index);
-        Get.find<ChatController>()
-            .chatPagingController
-            .itemList
-            ?.insert(0, data);
-      }
+      applyLocalFilter();
+      update();
     }
   }
 
@@ -889,44 +958,123 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
   GetOneFriendsData? getOneFriendsData = GetOneFriendsData();
   Future<void> getOneFriends(userId) async {
     debugPrint("[ANTIGRAVITY_DEBUG] getOneFriends called for userId: $userId");
+    this.userId = userId;
+
+    if (Utility.deviceContactsMap.isEmpty) {
+      Utility.loadDeviceContacts().then((_) => update());
+    }
+
+    // Instantly populate friend details from cache so name & photo display without waiting
+    final cachedFriend = allFriends.firstWhereOrNull((e) => e.userid == userId) ??
+        chatPagingController.itemList?.firstWhereOrNull((e) => e.userid == userId);
+    if (cachedFriend != null) {
+      getOneFriendsData = GetOneFriendsData(
+        userid: cachedFriend.userid,
+        fullname: cachedFriend.fullname,
+        nickname: cachedFriend.nickname,
+        profileimage: cachedFriend.profileimage,
+        isOnline: cachedFriend.isOnline ?? false,
+        mobile: cachedFriend.mobile,
+        countryCode: cachedFriend.countryCode,
+        email: cachedFriend.email,
+        channelID: cachedFriend.channelID,
+        isBlocked: cachedFriend.isBlocked,
+        friendrequestid: cachedFriend.friendrequestid,
+      );
+    } else if (getOneFriendsData?.userid != userId) {
+      getOneFriendsData = GetOneFriendsData(userid: userId);
+    }
+    update();
+
     var response = await chatPresenter.getOneFriends(
       userid: userId ?? "",
       isLoading: false,
     );
     debugPrint(
         "[ANTIGRAVITY_DEBUG] getOneFriends response received: ${response != null}");
-    if (getOneFriendsData?.userid != userId) {
-      getOneFriendsData = null;
-      shredMediaList.clear();
-    }
     if (response != null) {
       try {
         debugPrint(
             "[ANTIGRAVITY_DEBUG] getOneFriends response data: ${response.data.userid}");
         getOneFriendsData = response.data;
+        shredMediaList.clear();
 
-        for (var data
-            in getOneFriendsData?.latestmedias ?? <ChatListsMediaData>[]) {
-          if (data.content?.media.path.isNotEmpty ?? false) {
-            shredMediaList.add(
-              UserMediaModel(
-                url: data.content?.media.path,
-                isVideo: data.content?.media.type == "IMG" ? false : true,
-                timestemp: data.senttimestamp,
-              ),
-            );
-          } else {
-            data.content?.multimedias
-                ?.map(
-                  (e) => shredMediaList.add(
+        final myUserId =
+            Get.find<Repository>().getStringValue(LocalKeys.userIds);
+        final targetUserId = userId?.toString() ?? "";
+
+        // If this chat is currently open and has messages, derive media directly from this chat
+        if (chatMessageList.isNotEmpty && this.userId == targetUserId) {
+          for (var chat in chatMessageList) {
+            if (chat.isbroadcasted == true || chat.isGroupMessage == true) {
+              continue;
+            }
+            if (chat.content?.media.path.isNotEmpty ?? false) {
+              shredMediaList.add(
+                UserMediaModel(
+                  url: chat.content?.media.path,
+                  isVideo: chat.content?.media.type == "IMG" ? false : true,
+                  timestemp: chat.senttimestamp,
+                ),
+              );
+            } else if (chat.content?.multimedias?.isNotEmpty ?? false) {
+              chat.content?.multimedias?.forEach((e) {
+                if (e.path.isNotEmpty) {
+                  shredMediaList.add(
+                    UserMediaModel(
+                      url: e.path,
+                      isVideo: e.type == "IMG" ? false : true,
+                      timestemp: chat.senttimestamp,
+                    ),
+                  );
+                }
+              });
+            }
+          }
+        } else {
+          for (var data
+              in getOneFriendsData?.latestmedias ?? <ChatListsMediaData>[]) {
+            if (data.isbroadcasted == true || data.isGroupMessage == true) {
+              continue;
+            }
+
+            final fromId = data.from?.id ?? "";
+            final toId = data.to?.id ?? "";
+            if (fromId.isNotEmpty &&
+                toId.isNotEmpty &&
+                targetUserId.isNotEmpty &&
+                myUserId.isNotEmpty) {
+              final isParticipant =
+                  (fromId == myUserId && toId == targetUserId) ||
+                      (fromId == targetUserId && toId == myUserId);
+              if (!isParticipant) continue;
+            }
+
+            if (data.deletedfor?.any((d) => d.userid == myUserId) ?? false) {
+              continue;
+            }
+
+            if (data.content?.media.path.isNotEmpty ?? false) {
+              shredMediaList.add(
+                UserMediaModel(
+                  url: data.content?.media.path,
+                  isVideo: data.content?.media.type == "IMG" ? false : true,
+                  timestemp: data.senttimestamp,
+                ),
+              );
+            } else if (data.content?.multimedias?.isNotEmpty ?? false) {
+              data.content?.multimedias?.forEach((e) {
+                if (e.path.isNotEmpty) {
+                  shredMediaList.add(
                     UserMediaModel(
                       url: e.path,
                       isVideo: e.type == "IMG" ? false : true,
                       timestemp: data.senttimestamp,
                     ),
-                  ),
-                )
-                .toList();
+                  );
+                }
+              });
+            }
           }
         }
 
@@ -1013,6 +1161,8 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
     return responseModel.results!.first.formattedAddress ?? "";
   }
 
+  static final Map<String, List<ChatListsDoc>> userChatCache = {};
+
   List<ChatListsDoc> chatMessageList = [];
   List<ChatListDeletedfor> allDeleteList = [];
 
@@ -1024,6 +1174,7 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
 
   bool isLastPage = false;
   bool isLoading = false;
+  bool isChatLoading = false;
 
   final ScrollController scrollController = ScrollController();
   TextEditingController chatSearchController = TextEditingController();
@@ -1032,41 +1183,56 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
   Future<void> getChatLists(int pageKey, userId) async {
     if (pageKey == 1) {
       pageCount = 1;
+      isChatLoading = true;
+      update();
     }
-    var response = await chatPresenter.getChatLists(
-      userid: userId ?? "",
-      page: pageCount,
-      limit: 10,
-      search: chatSearchController.text,
-      isLoading: false,
-    );
-    if (response != null) {
-      if (pageKey == 1) {
-        isLastPage = false;
-        chatMessageList.clear();
-        allDeleteList.clear();
-      }
+    try {
+      var response = await chatPresenter.getChatLists(
+        userid: userId ?? "",
+        page: pageCount,
+        limit: 30,
+        search: chatSearchController.text,
+        isLoading: false,
+      );
+      if (response != null) {
+        if (pageKey == 1) {
+          isLastPage = false;
+          chatMessageList.clear();
+          allDeleteList.clear();
+        }
 
-      for (var data in response.data.docs ?? <ChatListsDoc>[]) {
-        allDeleteList.addAll(data.deletedfor ?? []);
-      }
+        for (var data in response.data.docs ?? <ChatListsDoc>[]) {
+          allDeleteList.addAll(data.deletedfor ?? []);
+        }
 
-      if ((response.data.docs?.length ?? 0) < 10) {
-        isLastPage = true;
-        chatMessageList.addAll(response.data.docs ?? []);
-      } else {
-        pageCount++;
-        chatMessageList.addAll(response.data.docs ?? []);
-        print(Get.find<Repository>().getStringValue(LocalKeys.userIds));
-      }
-      if (pageKey == 1) {
-        if (scrollController.positions.isNotEmpty) {
-          scrollController.jumpTo(0);
+        if ((response.data.docs?.length ?? 0) < 30) {
+          isLastPage = true;
+          chatMessageList.addAll(response.data.docs ?? []);
+        } else {
+          pageCount++;
+          chatMessageList.addAll(response.data.docs ?? []);
+          print(Get.find<Repository>().getStringValue(LocalKeys.userIds));
+        }
+
+        if (userId != null && userId.toString().isNotEmpty) {
+          userChatCache[userId.toString()] = List.from(chatMessageList);
+        }
+
+        if (pageKey == 1) {
+          if (chatMessageList.isNotEmpty) {
+            postSeenMessage(chatMessageList.first.id ?? "");
+          }
+          if (scrollController.positions.isNotEmpty) {
+            scrollController.jumpTo(0);
+          }
         }
       }
+    } finally {
+      if (pageKey == 1) {
+        isChatLoading = false;
+      }
+      update();
     }
-
-    update();
   }
 
   Future<void> fetchUserStatusAndNavigate(
@@ -1760,13 +1926,13 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
     required bool isGroupCall,
   }) async {
     var response = await chatPresenter.postCallInitaite(
-      isLoading: isLoading,
+      isLoading: false,
       isAudioCall: isAudioCall,
       isGroupCall: isGroupCall,
       isVideoCall: isVideoCall,
       receiverId: receiverId,
     );
-    if (response != null) {
+    if (response != null && response.data != null && response.data.calldata != null) {
       if (response.data.calldata.id == null ||
           response.data.calldata.id!.isEmpty) {
         Utility.showMessage("Failed to initiate call: Invalid meeting ID",
@@ -1780,46 +1946,38 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
           response.data.calldata.id ?? "",
           true,
           response.data.calldata.touser?.profileimage ?? "",
-          response.data.calldata.touser?.fullname?.isEmpty ?? false
-              ? response.data.calldata.touser?.nickname ?? ""
-              : response.data.calldata.touser?.fullname ?? "",
+          (response.data.calldata.touser?.fullname?.isNotEmpty ?? false)
+              ? response.data.calldata.touser?.fullname ?? ""
+              : (response.data.calldata.touser?.nickname ?? ""),
           true,
         );
       } else {
         RouteManagement.goToVideoCallScreen(
-            response.data.calldata.agorameta?.channelName ?? "",
-            response.data.calldata.agorameta?.token ?? "",
-            response.data.calldata.id ?? "",
-            true,
-            response.data.calldata.touser?.profileimage ?? "",
-            response.data.calldata.touser?.fullname?.isEmpty ?? false
-                ? response.data.calldata.touser?.nickname ?? ""
-                : response.data.calldata.touser?.fullname ?? "",
-            true);
-      }
-      FirebaseAccessToken firebaseAccessToken = FirebaseAccessToken();
-      String token = "";
-      Object? oauthError;
-      for (var attempt = 1; attempt <= 3; attempt++) {
-        try {
-          token = await firebaseAccessToken.getToken();
-          if (token.isNotEmpty) {
-            break;
-          }
-        } catch (e) {
-          oauthError = e;
-        }
-        await Future.delayed(Duration(milliseconds: 300 * attempt));
+          response.data.calldata.agorameta?.channelName ?? "",
+          response.data.calldata.agorameta?.token ?? "",
+          response.data.calldata.id ?? "",
+          true,
+          response.data.calldata.touser?.profileimage ?? "",
+          (response.data.calldata.touser?.fullname?.isNotEmpty ?? false)
+              ? response.data.calldata.touser?.fullname ?? ""
+              : (response.data.calldata.touser?.nickname ?? ""),
+          true,
+        );
       }
 
-      if (token.isEmpty) {
-        print(
-            "❌ Unable to get Firebase OAuth token for call push after retries. error=$oauthError");
-      } else {
-        // Get.find<Repository>().saveValue(LocalKeys.notificationToken, token);
-        print("OAuth $token");
-        postSendFcmApi(response.data, "onincomingindividualcall", token);
-      }
+      // Background push notification trigger (non-blocking)
+      () async {
+        try {
+          FirebaseAccessToken firebaseAccessToken = FirebaseAccessToken();
+          String token = await firebaseAccessToken.getToken();
+          if (token.isNotEmpty) {
+            postSendFcmApi(response.data, "onincomingindividualcall", token);
+          }
+        } catch (e) {
+          print("Background FCM push skip: $e");
+        }
+      }();
+
       chatPagingController.refresh();
     }
     update();
@@ -2024,17 +2182,19 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
   }
 
   Future<void> postReadChat(String? friendrequestids) async {
+    if (friendrequestids == null || friendrequestids.trim().isEmpty) return;
     await chatPresenter.postReadChat(
       isLoading: false,
-      friendrequestids: [friendrequestids ?? ""],
+      friendrequestids: [friendrequestids.trim()],
     );
   }
 
   Future<void> postUnReadChat(String? friendrequestids) async {
+    if (friendrequestids == null || friendrequestids.trim().isEmpty) return;
     var response = await chatPresenter.postUnReadChat(
       isLoading: false,
       friendrequestids: [
-        friendrequestids ?? "",
+        friendrequestids.trim(),
       ],
     );
     if (response != null) {
@@ -2091,7 +2251,14 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
 
   String? groupId;
   Future<void> sendGroupMessage(
-      String? pollId, bool isLocation, bool isPersonalContact) async {
+      String? pollId, bool isLocation, bool isPersonalContact,
+      {String? textMessage}) async {
+    String msgToSend =
+        (textMessage != null && textMessage.isNotEmpty)
+            ? textMessage
+            : sendMessageController.text;
+    sendMessageController.clear();
+
     List<String> userSelectList = [];
     for (var data in contactSelectList) {
       if (data.isSelect ?? false) {
@@ -2101,7 +2268,7 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
     var response = await chatPresenter.sendGroupMessage(
       isLoading: false,
       receiverid: groupId ?? "",
-      message: sendMessageController.text,
+      message: msgToSend,
       product: "",
       latitude: isLocation ? selectedLocationLatLag?.latitude.toString() : "",
       longitude: isLocation ? selectedLocationLatLag?.longitude.toString() : "",
@@ -2119,46 +2286,72 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
       usersList: userSelectList,
       mediaFileList: sentImageMsgLists
           .map(
-            (e) => ImageFormData(
-              fieldName: "file",
-              filePath: e.url ?? "",
-              mediaType: MediaType.parse(lookupMimeType(e.url ?? "")!),
-            ),
+            (e) {
+              final mime = lookupMimeType(e.url ?? "") ?? (e.isVideo == true ? "video/mp4" : "image/jpeg");
+              MediaType parsedType;
+              try {
+                parsedType = MediaType.parse(mime);
+              } catch (_) {
+                parsedType = MediaType("application", "octet-stream");
+              }
+              return ImageFormData(
+                fieldName: "file",
+                filePath: e.url ?? "",
+                mediaType: parsedType,
+              );
+            },
           )
           .toList(),
     );
     if (response != null) {
       sentImageMsgLists.clear();
-      getGroupChatLists(1);
+      await getGroupChatLists(1);
       Get.find<GroupChatController>().groupListPagingController.refresh();
     }
   }
 
-  Future<void> postGroupChatSendBulkMessage(String? pollId, isLocation) async {
+  Future<void> postGroupChatSendBulkMessage(String? pollId, isLocation,
+      {String? textMessage}) async {
+    String msgToSend =
+        (textMessage != null && textMessage.isNotEmpty)
+            ? textMessage
+            : sendMessageController.text;
+    sendMessageController.clear();
+
     var response = await chatPresenter.postGroupChatSendBulkMessage(
       isLoading: false,
       receiverid: groupId ?? "",
-      message: sendMessageController.text,
+      message: msgToSend,
       context: isReplyChat ? chatGroupListsDoc?.id : "",
       mediaFileList: sentImageMsgLists
           .map(
-            (e) => ImageFormData(
-              fieldName: "file[${sentImageMsgLists.indexOf(e)}]",
-              filePath: e.url ?? "",
-              mediaType: MediaType.parse(lookupMimeType(e.url ?? "")!),
-            ),
+            (e) {
+              final mime = lookupMimeType(e.url ?? "") ?? (e.isVideo == true ? "video/mp4" : "image/jpeg");
+              MediaType parsedType;
+              try {
+                parsedType = MediaType.parse(mime);
+              } catch (_) {
+                parsedType = MediaType("application", "octet-stream");
+              }
+              return ImageFormData(
+                fieldName: "file[${sentImageMsgLists.indexOf(e)}]",
+                filePath: e.url ?? "",
+                mediaType: parsedType,
+              );
+            },
           )
           .toList(),
     );
     if (response != null) {
       sentImageMsgLists.clear();
-      getGroupChatLists(1);
+      await getGroupChatLists(1);
       Get.find<GroupChatController>().groupListPagingController.refresh();
     }
   }
 
   bool isGroupLastPage = false;
   int pageGroupCount = 1;
+  bool isGroupChatLoading = false;
 
   final ScrollController scrollGroupController = ScrollController();
   List<ChatListsDoc> chatGroupMessageList = [];
@@ -2169,33 +2362,41 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
   Future<void> getGroupChatLists(int pageKey) async {
     if (pageKey == 1) {
       pageGroupCount = 1;
+      isGroupChatLoading = true;
+      update();
     }
-    var response = await chatPresenter.getGroupChatLists(
-      groupid: groupId ?? "",
-      page: pageGroupCount,
-      limit: 10,
-      search: groupChatSearchController.text,
-      isLoading: false,
-    );
-    if (response != null) {
-      if (pageKey == 1) {
-        isGroupLastPage = false;
-        chatGroupMessageList.clear();
-      }
-      if ((response.data.docs?.length ?? 0) < 10) {
-        isGroupLastPage = true;
-        chatGroupMessageList.addAll(response.data.docs ?? []);
-      } else {
-        pageGroupCount++;
-        chatGroupMessageList.addAll(response.data.docs ?? []);
-      }
-      if (pageKey == 1) {
-        if (scrollGroupController.positions.isNotEmpty) {
-          scrollGroupController.jumpTo(0);
+    try {
+      var response = await chatPresenter.getGroupChatLists(
+        groupid: groupId ?? "",
+        page: pageGroupCount,
+        limit: 10,
+        search: groupChatSearchController.text,
+        isLoading: false,
+      );
+      if (response != null) {
+        if (pageKey == 1) {
+          isGroupLastPage = false;
+          chatGroupMessageList.clear();
+        }
+        if ((response.data.docs?.length ?? 0) < 10) {
+          isGroupLastPage = true;
+          chatGroupMessageList.addAll(response.data.docs ?? []);
+        } else {
+          pageGroupCount++;
+          chatGroupMessageList.addAll(response.data.docs ?? []);
+        }
+        if (pageKey == 1) {
+          if (scrollGroupController.positions.isNotEmpty) {
+            scrollGroupController.jumpTo(0);
+          }
         }
       }
+    } finally {
+      if (pageKey == 1) {
+        isGroupChatLoading = false;
+      }
+      update();
     }
-    update();
   }
 
   Future<void> postGroupDeliveredMessage(String? messageid) async {
@@ -2572,41 +2773,57 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
 
   bool isBrodcastLastPage = false;
   bool isBrodcastLoading = false;
+  bool isBrodcastChatLoading = false;
 
   final ScrollController scrollBrodcastController = ScrollController();
 
   Future<void> postChatListBroadcast(int pageKey) async {
     if (pageKey == 1) {
       pageBrodcastCount = 1;
+      isBrodcastChatLoading = true;
+      update();
     }
-    var response = await chatPresenter.postChatListBroadcast(
-      broadcastid: broadcastid ?? "",
-      page: pageBrodcastCount,
-      limit: 10,
-      isLoading: false,
-    );
-    if (response != null) {
-      if (pageKey == 1) {
-        isBrodcastLastPage = false;
-        chatBrodcastMessageList.clear();
-      }
-      if ((response.data.docs?.length ?? 0) < 10) {
-        isBrodcastLastPage = true;
-        chatBrodcastMessageList.addAll(response.data.docs ?? []);
-      } else {
-        pageBrodcastCount++;
-        chatBrodcastMessageList.addAll(response.data.docs ?? []);
-      }
-      if (pageKey == 1) {
-        if (scrollBrodcastController.positions.isNotEmpty) {
-          scrollBrodcastController.jumpTo(0);
+    try {
+      var response = await chatPresenter.postChatListBroadcast(
+        broadcastid: broadcastid ?? "",
+        page: pageBrodcastCount,
+        limit: 10,
+        isLoading: false,
+      );
+      if (response != null) {
+        if (pageKey == 1) {
+          isBrodcastLastPage = false;
+          chatBrodcastMessageList.clear();
+        }
+        if ((response.data.docs?.length ?? 0) < 10) {
+          isBrodcastLastPage = true;
+          chatBrodcastMessageList.addAll(response.data.docs ?? []);
+        } else {
+          pageBrodcastCount++;
+          chatBrodcastMessageList.addAll(response.data.docs ?? []);
+        }
+        if (pageKey == 1) {
+          if (scrollBrodcastController.positions.isNotEmpty) {
+            scrollBrodcastController.jumpTo(0);
+          }
         }
       }
+    } finally {
+      if (pageKey == 1) {
+        isBrodcastChatLoading = false;
+      }
+      update();
     }
-    update();
   }
 
-  Future<void> postSendMessageBroadcast(String? pollId, isLocation) async {
+  Future<void> postSendMessageBroadcast(String? pollId, isLocation,
+      {String? textMessage}) async {
+    String msgToSend =
+        (textMessage != null && textMessage.isNotEmpty)
+            ? textMessage
+            : sendBrodcastMsgController.text;
+    sendBrodcastMsgController.clear();
+
     List<String> userSelectList = [];
 
     for (var data in contactSelectList) {
@@ -2617,7 +2834,7 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
     var response = await chatPresenter.postSendMessageBroadcast(
       isLoading: false,
       broadcastid: broadcastid ?? "",
-      message: sendBrodcastMsgController.text,
+      message: msgToSend,
       product: friendProductDoc?.id ?? "",
       latitude: isLocation ? selectedLocationLatLag?.latitude.toString() : "",
       longitude: isLocation ? selectedLocationLatLag?.longitude.toString() : "",
@@ -2626,11 +2843,20 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
       context: isReplyChat ? chatBrodcastListsDoc?.id : "",
       mediaFileList: sentImageMsgLists
           .map(
-            (e) => ImageFormData(
-              fieldName: "file",
-              filePath: e.url ?? "",
-              mediaType: MediaType.parse(lookupMimeType(e.url ?? "")!),
-            ),
+            (e) {
+              final mime = lookupMimeType(e.url ?? "") ?? (e.isVideo == true ? "video/mp4" : "image/jpeg");
+              MediaType parsedType;
+              try {
+                parsedType = MediaType.parse(mime);
+              } catch (_) {
+                parsedType = MediaType("application", "octet-stream");
+              }
+              return ImageFormData(
+                fieldName: "file",
+                filePath: e.url ?? "",
+                mediaType: parsedType,
+              );
+            },
           )
           .toList(),
     );
@@ -2638,7 +2864,7 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
       isReplyChat = false;
       chatBrodcastListsDoc = null;
       sentImageMsgLists.clear();
-      postChatListBroadcast(1);
+      await postChatListBroadcast(1);
       var index = Get.find<ChatController>()
           .broadcastPagingController
           .itemList
@@ -2672,19 +2898,35 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
     }
   }
 
-  Future<void> postSendMultiMediaBroadcast(String? pollId, isLocation) async {
+  Future<void> postSendMultiMediaBroadcast(String? pollId, isLocation,
+      {String? textMessage}) async {
+    String msgToSend =
+        (textMessage != null && textMessage.isNotEmpty)
+            ? textMessage
+            : sendBrodcastMsgController.text;
+    sendBrodcastMsgController.clear();
+
     var response = await chatPresenter.postSendMultiMediaBroadcast(
       isLoading: false,
       broadcastid: broadcastid ?? "",
-      message: sendBrodcastMsgController.text,
+      message: msgToSend,
       context: isReplyChat ? chatBrodcastListsDoc?.id : "",
       mediaFileList: sentImageMsgLists
           .map(
-            (e) => ImageFormData(
-              fieldName: "file[${sentImageMsgLists.indexOf(e)}]",
-              filePath: e.url ?? "",
-              mediaType: MediaType.parse(lookupMimeType(e.url ?? "")!),
-            ),
+            (e) {
+              final mime = lookupMimeType(e.url ?? "") ?? (e.isVideo == true ? "video/mp4" : "image/jpeg");
+              MediaType parsedType;
+              try {
+                parsedType = MediaType.parse(mime);
+              } catch (_) {
+                parsedType = MediaType("application", "octet-stream");
+              }
+              return ImageFormData(
+                fieldName: "file[${sentImageMsgLists.indexOf(e)}]",
+                filePath: e.url ?? "",
+                mediaType: parsedType,
+              );
+            },
           )
           .toList(),
     );
@@ -2692,7 +2934,7 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
       isReplyChat = false;
       chatBrodcastListsDoc = null;
       sentImageMsgLists.clear();
-      postChatListBroadcast(1);
+      await postChatListBroadcast(1);
       var index = Get.find<ChatController>()
           .broadcastPagingController
           .itemList
@@ -2858,7 +3100,7 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
       pagMediaCount = 1;
     }
     var response = await chatPresenter.postPhotoVideo(
-      userid: userId ?? "",
+      userid: ((brodId?.isNotEmpty ?? false) ? brodId : userId) ?? "",
       page: pagMediaCount,
       limit: 30,
       isLoading: false,
@@ -3244,7 +3486,7 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
       pagLinksCount = 1;
     }
     var response = await chatPresenter.postLinks(
-      userid: userId ?? "",
+      userid: ((brodId?.isNotEmpty ?? false) ? brodId : userId) ?? "",
       page: pagLinksCount,
       limit: 10,
       isLoading: false,
@@ -3486,7 +3728,7 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
       pagDocsCount = 1;
     }
     var response = await chatPresenter.postDocs(
-      userid: userId ?? "",
+      userid: ((brodId?.isNotEmpty ?? false) ? brodId : userId) ?? "",
       page: pagDocsCount,
       limit: 10,
       isLoading: false,
@@ -3745,7 +3987,7 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
       pagAudioMediaCount = 1;
     }
     var response = await chatPresenter.postAudios(
-      userid: userId ?? "",
+      userid: ((brodId?.isNotEmpty ?? false) ? brodId : userId) ?? "",
       page: pagAudioMediaCount,
       limit: 10,
       isLoading: false,
@@ -4536,6 +4778,43 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
       Utility.errorMessage(jsonDecode(response.data.toString())['Message']);
     }
     update();
+  }
+
+  Future<void> deleteChatConversation(MyFriendDatum itemData) async {
+    // Immediately remove from local lists and cache
+    allFriends.removeWhere((friend) =>
+        (itemData.friendrequestid != null &&
+            itemData.friendrequestid!.isNotEmpty &&
+            friend.friendrequestid == itemData.friendrequestid) ||
+        (itemData.userid != null &&
+            itemData.userid!.isNotEmpty &&
+            friend.userid == itemData.userid));
+
+    filteredFriends.removeWhere((friend) =>
+        (itemData.friendrequestid != null &&
+            itemData.friendrequestid!.isNotEmpty &&
+            friend.friendrequestid == itemData.friendrequestid) ||
+        (itemData.userid != null &&
+            itemData.userid!.isNotEmpty &&
+            friend.userid == itemData.userid));
+
+    if (itemData.userid != null) {
+      userChatCache.remove(itemData.userid);
+    }
+    applyLocalFilter();
+    update();
+
+    // Call backend API to delete friend request and clear conversation
+    if (itemData.friendrequestid != null && itemData.friendrequestid!.isNotEmpty) {
+      try {
+        await chatPresenter.postUnFriend(
+          friendrequestid: itemData.friendrequestid!,
+          isLoading: false,
+        );
+      } catch (e) {
+        debugPrint("Error deleting chat: $e");
+      }
+    }
   }
 
   List<ChatListsDoc> bookmarkUserList = [];

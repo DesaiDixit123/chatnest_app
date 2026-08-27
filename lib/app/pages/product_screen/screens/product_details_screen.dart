@@ -37,7 +37,7 @@ class ProductDetailsScreen extends StatelessWidget {
               child: SvgPicture.asset(
                 AssetConstants.appbarbackarrowicon,
                 colorFilter: const ColorFilter.mode(
-                  ColorsValue.maincolor1,
+                  Colors.black,
                   BlendMode.srcIn,
                 ),
               ),

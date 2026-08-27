@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chatnest/app/theme/theme.dart';
 import 'package:chatnest/app/utils/utils.dart';
+import 'package:chatnest/data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
@@ -69,18 +70,26 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                       onTap: widget.onClicked,
                     ),
                   )
-                : CachedNetworkImage(
-                    imageUrl: widget.imagePath ?? '',
-                    fit: BoxFit.cover,
-                    maxHeightDiskCache: 300,
-                    maxWidthDiskCache: 300,
-                    width: 130,
-                    height: 130,
-                    placeholder: (context, url) => Center(
-                          child: Image.asset(AssetConstants.usera, height: 130),
-                        ),
-                    errorWidget: (context, url, error) =>
-                        Image.asset(AssetConstants.usera)),
+                : ApiWrapper.isValidImageUrl(widget.imagePath)
+                    ? CachedNetworkImage(
+                        imageUrl:
+                            ApiWrapper.getFullImageUrl(widget.imagePath),
+                        fit: BoxFit.cover,
+                        maxHeightDiskCache: 300,
+                        maxWidthDiskCache: 300,
+                        width: 130,
+                        height: 130,
+                        placeholder: (context, url) => Center(
+                              child: Image.asset(AssetConstants.usera, height: 130),
+                            ),
+                        errorWidget: (context, url, error) =>
+                            Image.asset(AssetConstants.usera))
+                    : Image.asset(
+                        AssetConstants.usera,
+                        height: 130,
+                        width: 130,
+                        fit: BoxFit.cover,
+                      ),
           )),
         ),
       ),

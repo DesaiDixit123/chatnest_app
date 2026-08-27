@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:chatnest/app/utils/utility.dart';
 import 'package:chatnest/domain/domain.dart';
 
 GetOneFriendsModel getOneFriendsModelFromJson(String str) =>
@@ -170,6 +171,26 @@ class GetOneFriendsData {
         "isBlocked": isBlocked,
         "blockedBy": blockedBy,
       };
+
+  String get displayName {
+    final contactName = Utility.getContactNameForPhone(mobile);
+    if (contactName != null && contactName.trim().isNotEmpty) {
+      return contactName.trim();
+    }
+
+    final fn = (fullname ?? "").trim();
+    if (fn.isNotEmpty) return fn;
+    final nn = (nickname ?? "").trim();
+    if (nn.isNotEmpty) return nn;
+
+    final mob = (mobile ?? "").trim();
+    if (mob.isNotEmpty) {
+      final code = (countryCode ?? "").trim();
+      return code.isNotEmpty ? "$code $mob" : mob;
+    }
+
+    return "User";
+  }
 }
 
 class ChatListsMediaData {

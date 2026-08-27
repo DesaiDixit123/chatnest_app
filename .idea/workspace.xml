@@ -1,5 +1,84 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="3d1044c7-54cf-4965-b0f7-d7ddbf059396" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/android/app/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/app/build.gradle.bak" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/android/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/app/src/main/kotlin/com/festumevento/cochat/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/android/app/src/main/kotlin/com/festumevento/cochat/MainActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/android/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/build.gradle.kts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/android/gradle.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/android/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/settings.gradle.kts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/festom_field_flutter.iml" beforeDir="false" afterPath="$PROJECT_DIR$/festom_field_flutter.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/navigators/routes_management.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/navigators/routes_management.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/audio_call_screen/audio_call_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/audio_call_screen/audio_call_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/authScreen/screens/otp_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/authScreen/screens/otp_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/broadCastScreen/Screens/broadcast_chat_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/broadCastScreen/Screens/broadcast_chat_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/broadCastScreen/Screens/broadcast_list_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/broadCastScreen/Screens/broadcast_list_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/call_screen/call_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/call_screen/call_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/call_screen/screen/call_info_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/call_screen/screen/call_info_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/call_screen/screen/call_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/call_screen/screen/call_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/call_screen/screen/contact_list_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/call_screen/screen/contact_list_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/chat_screen/chat_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/chat_screen/chat_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/chat_screen/screen/archive_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/chat_screen/screen/archive_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/chat_screen/screen/chat_list_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/chat_screen/screen/chat_list_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/chat_screen/screen/chat_lock/chat_lock_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/chat_screen/screen/chat_lock/chat_lock_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/chat_screen/screen/chat_lock/pages/chat_list_lock_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/chat_screen/screen/chat_lock/pages/chat_list_lock_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/chat_screen/screen/chat_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/chat_screen/screen/chat_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/chat_screen/screen/chat_user_profile/chat_user_profile_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/chat_screen/screen/chat_user_profile/chat_user_profile_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/chat_screen/screen/chat_user_profile/pages/chat_personal_info_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/chat_screen/screen/chat_user_profile/pages/chat_personal_info_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/chat_screen/screen/contact_pages/view_all_contect.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/chat_screen/screen/contact_pages/view_all_contect.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/chat_screen/screen/shared_media/shared_media_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/chat_screen/screen/shared_media/shared_media_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/group_chat_screen/page/group_chat_list_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/group_chat_screen/page/group_chat_list_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/group_chat_screen/page/group_chat_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/group_chat_screen/page/group_chat_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/group_chat_screen/page/group_profile_details_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/group_chat_screen/page/group_profile_details_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/hidechateScreen/hidechat_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/hidechateScreen/hidechat_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/hidechateScreen/screens/chat_hide_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/hidechateScreen/screens/chat_hide_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/homeScreen/homeScreen_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/homeScreen/homeScreen_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/homeScreen/homeScreen_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/homeScreen/homeScreen_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/meeting_screen/meeting_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/meeting_screen/meeting_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/product_screen/screens/product_details_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/product_screen/screens/product_details_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/product_screen/screens/product_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/product_screen/screens/product_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/profileScreen/users_profiles_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/profileScreen/users_profiles_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/request_screen/request_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/request_screen/request_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/request_screen/screens/blocked_user.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/request_screen/screens/blocked_user.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/request_screen/screens/received_request.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/request_screen/screens/received_request.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/request_screen/screens/sent_request.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/request_screen/screens/sent_request.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/setting_screen/screens/setting_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/setting_screen/screens/setting_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/splashScreen/splash_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/splashScreen/splash_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/video_call_screen/video_call_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/video_call_screen/video_call_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/utils/utility.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/utils/utility.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/widgets/chat_component/chat_screen_utility.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/widgets/chat_component/chat_screen_utility.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/widgets/custom_profile_view.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/widgets/custom_profile_view.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/data/helpers/api_wrapper.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/data/helpers/api_wrapper.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/data/helpers/connect_helper.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/data/helpers/connect_helper.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/data/helpers/end_points.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/data/helpers/end_points.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/data/repositories/data_repositories.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/data/repositories/data_repositories.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/domain/models/chat_lists_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/domain/models/chat_lists_model.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/domain/models/friends_list_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/domain/models/friends_list_model.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/domain/models/get_call_initiated_data_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/domain/models/get_call_initiated_data_model.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/domain/models/get_one_freinds_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/domain/models/get_one_freinds_model.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/domain/models/my_friends_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/domain/models/my_friends_model.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/domain/repositories/repository.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/domain/repositories/repository.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/domain/services/CallingKitService.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/domain/services/CallingKitService.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/domain/services/firebase_api.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/domain/services/firebase_api.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/domain/services/socket_connection.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/domain/services/socket_connection.dart" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
   <component name="FileEditorManager">
     <leaf>
       <file leaf-file-name="main.dart" pinned="false" current-in-tab="true">
@@ -13,24 +92,56 @@
       </file>
     </leaf>
   </component>
-  <component name="ToolWindowManager">
-    <editor active="true" />
-    <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-    </layout>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 0
+}]]></component>
+  <component name="ProjectId" id="3IRQpT7ZvuAV6OtbehnrRfSMH1X" />
   <component name="ProjectView">
-    <navigator currentView="ProjectPane" proportions="" version="1">
-    </navigator>
+    <navigator currentView="ProjectPane" proportions="" version="1" />
     <panes>
       <pane id="ProjectPane">
         <option name="show-excluded-files" value="false" />
       </pane>
     </panes>
   </component>
-  <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="dart.analysis.tool.window.force.activate" value="true" />
-    <property name="show.migrate.to.gradle.popup" value="false" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Flutter.main.dart.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "dart.analysis.tool.window.visible": "false",
+    "git-widget-placeholder": "main",
+    "io.flutter.reload.alreadyRun": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/imac/Desktop/ChatNest/chatnest_app",
+    "show.migrate.to.gradle.popup": "false"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="3d1044c7-54cf-4965-b0f7-d7ddbf059396" name="Changes" comment="" />
+      <created>1787725083998</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1787725083998</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="ToolWindowManager">
+    <editor active="true" />
+    <layout>
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+    </layout>
   </component>
 </project>

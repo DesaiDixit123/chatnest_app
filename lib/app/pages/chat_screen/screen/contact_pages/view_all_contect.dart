@@ -211,7 +211,7 @@ class ViewAllContact extends StatelessWidget {
                                                   .microphonePermissionCheack(
                                                       context)) {
                                                 controller.postCallInitaite(
-                                                  isLoading: true,
+                                                  isLoading: false,
                                                   receiverId:
                                                       controller.userId ?? '',
                                                   isAudioCall: true,
@@ -237,7 +237,7 @@ class ViewAllContact extends StatelessWidget {
                                                       .microphonePermissionCheack(
                                                           context)) {
                                                 controller.postCallInitaite(
-                                                  isLoading: true,
+                                                  isLoading: false,
                                                   receiverId:
                                                       controller.userId ?? '',
                                                   isAudioCall: false,

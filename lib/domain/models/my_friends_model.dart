@@ -1,6 +1,10 @@
 import 'dart:convert';
 
-import 'package:chatnest/domain/models/models.dart';
+import 'package:collection/collection.dart';
+import 'package:get/get.dart';
+import 'package:chatnest/app/app.dart';
+import 'package:chatnest/app/pages/call_screen/call_controller.dart';
+import 'package:chatnest/domain/domain.dart';
 
 MyFriendsModel myFriendsModelFromJson(String str) =>
     MyFriendsModel.fromJson(json.decode(str));
@@ -200,6 +204,84 @@ class MyFriendDatum {
         "isBlocked": isBlocked,
         "blockedBy": blockedBy,
       };
+
+  String get displayName {
+    final currentUserId = Get.find<Repository>().getStringValue(LocalKeys.userIds);
+    if (userid == currentUserId) {
+      final fn = (fullname ?? "").trim();
+      if (fn.isNotEmpty) return fn;
+      final nn = (nickname ?? "").trim();
+      if (nn.isNotEmpty) return nn;
+      return "Message yourself";
+    }
+
+    // 1. Resolve OTHER participant's mobile number
+    String? otherUserMobile = mobile;
+    if (otherUserMobile == null || otherUserMobile.trim().isEmpty) {
+      if (lastchatmessage?.from != null &&
+          lastchatmessage?.from?.id == userid) {
+        otherUserMobile = lastchatmessage?.from?.mobile;
+      } else if (lastchatmessage?.to != null &&
+          lastchatmessage?.to?.id == userid) {
+        otherUserMobile = lastchatmessage?.to?.mobile;
+      }
+    }
+
+    // 2. Saved device contact name
+    if (otherUserMobile != null && otherUserMobile.trim().isNotEmpty) {
+      final contactName = Utility.getContactNameForPhone(otherUserMobile);
+      if (contactName != null && contactName.trim().isNotEmpty) {
+        return contactName.trim();
+      }
+    }
+
+    // 3. Registered ChatNest user full name
+    final fn = (fullname ?? "").trim();
+    if (fn.isNotEmpty) return fn;
+
+    // 4. Registered ChatNest user nickname
+    final nn = (nickname ?? "").trim();
+    if (nn.isNotEmpty) return nn;
+
+    // 5. Name from last chat message matching other participant's userid
+    if (lastchatmessage != null) {
+      if (lastchatmessage?.from != null &&
+          lastchatmessage?.from?.id == userid) {
+        final ffn = (lastchatmessage?.from?.fullname ?? "").trim();
+        if (ffn.isNotEmpty) return ffn;
+        final fnn = (lastchatmessage?.from?.nickname ?? "").trim();
+        if (fnn.isNotEmpty) return fnn;
+      }
+      if (lastchatmessage?.to != null &&
+          lastchatmessage?.to?.id == userid) {
+        final tfn = (lastchatmessage?.to?.fullname ?? "").trim();
+        if (tfn.isNotEmpty) return tfn;
+        final tnn = (lastchatmessage?.to?.nickname ?? "").trim();
+        if (tnn.isNotEmpty) return tnn;
+      }
+    }
+
+    // 6. Check CallController contacts cache if loaded
+    if (Get.isRegistered<CallController>()) {
+      final contact = Get.find<CallController>().contactsList.firstWhereOrNull(
+          (c) => c.userid == userid || c.chatNestUser?.id == userid);
+      if (contact != null &&
+          contact.name != null &&
+          contact.name!.trim().isNotEmpty &&
+          contact.name != contact.mobile) {
+        return contact.name!.trim();
+      }
+    }
+
+    // 7. Formatted mobile number
+    final mob = (otherUserMobile ?? mobile ?? "").trim();
+    if (mob.isNotEmpty) {
+      final code = (countryCode ?? "").trim();
+      return code.isNotEmpty ? "$code $mob" : (mob.startsWith("+") ? mob : "+91 $mob");
+    }
+
+    return "User";
+  }
 }
 
 class Permissions {

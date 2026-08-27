@@ -1121,6 +1121,31 @@ class ChatScreenUtility {
             ],
           ),
         ),
+        if (itemData.userid != Get.find<Repository>().getStringValue(LocalKeys.userIds))
+          PopupMenuItem(
+            value: 7,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Delete Chat".tr,
+                  style: Styles.black50014.copyWith(
+                    color: ColorsValue.redColor,
+                  ),
+                ),
+                Dimens.boxWidth10,
+                SvgPicture.asset(
+                  AssetConstants.ic_delete,
+                  height: Dimens.twenty,
+                  width: Dimens.twenty,
+                  colorFilter: const ColorFilter.mode(
+                    ColorsValue.redColor,
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ],
+            ),
+          ),
       ],
       elevation: 8.0,
     ).then(
@@ -1224,6 +1249,78 @@ class ChatScreenUtility {
             Get.find<ChatController>()
                 .postUnReadChat(itemData.friendrequestid ?? "");
           }
+        } else if (value == 7) {
+          await Get.dialog(
+            Padding(
+              padding: Dimens.edgeInsetsTop20,
+              child: Material(
+                color: ColorsValue.transparent,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: Dimens.edgeInsets20_0_20_0,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: ColorsValue.white,
+                          borderRadius: BorderRadius.circular(Dimens.fifteen),
+                        ),
+                        child: Padding(
+                          padding: Dimens.edgeInsets25_30_25_30,
+                          child: Column(
+                            children: [
+                              Align(
+                                alignment: Alignment.topRight,
+                                child: InkWell(
+                                    onTap: () {
+                                      Get.back();
+                                    },
+                                    child: SvgPicture.asset(
+                                      AssetConstants.cancleicon,
+                                    )),
+                              ),
+                              SvgPicture.asset(
+                                AssetConstants.canclepopupicon,
+                              ),
+                              Dimens.boxHeight18,
+                              Text(
+                                "Delete Chat".tr,
+                                style: Styles.black70020,
+                              ),
+                              Dimens.boxHeight10,
+                              Text(
+                                "Are you sure you want to delete this chat?",
+                                textAlign: TextAlign.center,
+                                style: Styles.greyColor888840014,
+                              ),
+                              Dimens.boxHeight18,
+                              CustomBottomButton(
+                                firstbtnText: "Cancel".toUpperCase(),
+                                secondbtnTxt: "Delete".toUpperCase(),
+                                firstStyle: Styles.greyColor888850014,
+                                secondStyle: Styles.white50014,
+                                bordercolor: ColorsValue.greyColor8888,
+                                buttoncolor: ColorsValue.redColor,
+                                firstOnPressed: () {
+                                  Get.back();
+                                },
+                                secondOnPressed: () {
+                                  Get.back();
+                                  Get.find<ChatController>()
+                                      .deleteChatConversation(itemData);
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
         }
       },
     );

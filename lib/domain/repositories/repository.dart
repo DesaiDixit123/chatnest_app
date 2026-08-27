@@ -1559,7 +1559,8 @@ class Repository {
             MessageType.error, () => null, '');
         return null;
       }
-    } catch (_) {
+    } catch (e, stack) {
+      debugPrint("[ANTIGRAVITY_DEBUG] Exception in getChatLists parsing: $e\n$stack");
       Utility.closeDialog();
       UnimplementedError();
       return null;
@@ -2241,16 +2242,18 @@ class Repository {
         isVideoCall: isVideoCall,
         receiverId: receiverId,
       );
+      print("[CALL_INITIATE] Raw status: ${response.statusCode}, data: ${response.data}");
       var getCallInitiatedDataModel =
           getCallInitiatedDataModelFromJson(response.data);
       if (getCallInitiatedDataModel.status == 200) {
         return getCallInitiatedDataModel;
       } else {
+        print("[CALL_INITIATE] Status not 200: ${getCallInitiatedDataModel.status} ${getCallInitiatedDataModel.message}");
         return null;
       }
-    } catch (_) {
+    } catch (e, stack) {
+      print("[CALL_INITIATE] Exception during initiate: $e\n$stack");
       Utility.closeDialog();
-      UnimplementedError();
       return null;
     }
   }
@@ -4806,6 +4809,21 @@ class Repository {
     } catch (_) {
       Utility.closeDialog();
       UnimplementedError();
+      return null;
+    }
+  }
+
+  Future<ResponseModel?> updateFcmToken({
+    bool isLoading = false,
+    required String fcmToken,
+  }) async {
+    try {
+      var response = await _dataRepository.updateFcmToken(
+        fcmToken: fcmToken,
+        isLoading: isLoading,
+      );
+      return response;
+    } catch (_) {
       return null;
     }
   }

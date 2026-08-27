@@ -25,6 +25,13 @@ class HomeScreenController extends GetxController
     selectedChateData = null;
     selectedGroupChatData = null;
     fetchDataFromNative();
+    Utility.loadDeviceContacts().then((_) {
+      if (Get.isRegistered<ChatController>()) {
+        Get.find<ChatController>().applyLocalFilter();
+        Get.find<ChatController>().update();
+      }
+      update();
+    });
     super.onInit();
   }
 
@@ -34,76 +41,16 @@ class HomeScreenController extends GetxController
         (call) async {
           if (call.method == 'CALL_ACCEPTED_INTENT') {
             final data = await call.arguments;
-            if (data != null) {
-              if (data['callType'] == "meeting") {
-                await RouteManagement.goToMeetingCallScreen(
-                  data['agorachannelName'],
-                  data['agoratoken'],
-                  data['callId'],
-                  true,
-                  false,
-                );
-              } else if (data['callType'] == "yes") {
-                await Get.put<VideoCallController>(
-                  VideoCallController(
-                    Get.put(
-                      VideoCallPresenter(
-                        Get.put(
-                          VideoCallUsecases(
-                            Get.find(),
-                          ),
-                          permanent: true,
-                        ),
-                      ),
-                      permanent: true,
-                    ),
-                    api: ApiWrapper(),
-                  ),
-                ).postChatJoinCall(data['callId']);
-                await RouteManagement.goToVideoCallScreen(
-                  data['agorachannelName'],
-                  data['agoratoken'],
-                  data['callId'],
-                  false,
-                  data['banner'],
-                  data['fromusername'],
-                  false,
-                );
-              } else {
-                await Get.put<AudioCallController>(
-                  AudioCallController(
-                    Get.put(
-                      AudioCallPresenter(
-                        Get.put(
-                          AudioCallUsecases(
-                            Get.find(),
-                          ),
-                          permanent: true,
-                        ),
-                      ),
-                      permanent: true,
-                    ),
-                    api: ApiWrapper(),
-                  ),
-                ).postChatJoinCall(data['callId']);
-                await RouteManagement.goToAudioCallScreen(
-                  data['agorachannelName'],
-                  data['agoratoken'],
-                  data['callId'],
-                  false,
-                  data['banner'],
-                  data['fromusername'],
-                  false,
-                );
-              }
+            if (data != null && data is Map) {
+              await FirebaseApi.handleAcceptedCallData(data);
             } else {
-              print("error");
+              print("[ANTIGRAVITY_DEBUG] CALL_ACCEPTED_INTENT received null or invalid data");
             }
           }
         },
       );
-    } on PlatformException catch (e) {
-      print('Error: ${e.message}');
+    } catch (e) {
+      print("[ANTIGRAVITY_DEBUG] fetchDataFromNative error: $e");
     }
   }
 
@@ -217,27 +164,22 @@ class HomeScreenController extends GetxController
           LocalKeys.authorizationhidepin, response.data?.chathidepin ?? "");
 
       profileData = response.data!;
-      fullName = response.data!.fullname ?? '';
-      profilePic = response.data?.profileimage ?? "";
-      isProfile = response.data!.isprofilecompleted;
-
-      // isProfile ?? false
-      //     ? null
-      //     : Future.delayed(const Duration(seconds: 0)).then(
-      //         (value) {
-      //           showDialog(false);
-      //         },
-      //       );
+      isProfile = response.data?.isprofilecompleted ?? false;
+      fullName = (isProfile == true) ? (response.data!.fullname ?? '') : '';
+      profilePic =
+          (isProfile == true) ? (response.data?.profileimage ?? "") : "";
 
       Get.find<Repository>()
           .saveValue(LocalKeys.userIds, response.data?.id ?? "");
       Get.find<Repository>()
-          .saveValue(LocalKeys.profileImg, response.data?.profileimage ?? "");
+          .saveValue(LocalKeys.profileImg, profilePic ?? "");
       Get.find<Repository>()
           .saveValue(LocalKeys.chanelId, response.data?.channelId ?? "");
 
       // Initialize socket right after we get the required channelId and profile info
       SocketConnection.initSocket();
+      SocketConnection.registerUserChannel(response.data?.channelId ?? "");
+      FirebaseApi.syncFcmTokenWithBackend();
       Get.find<ProfileController>().getBusinessList();
 
       update();

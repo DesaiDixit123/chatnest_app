@@ -40,7 +40,7 @@ class BroadCastListScreen extends StatelessWidget {
                 child: SvgPicture.asset(
                   AssetConstants.appbarbackarrowicon,
                   colorFilter: const ColorFilter.mode(
-                      ColorsValue.maincolor1, BlendMode.srcIn),
+                      Colors.black, BlendMode.srcIn),
                 ),
               ),
             ),

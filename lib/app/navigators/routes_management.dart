@@ -1,6 +1,7 @@
 // coverage:ignore-file
 
 import 'package:chatnest/app/navigators/app_pages.dart';
+import 'package:chatnest/app/pages/pages.dart';
 import 'package:chatnest/app/utils/utility.dart';
 import 'package:chatnest/domain/domain.dart';
 import 'package:get/get.dart';
@@ -12,7 +13,18 @@ abstract class RouteManagement {
   static void goToLoginView() => Get.offAllNamed<void>(Routes.logingScreen);
   static void goToOtpView(String key, bool isChange, String mobile) =>
       Get.toNamed<void>(Routes.otpScreen, arguments: [key, isChange, mobile]);
-  static void goToHomeScreenView() => Get.offAllNamed<void>(Routes.homeScreen);
+  static void goToHomeScreenView() {
+    final isCallActive = Get.isRegistered<CallManagerService>() &&
+        Get.find<CallManagerService>().isCallActive;
+    final isAudioOpen = Get.isRegistered<AudioCallController>();
+    final isVideoOpen = Get.isRegistered<VideoCallController>();
+
+    if (isCallActive || isAudioOpen || isVideoOpen) {
+      print("[ANTIGRAVITY_DEBUG] RouteManagement: Call active during goToHomeScreenView. Skipping offAllNamed!");
+      return;
+    }
+    Get.offAllNamed<void>(Routes.homeScreen);
+  }
   static void goTochangeBusinessHoursView() =>
       Get.toNamed<void>(Routes.changeBusinessHoursScreen);
   static void goTocreateProfileView() =>

@@ -51,25 +51,40 @@ class UserProfileScreen extends StatelessWidget {
                                         borderRadius: BorderRadius.circular(
                                           Dimens.hundred,
                                         ),
-                                        child: CachedNetworkImage(
-                                          imageUrl: ApiWrapper.imageUrl +
-                                              (controller.profileImage ?? ""),
-                                          fit: BoxFit.cover,
-                                          maxHeightDiskCache: 300,
-                                          maxWidthDiskCache: 300,
-                                          width: Dimens.hundredThirty,
-                                          height: Dimens.hundredThirty,
-                                          placeholder: (context, url) => Center(
-                                            child: Image.asset(
-                                              AssetConstants.usera,
-                                              height: Dimens.hundredThirty,
-                                            ),
-                                          ),
-                                          errorWidget: (context, url, error) =>
-                                              Image.asset(
-                                            AssetConstants.usera,
-                                          ),
-                                        ),
+                                        child: ApiWrapper.isValidImageUrl(controller.profileImage)
+                                            ? CachedNetworkImage(
+                                                imageUrl: ApiWrapper.imageUrl +
+                                                    controller.profileImage!,
+                                                fit: BoxFit.cover,
+                                                maxHeightDiskCache: 300,
+                                                maxWidthDiskCache: 300,
+                                                width: Dimens.hundredThirty,
+                                                height: Dimens.hundredThirty,
+                                                placeholder: (context, url) =>
+                                                    Center(
+                                                  child: Image.asset(
+                                                    AssetConstants.usera,
+                                                    height:
+                                                        Dimens.hundredThirty,
+                                                    width: Dimens.hundredThirty,
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                ),
+                                                errorWidget:
+                                                    (context, url, error) =>
+                                                        Image.asset(
+                                                  AssetConstants.usera,
+                                                  height: Dimens.hundredThirty,
+                                                  width: Dimens.hundredThirty,
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              )
+                                            : Image.asset(
+                                                AssetConstants.usera,
+                                                height: Dimens.hundredThirty,
+                                                width: Dimens.hundredThirty,
+                                                fit: BoxFit.cover,
+                                              ),
                                       ),
                                     ),
                                   ),

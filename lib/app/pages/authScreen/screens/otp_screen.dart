@@ -51,18 +51,6 @@ class OtpScreen extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 Dimens.boxHeight30,
-                if (controller.demoOtp != null)
-  // Padding(
-  //   padding: const EdgeInsets.only(top: 12),
-  //   child: Text(
-  //     "Demo OTP: ${controller.demoOtp}",
-  //     style: const TextStyle(
-  //       color: Colors.green,
-  //       fontWeight: FontWeight.bold,
-  //     ),
-  //   ),
-  // ),
-
                 PinCodeTextField(
                   obscureText: true,
                   appContext: context,

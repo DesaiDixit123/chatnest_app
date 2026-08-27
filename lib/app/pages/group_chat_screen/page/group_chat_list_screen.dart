@@ -335,26 +335,38 @@ class GroupChatListScreen extends StatelessWidget {
                                         child: ClipRRect(
                                           borderRadius: BorderRadius.circular(
                                               Dimens.hundred),
-                                          child: CachedNetworkImage(
-                                            imageUrl: ApiWrapper.imageUrl +
-                                                (item.profileimage ?? ""),
-                                            fit: BoxFit.cover,
-                                            maxHeightDiskCache: 90,
-                                            maxWidthDiskCache: 90,
-                                            width: Dimens.fifty,
-                                            height: Dimens.fifty,
-                                            placeholder: (context, url) =>
-                                                Image.asset(
-                                              AssetConstants.usera,
-                                            ),
-                                            errorWidget:
-                                                (context, url, error) =>
-                                                    Image.asset(
-                                              AssetConstants.usera,
-                                            ),
+                                           child: ApiWrapper.isValidImageUrl(
+                                                   item.profileimage)
+                                               ? CachedNetworkImage(
+                                                   imageUrl:
+                                                       ApiWrapper.imageUrl +
+                                                           item.profileimage!,
+                                                   fit: BoxFit.cover,
+                                                   maxHeightDiskCache: 90,
+                                                   maxWidthDiskCache: 90,
+                                                   width: Dimens.fifty,
+                                                   height: Dimens.fifty,
+                                                   placeholder: (context,
+                                                           url) =>
+                                                       Image.asset(
+                                                     AssetConstants.usera,
+                                                     fit: BoxFit.cover,
+                                                   ),
+                                                   errorWidget: (context, url,
+                                                           error) =>
+                                                       Image.asset(
+                                                     AssetConstants.usera,
+                                                     fit: BoxFit.cover,
+                                                   ),
+                                                 )
+                                               : Image.asset(
+                                                   AssetConstants.usera,
+                                                   fit: BoxFit.cover,
+                                                   width: Dimens.fifty,
+                                                   height: Dimens.fifty,
+                                                 ),
                                           ),
                                         ),
-                                      ),
                                       Positioned(
                                         right: 0,
                                         bottom: 0,
@@ -376,23 +388,33 @@ class GroupChatListScreen extends StatelessWidget {
                                     child: ClipRRect(
                                       borderRadius:
                                           BorderRadius.circular(Dimens.hundred),
-                                      child: CachedNetworkImage(
-                                        imageUrl: ApiWrapper.imageUrl +
-                                            (item.profileimage ?? ""),
-                                        fit: BoxFit.cover,
-                                        maxHeightDiskCache: 90,
-                                        maxWidthDiskCache: 90,
-                                        width: Dimens.fifty,
-                                        height: Dimens.fifty,
-                                        placeholder: (context, url) =>
-                                            Image.asset(
-                                          AssetConstants.usera,
-                                        ),
-                                        errorWidget: (context, url, error) =>
-                                            Image.asset(
-                                          AssetConstants.usera,
-                                        ),
-                                      ),
+                                      child: ApiWrapper.isValidImageUrl(
+                                              item.profileimage)
+                                          ? CachedNetworkImage(
+                                              imageUrl: ApiWrapper.imageUrl +
+                                                  item.profileimage!,
+                                              fit: BoxFit.cover,
+                                              maxHeightDiskCache: 90,
+                                              maxWidthDiskCache: 90,
+                                              width: Dimens.fifty,
+                                              height: Dimens.fifty,
+                                              placeholder: (context, url) =>
+                                                  Image.asset(
+                                                AssetConstants.usera,
+                                                fit: BoxFit.cover,
+                                              ),
+                                              errorWidget: (context, url, error) =>
+                                                  Image.asset(
+                                                AssetConstants.usera,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            )
+                                          : Image.asset(
+                                              AssetConstants.usera,
+                                              fit: BoxFit.cover,
+                                              width: Dimens.fifty,
+                                              height: Dimens.fifty,
+                                            ),
                                     ),
                                   ),
                             title: Text(

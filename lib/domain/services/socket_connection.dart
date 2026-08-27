@@ -24,7 +24,40 @@ abstract class SocketConnection {
     socket?.disconnect();
   }
 
+  static String _currentListeningChannelId = '';
+
+  static void registerUserChannel([String? specificChannelId]) {
+    final channelId = (specificChannelId != null && specificChannelId.trim().isNotEmpty)
+        ? specificChannelId.trim()
+        : (Get.isRegistered<Repository>()
+            ? Get.find<Repository>().getStringValue(LocalKeys.chanelId).trim()
+            : '');
+
+    if (channelId.isEmpty) return;
+
+    print("[ANTIGRAVITY_SOCKET] Registering user channel: $channelId");
+
+    if (socket != null && socket!.connected) {
+      socket!.emit('init', {'channelID': channelId});
+    }
+
+    if (_currentListeningChannelId != channelId) {
+      if (_currentListeningChannelId.isNotEmpty) {
+        socket?.off(_currentListeningChannelId);
+      }
+      _currentListeningChannelId = channelId;
+      socket?.off(channelId);
+      socket?.on(channelId, _handleChannelData);
+      print("[ANTIGRAVITY_SOCKET] Attached listener to channel: $channelId");
+    }
+  }
+
   static initSocket() {
+    if (socket != null && socket!.connected) {
+      registerUserChannel();
+      return;
+    }
+
     socket = IO.io(
       ApiWrapper.baseUrl,
       IO.OptionBuilder()
@@ -36,24 +69,18 @@ abstract class SocketConnection {
           .setTimeout(20000)
           .build(),
     );
+
     socket!.onConnect((_) {
-      final channelId =
-          Get.find<Repository>().getStringValue(LocalKeys.chanelId);
-      socket!.emit('init', {'channelID': channelId});
+      print("✅ [ANTIGRAVITY_SOCKET] Connected to socket server");
+      registerUserChannel();
     });
 
-    // socket!.onConnect((_) {
-    //   print("Conttecty SuseesFully...");
-    //   print(Get.find<Repository>().getStringValue(LocalKeys.chanelId));
-    //   socket!.emit('init', {
-    //     'channelID': Get.find<Repository>().getStringValue(LocalKeys.chanelId),
-    //   });
-    // });
     socket!.onReconnect((_) {
-      final channelId =
-          Get.find<Repository>().getStringValue(LocalKeys.chanelId);
-      socket!.emit('init', {'channelID': channelId});
+      print("✅ [ANTIGRAVITY_SOCKET] Reconnected to socket server");
+      registerUserChannel();
     });
+
+    registerUserChannel();
 
     socket?.on("userbecomeonline", (data) async {
       print(data);
@@ -115,6 +142,73 @@ abstract class SocketConnection {
     socket!.onDisconnect((_) => print("❌ DISCONNECTED"));
     socket!.onReconnect((_) => print("✅ RECONNECTED"));
 
+    socket?.on("call-rejected", (data) async {
+      print("[ANTIGRAVITY_DEBUG] Top-level call-rejected socket event: $data");
+      final id = (data is Map ? (data['callId'] ?? data['callid'] ?? data['data']?['callid']) : data).toString();
+      if (Get.isRegistered<AudioCallController>()) {
+        final ctrl = Get.find<AudioCallController>();
+        if (id.isEmpty || ctrl.callId == id) {
+          Utility.audioPlayer.stop();
+          await CallingKitService.endAllCalls();
+          ctrl.handleRemoteCallTermination(reason: "Call declined");
+        }
+      }
+      if (Get.isRegistered<VideoCallController>()) {
+        final ctrl = Get.find<VideoCallController>();
+        if (id.isEmpty || ctrl.callId == id) {
+          Utility.audioPlayer.stop();
+          await CallingKitService.endAllCalls();
+          ctrl.handleRemoteCallTermination(reason: "Call declined");
+        }
+      }
+    });
+
+    socket?.on("call-cancelled", (data) async {
+      print("[ANTIGRAVITY_DEBUG] Top-level call-cancelled socket event: $data");
+      final id = (data is Map ? (data['callId'] ?? data['callid'] ?? data['data']?['callid']) : data).toString();
+      if (Get.isRegistered<AudioCallController>()) {
+        final ctrl = Get.find<AudioCallController>();
+        if (id.isEmpty || ctrl.callId == id) {
+          Utility.audioPlayer.stop();
+          await CallingKitService.endAllCalls();
+          ctrl.handleRemoteCallTermination(reason: "Call cancelled");
+        }
+      }
+      if (Get.isRegistered<VideoCallController>()) {
+        final ctrl = Get.find<VideoCallController>();
+        if (id.isEmpty || ctrl.callId == id) {
+          Utility.audioPlayer.stop();
+          await CallingKitService.endAllCalls();
+          ctrl.handleRemoteCallTermination(reason: "Call cancelled");
+        }
+      }
+    });
+
+    socket?.on("call-ended", (data) async {
+      print("[ANTIGRAVITY_DEBUG] Top-level call-ended socket event: $data");
+      final id = (data is Map ? (data['callId'] ?? data['callid'] ?? data['data']?['callid']) : data).toString();
+      if (Get.isRegistered<AudioCallController>()) {
+        final ctrl = Get.find<AudioCallController>();
+        if (id.isEmpty || ctrl.callId == id) {
+          Utility.audioPlayer.stop();
+          await CallingKitService.endAllCalls();
+          ctrl.handleRemoteCallTermination(reason: "Call ended");
+        }
+      }
+      if (Get.isRegistered<VideoCallController>()) {
+        final ctrl = Get.find<VideoCallController>();
+        if (id.isEmpty || ctrl.callId == id) {
+          Utility.audioPlayer.stop();
+          await CallingKitService.endAllCalls();
+          ctrl.handleRemoteCallTermination(reason: "Call ended");
+        }
+      }
+    });
+
+    socket?.on("stop-ringtone", (data) async {
+      Utility.audioPlayer.stop();
+    });
+
     socket?.on("userbecomeoffline", (data) async {
       Utility.onlineOfflineUserList.clear();
       for (var datas in data["allonlinusers"].keys) {
@@ -142,81 +236,118 @@ abstract class SocketConnection {
       Get.forceAppUpdate();
     });
 
-    socket!.on(Get.find<Repository>().getStringValue(LocalKeys.chanelId),
-        (data) async {
-      print("channel data: $data");
+    socket!.onDisconnect((_) => print('Connection Disconnection'));
+    socket!.onConnectError((err) => print("Connection Error: $err"));
+    socket!.onError((err) => print("Socket Error: $err"));
+  }
+
+  static void _handleChannelData(dynamic data) async {
+    print("channel data: $data");
+      if (data != null && (data['event'] == 'forcelogout' || data['event'] == 'userlogout')) {
+        if (!ApiWrapper.isHandlingUnauthorized) {
+          ApiWrapper.isHandlingUnauthorized = true;
+          socketDisconnect();
+          Get.find<Repository>().deleteAllSecuredValues();
+          RouteManagement.goToLoginView();
+          Utility.showMessage(
+            "Session expired or logged in from another device".tr,
+            MessageType.error,
+            () => null,
+            '',
+          );
+          Future.delayed(const Duration(seconds: 4), () {
+            ApiWrapper.isHandlingUnauthorized = false;
+          });
+        }
+        return;
+      }
       if (data['event'] == 'onnewindividualchatmessage') {
         var chatListsDoc = ChatListsDoc.fromJson(data['data']['messagedata']);
-        var chatController = Get.find<ChatController>();
+        final fromId = (data['data']['fromid'] ?? "").toString();
 
-        if (Utility.currentChatPageId == data['data']['fromid']) {
-          chatController.chatMessageList.insert(0, chatListsDoc);
+        if (Get.isRegistered<ChatController>()) {
+          var chatController = Get.find<ChatController>();
 
-          await chatController.postSeenMessage(data['data']['messageid']);
-          // Ensure the chat UI updates immediately for the open conversation
-          chatController.update();
-        } else {
-          await chatController.postDeliveredMessage(data['data']['messageid']);
-        }
+          if (fromId.isNotEmpty && Utility.currentChatPageId == fromId) {
+            final existingMsgIndex = chatController.chatMessageList
+                .indexWhere((e) => e.id == chatListsDoc.id);
+            if (existingMsgIndex == -1) {
+              chatController.chatMessageList.insert(0, chatListsDoc);
+            } else {
+              chatController.chatMessageList[existingMsgIndex] = chatListsDoc;
+            }
+            ChatController.userChatCache[fromId] =
+                List.from(chatController.chatMessageList);
 
-        // Update allFriends to keep the source of truth in sync
-        var friendIndex = chatController.allFriends
-            .indexWhere((element) => element.userid == data['data']['fromid']);
-        if (friendIndex != -1) {
-          var friendData = chatController.allFriends.removeAt(friendIndex);
-          friendData.lastchatmessage = chatListsDoc;
-          if (Utility.currentChatPageId == data['data']['fromid']) {
-            friendData.unreadmessageCount = 0;
+            await chatController.postSeenMessage(data['data']['messageid']);
+            chatController.update();
           } else {
-            friendData.unreadmessageCount += 1;
+            await chatController.postDeliveredMessage(data['data']['messageid']);
           }
-          chatController.allFriends.insert(0, friendData);
-        }
 
-        var index = chatController.chatPagingController.itemList
-            ?.indexWhere((element) => element.userid == data['data']['fromid']);
-        if (index?.isNegative == false) {
-          int idx = index!;
-          chatController.chatPagingController.itemList?[idx].lastchatmessage =
-              null;
-          chatController.chatPagingController.itemList?[idx].lastchatmessage =
-              chatListsDoc;
-          if (Utility.currentChatPageId == data['data']['fromid']) {
-            chatController
-                .chatPagingController.itemList?[idx].unreadmessageCount = 0;
-          } else {
-            chatController
-                .chatPagingController.itemList?[idx].unreadmessageCount += 1;
+          if (fromId.isNotEmpty) {
+            var friendIndex = chatController.allFriends
+                .indexWhere((element) => element.userid == fromId);
+            if (friendIndex != -1) {
+              var friendData = chatController.allFriends.removeAt(friendIndex);
+              friendData.lastchatmessage = chatListsDoc;
+              if (Utility.currentChatPageId == fromId) {
+                friendData.unreadmessageCount = 0;
+              } else {
+                friendData.unreadmessageCount =
+                    (friendData.unreadmessageCount ?? 0) + 1;
+              }
+              chatController.allFriends.insert(0, friendData);
+            } else {
+              final senderName = (data['data']['fromusername'] ?? "").toString();
+              final profileImage = (data['data']['banner'] ?? "").toString();
+              final fromMobile = (chatListsDoc.from?.mobile ?? "").toString();
+              final fromCountryCode =
+                  (chatListsDoc.from?.countryCode ?? "").toString();
+
+              var newFriend = MyFriendDatum(
+                userid: fromId,
+                fullname: senderName.isNotEmpty
+                    ? senderName
+                    : (fromMobile.isNotEmpty ? fromMobile : "User"),
+                nickname: senderName,
+                profileimage: profileImage,
+                mobile: fromMobile,
+                countryCode: fromCountryCode,
+                lastchatmessage: chatListsDoc,
+                unreadmessageCount: Utility.currentChatPageId == fromId ? 0 : 1,
+              );
+              chatController.allFriends.insert(0, newFriend);
+            }
+
+            chatController.applyLocalFilter();
+            chatController.update();
           }
-          var tempData = chatController.chatPagingController.itemList?[idx];
-          if (tempData != null) {
-            chatController.chatPagingController.itemList?.removeAt(idx);
-            chatController.chatPagingController.itemList?.insert(0, tempData);
-          }
-          chatController.update();
-        } else {
-          chatController.chatPagingController.refresh();
         }
       } else if (data['event'] == "ongroupmemberadded") {
         if (data['data']['groupdata'] != null) {
           var chatListsDoc = GroupChatDatum.fromJson(data['data']['groupdata']);
-          var index = Get.find<GroupChatController>()
-              .groupListPagingController
-              .itemList
-              ?.indexWhere((element) => element.id == chatListsDoc.id);
-          if (index?.isNegative ?? false) {
-            Get.find<GroupChatController>()
+          if (Get.isRegistered<GroupChatController>()) {
+            var index = Get.find<GroupChatController>()
                 .groupListPagingController
                 .itemList
-                ?.insert(0, chatListsDoc);
+                ?.indexWhere((element) => element.id == chatListsDoc.id);
+            if (index?.isNegative ?? false) {
+              Get.find<GroupChatController>()
+                  .groupListPagingController
+                  .itemList
+                  ?.insert(0, chatListsDoc);
+            }
           }
         } else {
           if (Utility.currentChatPageId == data['data']['groupid']) {
             var chatGroupListsDoc =
                 ChatListsDoc.fromJson(data['data']['messagedata']);
-            Get.find<ChatController>()
-                .chatGroupMessageList
-                .insert(0, chatGroupListsDoc);
+            if (Get.isRegistered<ChatController>()) {
+              Get.find<ChatController>()
+                  .chatGroupMessageList
+                  .insert(0, chatGroupListsDoc);
+            }
             await Get.find<ChatController>()
                 .postGroupSeenMessage(data['data']['messageid']);
           }
@@ -439,31 +570,59 @@ abstract class SocketConnection {
             Get.forceAppUpdate();
           }
         }
-      } else if (data['event'] == "onuserleavethecall") {
-        Utility.audioPlayer.pause();
-        // Do not force-close active call screens when a participant leaves.
-        // Agora onUserOffline handles in-call participant removal.
-        if (Get.isRegistered<VideoCallController>() ||
-            Get.isRegistered<AudioCallController>()) {
-          // keep ongoing call UI open
-        } else if (data['data']['calldata']['isvideocall'] == true ||
-            data['data']['calldata']['isaudiocall'] == true) {
-          await CallingKitService.endAllCalls();
+      } else if (data['event'] == "onuserjointhecall") {
+        print("[ANTIGRAVITY_DEBUG] User joined the call socket event received: $data");
+        Utility.audioPlayer.stop();
+        if (Get.isRegistered<AudioCallController>()) {
+          Get.find<AudioCallController>().handleRemoteUserJoined();
         }
-      } else if (data['event'] == "oncallendedbyhost" || data['event'] == "oncallcancelled") {
-        print("[ANTIGRAVITY_DEBUG] Call ended by host event received");
-        Utility.audioPlayer.pause();
-        await CallingKitService.endAllCalls();
         if (Get.isRegistered<VideoCallController>()) {
-          Get.find<VideoCallController>().disposeAgora();
-          if (Get.currentRoute == Routes.videoCallScreen) {
-            Get.back();
+          Get.find<VideoCallController>().handleRemoteUserJoined();
+        }
+      } else if (data['event'] == "onuserleavethecall") {
+        final eventCallId = (data['data']?['calldata']?['id'] ?? data['data']?['calldata']?['_id'] ?? data['data']?['callid'] ?? data['data']?['callId'] ?? "").toString();
+        Utility.audioPlayer.stop();
+        final isGroup = _toBool(data['data']?['calldata']?['isgroupcall']) || _toBool(data['data']?['isgroupcall']);
+        if (!isGroup) {
+          if (Get.isRegistered<VideoCallController>()) {
+            final ctrl = Get.find<VideoCallController>();
+            if (eventCallId.isEmpty || ctrl.callId == eventCallId) {
+              CallingKitService.endAllCalls();
+              ctrl.handleRemoteCallTermination(reason: "Call ended");
+            }
+          }
+          if (Get.isRegistered<AudioCallController>()) {
+            final ctrl = Get.find<AudioCallController>();
+            if (eventCallId.isEmpty || ctrl.callId == eventCallId) {
+              CallingKitService.endAllCalls();
+              ctrl.handleRemoteCallTermination(reason: "Call ended");
+            }
+          }
+        }
+      } else if (data['event'] == "oncallendedbyhost" ||
+          data['event'] == "oncallcancelled" ||
+          data['event'] == "oncallrejected" ||
+          data['event'] == "oncallended") {
+        print("[ANTIGRAVITY_DEBUG] Call ended/rejected/cancelled event received: ${data['event']}");
+        final eventCallId = (data['data']?['calldata']?['id'] ?? data['data']?['calldata']?['_id'] ?? data['data']?['callid'] ?? data['data']?['callId'] ?? data['data']?['id'] ?? "").toString();
+        final String reason = data['event'] == "oncallrejected"
+            ? "Call declined"
+            : (data['event'] == "oncallcancelled" ? "Call cancelled" : "Call ended");
+
+        if (Get.isRegistered<VideoCallController>()) {
+          final ctrl = Get.find<VideoCallController>();
+          if (eventCallId.isEmpty || ctrl.callId == eventCallId) {
+            Utility.audioPlayer.stop();
+            CallingKitService.endAllCalls();
+            ctrl.handleRemoteCallTermination(reason: reason);
           }
         }
         if (Get.isRegistered<AudioCallController>()) {
-          Get.find<AudioCallController>().disposeAgora();
-          if (Get.currentRoute == Routes.audioCallScreen) {
-            Get.back();
+          final ctrl = Get.find<AudioCallController>();
+          if (eventCallId.isEmpty || ctrl.callId == eventCallId) {
+            Utility.audioPlayer.stop();
+            CallingKitService.endAllCalls();
+            ctrl.handleRemoteCallTermination(reason: reason);
           }
         }
         if (Get.isRegistered<MeetingCallController>()) {
@@ -555,15 +714,20 @@ abstract class SocketConnection {
             callDataNested['agoratoken'] ??
             callAgoraMeta['token'] ??
             "";
-        String callid = callDataRoot['callid'] ??
+        String callid = (callDataRoot['callid'] ??
             callDataNested['callid'] ??
             callDataNested['_id'] ??
-            "";
+            agorachannelName ??
+            "").toString();
+        String fromid = (callDataRoot['fromid'] ??
+            callDataNested['from'] ??
+            callDataRoot['from'] ??
+            "").toString();
         String banner = callDataRoot['banner'] ?? "";
         String fromusername = callDataRoot['fromusername'] ?? "";
 
         print(
-            "[ANTIGRAVITY_DEBUG] Extracted: channel=$agorachannelName, token=$agoratoken, id=$callid");
+            "[ANTIGRAVITY_DEBUG] Extracted: channel=$agorachannelName, token=$agoratoken, id=$callid, fromid=$fromid");
 
         if (isVideoCall) {
           FirebaseApi.showCallkitIncoming(
@@ -574,6 +738,7 @@ abstract class SocketConnection {
             callTypeForKit,
             banner,
             fromusername,
+            fromid: fromid,
           );
           Get.find<Repository>().saveSecureValue("Data", "123");
         } else if (isAudioCall) {
@@ -585,6 +750,7 @@ abstract class SocketConnection {
             callTypeForKit,
             banner,
             fromusername,
+            fromid: fromid,
           );
         }
       } else if (data['event'] == "onincominggroupcall") {
@@ -643,9 +809,5 @@ abstract class SocketConnection {
           );
         }
       }
-    });
-    socket!.onDisconnect((_) => print('Connection Disconnection'));
-    socket!.onConnectError((err) => print("Connection Error: $err"));
-    socket!.onError((err) => print("Socket Error: $err"));
   }
 }

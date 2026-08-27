@@ -1,6 +1,11 @@
 package com.festumevento.cochat
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
@@ -12,23 +17,90 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
+    private var initialCallData: HashMap<String, Any?>? = null
+    private var helloWorldChannel: MethodChannel? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        createCallNotificationChannel()
+        handleIntent(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun createCallNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager ?: return
+
+            val soundUri =
+                Uri.parse("android.resource://" + packageName + "/" + R.raw.ringtone_default)
+            val audioAttributes = AudioAttributes.Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+                .build()
+
+            val channelIds = listOf(
+                "callkit_incoming_channel_id",
+                "incoming_call_channel_id",
+                "ChatNest Incoming Calls"
+            )
+
+            for (channelId in channelIds) {
+                try {
+                    notificationManager.deleteNotificationChannel(channelId)
+                } catch (_: Exception) {}
+
+                val channel = NotificationChannel(
+                    channelId,
+                    "Incoming Calls",
+                    NotificationManager.IMPORTANCE_HIGH
+                ).apply {
+                    description = "Incoming call notifications"
+                    setSound(null, null)
+                    enableVibration(true)
+                    vibrationPattern = longArrayOf(0, 1000, 500, 1000, 500, 1000)
+                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                    setBypassDnd(true)
+                }
+                notificationManager.createNotificationChannel(channel)
+            }
+        }
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        if (intent != null && intent.action == "com.hiennv.flutter_callkit_incoming.ACTION_CALL_ACCEPT") {
+            val extras = intent.extras
+            if (extras != null) {
+                val callData = fromBundle(extras)
+                initialCallData = callData
+                helloWorldChannel?.invokeMethod("CALL_ACCEPTED_INTENT", callData)
+            }
+        }
+    }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
-        val helloWorldChannel =
+        helloWorldChannel =
             MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "HelloWorld")
-        val appOpenedIntent = intent
 
-        if (
-            appOpenedIntent != null &&
-            appOpenedIntent.action == "com.hiennv.flutter_callkit_incoming.ACTION_CALL_ACCEPT"
-        ) {
-            val extras = appOpenedIntent.extras
-            if (extras != null) {
-                helloWorldChannel.invokeMethod("CALL_ACCEPTED_INTENT", fromBundle(extras))
+        helloWorldChannel?.setMethodCallHandler { call, result ->
+            if (call.method == "getInitialAcceptedCall") {
+                val data = initialCallData
+                initialCallData = null
+                result.success(data)
+            } else {
+                result.notImplemented()
             }
-        } else {
-            helloWorldChannel.invokeMethod("CHAT_ACCEPTED_INTENT", null)
+        }
+
+        if (initialCallData != null) {
+            helloWorldChannel?.invokeMethod("CALL_ACCEPTED_INTENT", initialCallData)
         }
 
         val ringtoneChannel =
@@ -50,10 +122,17 @@ class MainActivity : FlutterActivity() {
 
     @Suppress("DEPRECATION", "UNCHECKED_CAST")
     private fun fromBundle(bundle: Bundle): HashMap<String, Any?> {
-        val extraCallkitData = bundle.getBundle("EXTRA_CALLKIT_CALL_DATA") ?: return HashMap()
-        return extraCallkitData.getSerializable(CallkitConstants.EXTRA_CALLKIT_EXTRA)
+        val extraCallkitData = bundle.getBundle("EXTRA_CALLKIT_CALL_DATA") ?: bundle
+        val extra = extraCallkitData.getSerializable(CallkitConstants.EXTRA_CALLKIT_EXTRA)
             as? HashMap<String, Any?>
-            ?: HashMap()
+        if (extra != null && extra.isNotEmpty()) {
+            return extra
+        }
+        val map = HashMap<String, Any?>()
+        for (key in extraCallkitData.keySet()) {
+            map[key] = extraCallkitData.get(key)
+        }
+        return map
     }
 
     private fun setRingtone(uri: Uri) {
@@ -76,3 +155,4 @@ class MainActivity : FlutterActivity() {
         }
     }
 }
+

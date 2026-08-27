@@ -9,6 +9,8 @@ import 'package:chatnest/data/helpers/connect_helper.dart';
 import 'package:http_parser/src/media_type.dart' as media_type;
 import 'package:http/http.dart' as http;
 
+import 'package:get/get.dart';
+import '../../app/navigators/routes_management.dart';
 import '../../app/utils/utility.dart';
 import '../../device/repositories/device_repositories.dart';
 import '../../domain/domain.dart';
@@ -16,6 +18,7 @@ import '../repositories/data_repositories.dart';
 
 /// API WRAPPER to call all the APIs and handle the error status codes
 class ApiWrapper {
+  static bool isHandlingUnauthorized = false;
   // Override in build/run:
   // --dart-define=API_BASE_ORIGIN=https://your-api-host
   static final String _apiOrigin = _resolveApiOrigin();
@@ -33,6 +36,31 @@ class ApiWrapper {
   }
 
   static String imageUrl = 'https://api.cochat.click/';
+
+  static bool isValidImageUrl(String? path) {
+    if (path == null) return false;
+    final trimmed = path.trim();
+    if (trimmed.isEmpty) return false;
+    final lower = trimmed.toLowerCase();
+    if (lower == 'null' || lower == 'undefined' || lower == 'none' || lower == 'false') return false;
+    if (trimmed == imageUrl || trimmed == _apiOrigin || trimmed == '$_apiOrigin/') return false;
+    if (trimmed == 'https://api.cochat.click' || trimmed == 'https://api.cochat.click/') return false;
+    if (trimmed.endsWith('/') || trimmed.endsWith('/apis/v2') || trimmed.endsWith('/apis/v2/')) return false;
+    if (!trimmed.contains('.') && !trimmed.startsWith('http://') && !trimmed.startsWith('https://')) return false;
+    return true;
+  }
+
+  static String getFullImageUrl(String? path) {
+    if (!isValidImageUrl(path)) return '';
+    final trimmed = path!.trim();
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      return trimmed;
+    }
+    if (trimmed.startsWith('/')) {
+      return imageUrl + trimmed.substring(1);
+    }
+    return imageUrl + trimmed;
+  }
 
   static String placeApiCall = 'AIzaSyAy1EmmZYXtEjbDPvV7gIW0Qs2oD6WKi2o';
   Map<String, String> get defaultHeaders => {
@@ -369,8 +397,20 @@ class ApiWrapper {
       case 401:
 
         /// unauthorized
-        Repository(DeviceRepository(), DataRepository(ConnectHelper()))
-            .deleteAllSecuredValues();
+        if (!isHandlingUnauthorized) {
+          isHandlingUnauthorized = true;
+          Get.find<Repository>().deleteAllSecuredValues();
+          RouteManagement.goToLoginView();
+          Utility.showMessage(
+            "Session expired or logged in from another device".tr,
+            MessageType.error,
+            () => null,
+            '',
+          );
+          Future.delayed(const Duration(seconds: 4), () {
+            isHandlingUnauthorized = false;
+          });
+        }
 
         return ResponseModel(
           data: response.body,

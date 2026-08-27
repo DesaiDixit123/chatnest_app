@@ -13,10 +13,22 @@ class SplashController extends GetxController {
     super.onInit();
     // Wait for the splash animation (3 s), then navigate based on auth state
     Future.delayed(const Duration(seconds: 3)).then((_) {
+      final isCallActive = Get.isRegistered<CallManagerService>() &&
+          Get.find<CallManagerService>().isCallActive;
+      final isAudioOpen = Get.isRegistered<AudioCallController>();
+      final isVideoOpen = Get.isRegistered<VideoCallController>();
+
+      if (isCallActive || isAudioOpen || isVideoOpen) {
+        print("[ANTIGRAVITY_DEBUG] SplashController: Call is already active/open. Skipping offAllNamed!");
+        return;
+      }
+
       final isLoggedIn = Get.find<Repository>()
           .getStringValue(LocalKeys.authToken)
           .isNotEmpty;
       if (isLoggedIn) {
+        FirebaseApi.syncFcmTokenWithBackend();
+        SocketConnection.initSocket();
         RouteManagement.goToHomeScreenView();
       } else {
         RouteManagement.goToLoginView();

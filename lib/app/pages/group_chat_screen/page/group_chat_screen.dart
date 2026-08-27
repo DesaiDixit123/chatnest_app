@@ -51,6 +51,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               .unreadmessageCount = 0;
         }
         controller.getOneGroup();
+        controller.chatGroupMessageList.clear();
+        controller.isGroupChatLoading = true;
         await controller.getGroupChatLists(1);
         controller.scrollGroupController.addListener(() async {
           if (controller.scrollGroupController.position.pixels ==
@@ -107,7 +109,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   child: SvgPicture.asset(
                     AssetConstants.appbarbackarrowicon,
                     colorFilter: const ColorFilter.mode(
-                      ColorsValue.maincolor1,
+                      Colors.black,
                       BlendMode.srcIn,
                     ),
                   ),
@@ -297,17 +299,12 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                             () => controller.getGroupChatLists(1),
                           ),
                           color: ColorsValue.appColor,
-                          child: controller.chatGroupMessageList.isEmpty
-                              ? Center(
-                                  child: CircularProgressIndicator(
-                                    color: ColorsValue.appColor,
-                                  ),
-                                )
-                              : ListView.builder(
-                                  reverse: true,
-                                  controller: controller.scrollGroupController,
-                                  itemCount:
-                                      controller.chatGroupMessageList.length,
+                          child: ListView.builder(
+                            reverse: true,
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            controller: controller.scrollGroupController,
+                            itemCount:
+                                controller.chatGroupMessageList.length,
                                   itemBuilder: (context, index) {
                                     bool isSameDate = false;
                                     String? newDate = '';
@@ -9321,13 +9318,13 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                           ),
                           Dimens.boxWidth10,
                           InkWell(
-                            onTap: () {
+                            onTap: () async {
                               if (controller
                                   .sendMessageController.text.isNotEmpty) {
                                 if (!controller.isChatGroupMessageEdit) {
-                                  controller.sendGroupMessage("", false, false);
+                                  await controller.sendGroupMessage("", false, false);
                                 } else {
-                                  controller.postChatGroupMessageEdit(
+                                  await controller.postChatGroupMessageEdit(
                                       controller.sendMessageController.text);
                                 }
                                 controller.isReplyChat = false;

@@ -35,21 +35,29 @@ class ChatLockScreen extends StatelessWidget {
                 onTap: () {
                   RouteManagement.goToHomeScreenView();
                 },
-                child: SvgPicture.asset(AssetConstants.appbarbackarrowicon),
+                child: SvgPicture.asset(
+                  AssetConstants.appbarbackarrowicon,
+                  colorFilter: const ColorFilter.mode(
+                    Colors.black,
+                    BlendMode.srcIn,
+                  ),
+                ),
               ),
             ),
             bottom: TabBar(
               controller: controller.chatLockTabController,
-              indicatorColor: ColorsValue.maincolor1,
+              indicatorColor: Colors.black,
               indicatorSize: TabBarIndicatorSize.tab,
               padding: Dimens.edgeInsets0,
               indicatorPadding: Dimens.edgeInsets20_0_20_0,
               indicator: const UnderlineTabIndicator(
                 borderSide: BorderSide(
                   width: 3,
-                  color: ColorsValue.maincolor1,
+                  color: Colors.black,
                 ),
               ),
+              labelColor: Colors.black,
+              unselectedLabelColor: Colors.black54,
               tabs: <Widget>[
                 Padding(
                   padding: Dimens.edgeInsets20_0_20_0,
@@ -57,8 +65,8 @@ class ChatLockScreen extends StatelessWidget {
                     child: Text(
                       "chat".tr,
                       style: controller.chatLockTabController.index == 0
-                          ? Styles.main50016
-                          : Styles.greyColor888850016,
+                          ? Styles.black70016
+                          : Styles.black50016,
                     ),
                   ),
                 ),
@@ -66,8 +74,8 @@ class ChatLockScreen extends StatelessWidget {
                   child: Text(
                     'groupchat'.tr,
                     style: controller.chatLockTabController.index == 1
-                        ? Styles.main50016
-                        : Styles.greyColor888850016,
+                        ? Styles.black70016
+                        : Styles.black50016,
                   ),
                 )
               ],

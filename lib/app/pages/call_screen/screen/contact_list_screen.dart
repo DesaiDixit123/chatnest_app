@@ -35,6 +35,10 @@ class ContactListScreen extends StatelessWidget {
                 padding: Dimens.edgeInsets20_15_10_15,
                 child: SvgPicture.asset(
                   AssetConstants.appbarbackarrowicon,
+                  colorFilter: const ColorFilter.mode(
+                    Colors.black,
+                    BlendMode.srcIn,
+                  ),
                 ),
               ),
             ),
@@ -92,7 +96,13 @@ class ContactListScreen extends StatelessWidget {
                                 ? controller.contactsList[index]
                                 : controller.searchContactsList[index];
                             return InkWell(
-                              onTap: () {},
+                              onTap: () {
+                                if (item.isChatNestUser == true &&
+                                    (item.userid?.isNotEmpty ?? false)) {
+                                  RouteManagement.gooffAndToNamedChatScreen(
+                                      item.userid!, false);
+                                }
+                              },
                               child: ListTile(
                                 contentPadding: Dimens.edgeInsets0,
                                 leading: Container(
@@ -123,7 +133,14 @@ class ContactListScreen extends StatelessWidget {
                                   ),
                                 ),
                                 title: Text(
-                                  item.name.toString(),
+                                  (item.name != null &&
+                                          item.name!.trim().isNotEmpty &&
+                                          item.name != item.mobile)
+                                      ? item.name!
+                                      : (Utility.getContactNameForPhone(
+                                              item.mobile) ??
+                                          item.name ??
+                                          "User"),
                                   style: Styles.black50016,
                                 ),
                                 subtitle: Text(
@@ -132,17 +149,14 @@ class ContactListScreen extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                   style: Styles.greyColor888840012,
                                 ),
-                                trailing: controller
-                                            .contactsList[index].isChatNestUser ==
-                                        false
+                                trailing: item.isChatNestUser == false
                                     ? InkWell(
                                         onTap: () {
                                           Get.dialog(
                                             SentRequestDialog(
                                               formKey:
                                                   controller.sendRequestKey,
-                                              title: controller
-                                                  .contactsList[index].name,
+                                              title: item.name,
                                               textEditingController:
                                                   controller.messageController,
                                               onTap: () {
@@ -152,11 +166,7 @@ class ContactListScreen extends StatelessWidget {
                                                   Get.back();
                                                   controller
                                                       .sendNewFriendRequest(
-                                                          controller
-                                                                  .contactsList[
-                                                                      index]
-                                                                  .userid ??
-                                                              "",
+                                                          item.userid ?? "",
                                                           controller
                                                               .messageController
                                                               .text,
@@ -239,10 +249,7 @@ class ContactListScreen extends StatelessWidget {
                                             ? InkWell(
                                                 onTap: () {
                                                   controller.cancelSentRequest(
-                                                      controller
-                                                              .contactsList[
-                                                                  index]
-                                                              .friendrequestid ??
+                                                      item.friendrequestid ??
                                                           "");
                                                   controller.update();
                                                 },
@@ -874,11 +881,7 @@ class ContactListScreen extends StatelessWidget {
                                                     : InkWell(
                                                         onTap: () {
                                                           RouteManagement.gooffAndToNamedChatScreen(
-                                                              controller
-                                                                      .contactsList[
-                                                                          index]
-                                                                      .userid ??
-                                                                  "",
+                                                              item.userid ?? "",
                                                               false);
                                                         },
                                                         child: Container(

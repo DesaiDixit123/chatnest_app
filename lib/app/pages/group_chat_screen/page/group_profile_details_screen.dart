@@ -87,28 +87,39 @@ class GroupProfileDetailsScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(
                                   Dimens.hundred,
                                 ),
-                                child: CachedNetworkImage(
-                                  imageUrl: ApiWrapper.imageUrl +
-                                      (controller
-                                              .getOneGroupData?.profileimage ??
-                                          ""),
-                                  fit: BoxFit.cover,
-                                  maxHeightDiskCache: 300,
-                                  maxWidthDiskCache: 300,
-                                  width: Dimens.hundredTwenty,
-                                  height: Dimens.hundredTwenty,
-                                  placeholder: (context, url) => Center(
-                                    child: Image.asset(
-                                      AssetConstants.usera,
-                                      height: Dimens.hundredTwenty,
-                                    ),
-                                  ),
-                                  errorWidget: (context, url, error) =>
-                                      Image.asset(
-                                    AssetConstants.usera,
-                                    height: Dimens.hundredTwenty,
-                                  ),
-                                ),
+                                child: ApiWrapper.isValidImageUrl(
+                                        controller.getOneGroupData?.profileimage)
+                                    ? CachedNetworkImage(
+                                        imageUrl: ApiWrapper.imageUrl +
+                                            controller.getOneGroupData!
+                                                .profileimage!,
+                                        fit: BoxFit.cover,
+                                        maxHeightDiskCache: 300,
+                                        maxWidthDiskCache: 300,
+                                        width: Dimens.hundredTwenty,
+                                        height: Dimens.hundredTwenty,
+                                        placeholder: (context, url) => Center(
+                                          child: Image.asset(
+                                            AssetConstants.usera,
+                                            height: Dimens.hundredTwenty,
+                                            width: Dimens.hundredTwenty,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                        errorWidget: (context, url, error) =>
+                                            Image.asset(
+                                          AssetConstants.usera,
+                                          height: Dimens.hundredTwenty,
+                                          width: Dimens.hundredTwenty,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      )
+                                    : Image.asset(
+                                        AssetConstants.usera,
+                                        height: Dimens.hundredTwenty,
+                                        width: Dimens.hundredTwenty,
+                                        fit: BoxFit.cover,
+                                      ),
                               ),
                             ),
                           ),
@@ -770,27 +781,38 @@ class GroupProfileDetailsScreen extends StatelessWidget {
                                   child: ClipRRect(
                                     borderRadius:
                                         BorderRadius.circular(Dimens.hundred),
-                                    child: CachedNetworkImage(
-                                      imageUrl: ApiWrapper.imageUrl +
-                                          (item.userid?.profileimage ?? ""),
-                                      fit: BoxFit.cover,
-                                      maxHeightDiskCache: 90,
-                                      maxWidthDiskCache: 90,
-                                      width: Dimens.fourtyFive,
-                                      height: Dimens.fourtyFive,
-                                      placeholder: (context, url) =>
-                                          Image.asset(
-                                        AssetConstants.usera,
-                                        width: Dimens.fourtyFive,
-                                        height: Dimens.fourtyFive,
-                                      ),
-                                      errorWidget: (context, url, error) =>
-                                          Image.asset(
-                                        AssetConstants.usera,
-                                        width: Dimens.fourtyFive,
-                                        height: Dimens.fourtyFive,
-                                      ),
-                                    ),
+                                    child: ApiWrapper.isValidImageUrl(
+                                            item.userid?.profileimage)
+                                        ? CachedNetworkImage(
+                                            imageUrl: ApiWrapper.imageUrl +
+                                                item.userid!.profileimage!,
+                                            fit: BoxFit.cover,
+                                            maxHeightDiskCache: 90,
+                                            maxWidthDiskCache: 90,
+                                            width: Dimens.fourtyFive,
+                                            height: Dimens.fourtyFive,
+                                            placeholder: (context, url) =>
+                                                Image.asset(
+                                              AssetConstants.usera,
+                                              width: Dimens.fourtyFive,
+                                              height: Dimens.fourtyFive,
+                                              fit: BoxFit.cover,
+                                            ),
+                                            errorWidget:
+                                                (context, url, error) =>
+                                                    Image.asset(
+                                              AssetConstants.usera,
+                                              width: Dimens.fourtyFive,
+                                              height: Dimens.fourtyFive,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          )
+                                        : Image.asset(
+                                            AssetConstants.usera,
+                                            width: Dimens.fourtyFive,
+                                            height: Dimens.fourtyFive,
+                                            fit: BoxFit.cover,
+                                          ),
                                   ),
                                 ),
                                 Visibility(

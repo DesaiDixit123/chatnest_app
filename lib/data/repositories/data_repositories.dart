@@ -2363,4 +2363,13 @@ class DataRepository extends DomainRepository {
         meetingid: meetingid,
         isLoading: isLoading,
       );
+
+  Future<ResponseModel> updateFcmToken({
+    bool isLoading = false,
+    required String fcmToken,
+  }) async =>
+      connectHelper.updateFcmToken(
+        fcmToken: fcmToken,
+        isLoading: isLoading,
+      );
 }

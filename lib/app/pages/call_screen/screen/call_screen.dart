@@ -195,7 +195,7 @@ class CallScreen extends StatelessWidget {
       if (await Utility.cameraPermissionCheack(context) &&
           await Utility.microphonePermissionCheack(context)) {
         Get.find<ChatController>().postCallInitaite(
-          isLoading: true,
+          isLoading: false,
           receiverId: peerUserId,
           isAudioCall: false,
           isGroupCall: false,
@@ -205,7 +205,7 @@ class CallScreen extends StatelessWidget {
     } else {
       if (await Utility.microphonePermissionCheack(context)) {
         Get.find<ChatController>().postCallInitaite(
-          isLoading: true,
+          isLoading: false,
           receiverId: peerUserId,
           isAudioCall: true,
           isGroupCall: false,

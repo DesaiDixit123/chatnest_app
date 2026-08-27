@@ -7,6 +7,7 @@ import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart' as agora;
 import 'package:audioplayers/audioplayers.dart';
 import 'package:chatnest/app/app.dart';
+import 'package:chatnest/app/navigators/app_pages.dart';
 import 'package:chatnest/data/helpers/api_wrapper.dart';
 import 'package:chatnest/domain/domain.dart';
 import 'package:flutter/foundation.dart';
@@ -31,10 +32,10 @@ class AudioCallController extends GetxController {
   void onInit() {
     final args = Get.arguments;
     if (args is List) {
-      userImage = args.length > 4 ? args[4] ?? "" : "";
-      userName = args.length > 5 ? args[5] ?? "User" : "User";
+      userImage = args.length > 4 ? (args[4] ?? "").toString() : "";
+      userName = args.length > 5 ? (args[5] ?? "User").toString() : "User";
       isCall = args.length > 6 ? args[6] ?? false : false;
-      callId = args.length > 2 ? args[2] ?? "" : "";
+      callId = args.length > 2 ? (args[2] ?? "").toString() : "";
       isSelfCall = args.length > 6 ? args[6] ?? false : false;
     } else {
       userImage = "";
@@ -42,6 +43,21 @@ class AudioCallController extends GetxController {
       isCall = false;
       isSelfCall = false;
     }
+
+    if (userName == "User" || userName.trim().isEmpty) {
+      final fallback = (Utility.callLogsData['fromusername'] ?? Utility.callLogsData['name'] ?? Utility.callLogsData['fromUserName'] ?? "").toString();
+      if (fallback.isNotEmpty) {
+        userName = fallback;
+      }
+    }
+    if (userImage == null || userImage!.isEmpty) {
+      final fallbackImg = (Utility.callLogsData['banner'] ?? Utility.callLogsData['img'] ?? Utility.callLogsData['profileimage'] ?? "").toString();
+      if (fallbackImg.isNotEmpty) {
+        userImage = fallbackImg;
+      }
+    }
+
+    _registerSocketListeners();
 
     if (isCall) {
       Utility.audioPlayer
@@ -51,6 +67,15 @@ class AudioCallController extends GetxController {
     super.onInit();
   }
 
+  @override
+  void onClose() {
+    _unregisterSocketListeners();
+    Utility.audioPlayer.stop();
+    timer?.cancel();
+    callDurationTimer?.cancel();
+    super.onClose();
+  }
+
   String? userImage;
   int counter = 30;
   Timer? timer;
@@ -58,10 +83,131 @@ class AudioCallController extends GetxController {
   bool isCall = false;
   bool isCallConnected = false;
   bool _isAutoEndingCall = false;
+  bool _isEnding = false;
+  String? endReasonText;
   String userName = "User";
   Duration callDuration = Duration.zero;
 
   String callId = "";
+
+  void _registerSocketListeners() {
+    if (callId.isNotEmpty) {
+      SocketConnection.socket?.emit("join-call-room", {"callId": callId});
+    }
+
+    SocketConnection.socket?.off("call-rejected", _onCallRejected);
+    SocketConnection.socket?.on("call-rejected", _onCallRejected);
+
+    SocketConnection.socket?.off("call-cancelled", _onCallCancelled);
+    SocketConnection.socket?.on("call-cancelled", _onCallCancelled);
+
+    SocketConnection.socket?.off("call-ended", _onCallEnded);
+    SocketConnection.socket?.on("call-ended", _onCallEnded);
+
+    SocketConnection.socket?.off("stop-ringtone", _onStopRingtone);
+    SocketConnection.socket?.on("stop-ringtone", _onStopRingtone);
+
+    SocketConnection.socket?.off("call-accepted", _onCallAccepted);
+    SocketConnection.socket?.on("call-accepted", _onCallAccepted);
+  }
+
+  void _unregisterSocketListeners() {
+    SocketConnection.socket?.off("call-rejected", _onCallRejected);
+    SocketConnection.socket?.off("call-cancelled", _onCallCancelled);
+    SocketConnection.socket?.off("call-ended", _onCallEnded);
+    SocketConnection.socket?.off("stop-ringtone", _onStopRingtone);
+    SocketConnection.socket?.off("call-accepted", _onCallAccepted);
+  }
+
+  void _onCallRejected(dynamic data) {
+    final id = (data is Map ? (data['callId'] ?? data['callid']) : data).toString();
+    if (id.isNotEmpty && id != callId) return;
+    print("[ANTIGRAVITY_DEBUG] AudioCallController: Remote call rejected received");
+    handleRemoteCallTermination(reason: "Call declined");
+  }
+
+  void _onCallCancelled(dynamic data) {
+    final id = (data is Map ? (data['callId'] ?? data['callid']) : data).toString();
+    if (id.isNotEmpty && id != callId) return;
+    print("[ANTIGRAVITY_DEBUG] AudioCallController: Remote call cancelled received");
+    handleRemoteCallTermination(reason: "Call cancelled");
+  }
+
+  void _onCallEnded(dynamic data) {
+    final id = (data is Map ? (data['callId'] ?? data['callid']) : data).toString();
+    if (id.isNotEmpty && id != callId) return;
+    print("[ANTIGRAVITY_DEBUG] AudioCallController: Remote call ended received");
+    handleRemoteCallTermination(reason: "Call ended");
+  }
+
+  void _onStopRingtone(dynamic data) {
+    Utility.audioPlayer.stop();
+  }
+
+  void _onCallAccepted(dynamic data) {
+    final id = (data is Map ? (data['callId'] ?? data['callid']) : data).toString();
+    if (id.isNotEmpty && id != callId) return;
+    handleRemoteUserJoined();
+  }
+
+  void handleRemoteUserJoined() {
+    print("[ANTIGRAVITY_DEBUG] AudioCallController: handleRemoteUserJoined");
+    Utility.audioPlayer.stop();
+    timer?.cancel();
+    if (!isCallConnected) {
+      _startCallDurationTimer();
+    }
+  }
+
+  Future<void> handleRemoteCallTermination({required String reason}) async {
+    if (_isEnding) return;
+    _isEnding = true;
+
+    print("[ANTIGRAVITY_DEBUG] AudioCallController: handleRemoteCallTermination reason=$reason");
+
+    Utility.audioPlayer.stop();
+    timer?.cancel();
+    _stopCallDurationTimer();
+
+    endReasonText = reason;
+    update();
+
+    await CallingKitService.endAllCalls();
+    await disposeAgora();
+    await Get.find<CallManagerService>().endCall();
+
+    Future.delayed(const Duration(milliseconds: 600), () {
+      _safeNavigateBack();
+    });
+  }
+
+  void _safeNavigateBack() {
+    print("[ANTIGRAVITY_DEBUG] AudioCallController: _safeNavigateBack popping route");
+    try {
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+    } catch (_) {}
+
+    try {
+      final nav = Get.key.currentState;
+      if (nav != null && nav.canPop()) {
+        nav.pop();
+        return;
+      }
+    } catch (_) {}
+
+    try {
+      if (Get.context != null && Navigator.canPop(Get.context!)) {
+        Navigator.pop(Get.context!);
+        return;
+      }
+    } catch (_) {}
+
+    try {
+      Get.back();
+    } catch (_) {}
+  }
 
   String _preferredName(dynamic fullname, dynamic nickname) {
     final full = (fullname ?? "").toString().trim();
@@ -73,12 +219,15 @@ class AudioCallController extends GetxController {
   }
 
   void startTimer() {
+    timer?.cancel();
     const oneSec = Duration(seconds: 30);
     timer = Timer(
       oneSec,
       () async {
-        postChatMissedCall(callId);
-        await disposeAgora();
+        if (!isCallConnected && !_isEnding && callId.isNotEmpty) {
+          await postChatMissedCall(callId);
+          await handleRemoteCallTermination(reason: "No answer");
+        }
       },
     );
   }
@@ -87,6 +236,9 @@ class AudioCallController extends GetxController {
       users.where((u) => u.uid != currentUid).length;
 
   String get callStatusText {
+    if (endReasonText != null && endReasonText!.isNotEmpty) {
+      return endReasonText!;
+    }
     if (!isCallConnected) {
       return "Ringing...";
     }
@@ -144,18 +296,17 @@ class AudioCallController extends GetxController {
   bool isVideo = true;
 
   Future<void> disposeAgora() async {
-    Utility.audioPlayer.pause();
+    Utility.audioPlayer.stop();
     timer?.cancel();
     _stopCallDurationTimer(reset: true);
     users.clear();
     pendingInvitees.clear();
     queuedRemoteMembersById.clear();
     queuedRemoteMemberOrder.clear();
-    // We do NOT release the engine here anymore, it stays in CallManagerService
   }
 
   Future<void> _endCallGlobally() async {
-    Utility.audioPlayer.pause();
+    Utility.audioPlayer.stop();
     timer?.cancel();
     _stopCallDurationTimer(reset: true);
     users.clear();
@@ -164,7 +315,6 @@ class AudioCallController extends GetxController {
       await postChatLeaveCall(callId);
     }
     
-    // Explicitly release engine and clear state
     await Get.find<CallManagerService>().endCall();
   }
 
@@ -195,11 +345,28 @@ class AudioCallController extends GetxController {
       }
       
       final uid = _generateNumericUid(userId);
+      final memberName = _preferredName(user["fullname"], user["nickname"]);
+      final memberImage = (user["profileimage"] ?? "").toString();
+
       callMembersMap[userId] = {
-        "name": _preferredName(user["fullname"], user["nickname"]),
-        "image": (user["profileimage"] ?? "").toString(),
+        "name": memberName,
+        "image": memberImage,
         "uid": uid.toString(),
       };
+
+      final currentUserId = Get.find<Repository>().getStringValue(LocalKeys.userIds);
+      if (userId != currentUserId) {
+        if (userName == "User" || userName.trim().isEmpty) {
+          if (memberName.isNotEmpty && memberName != "User") {
+            userName = memberName;
+          }
+        }
+        if (userImage == null || userImage!.isEmpty) {
+          if (memberImage.isNotEmpty) {
+            userImage = memberImage;
+          }
+        }
+      }
 
       final status = (m["status"] ?? "").toString().toLowerCase();
       if (status == "ringing") {
@@ -344,7 +511,7 @@ class AudioCallController extends GetxController {
         uid: _generateNumericUid(Utility.profileData?.id ?? "0"),
         options: ChannelMediaOptions(
           clientRoleType: ClientRoleType.clientRoleBroadcaster,
-          channelProfile: ChannelProfileType.channelProfileLiveBroadcasting,
+          channelProfile: ChannelProfileType.channelProfileCommunication,
           publishMicrophoneTrack: isMicEnabled,
           publishCameraTrack: isVideoEnabled,
         ),
@@ -368,8 +535,12 @@ class AudioCallController extends GetxController {
       userImage: userImage ?? "",
     );
 
-    // If already connected in background, restore the timer immediately
-    if (callManager.connectedAt.value != null) {
+    // If caller, reset connectedAt so Ringing... is shown
+    if (isSelfCall == true) {
+      callManager.connectedAt.value = null;
+      isCallConnected = false;
+      callDuration = Duration.zero;
+    } else if (callManager.connectedAt.value != null) {
       _startCallDurationTimer();
     }
   }
@@ -395,7 +566,7 @@ class AudioCallController extends GetxController {
     agoraEngine = createAgoraRtcEngine();
     await agoraEngine?.initialize(const RtcEngineContext(
       appId: '0bacf816c87b4b4799c3e59f09f415c2',
-      channelProfile: ChannelProfileType.channelProfileLiveBroadcasting,
+      channelProfile: ChannelProfileType.channelProfileCommunication,
     ));
     await agoraEngine?.enableAudio();
     await agoraEngine?.setClientRole(
@@ -553,15 +724,49 @@ class AudioCallController extends GetxController {
 
   Future<void> onCallEnd(
       BuildContext context, AudioCallController controller) async {
-    if ((isSelfCall ?? false) && callId.isNotEmpty) {
-      SocketConnection.socket?.emit("call-cancelled", {"callId": callId});
-    }
-    
-    await _endCallGlobally();
+    if (_isEnding) return;
+    _isEnding = true;
 
-    if (context.mounted) {
-      Get.back();
+    Utility.audioPlayer.stop();
+    timer?.cancel();
+    _stopCallDurationTimer();
+
+    final currentUserId = Get.find<Repository>().getStringValue(LocalKeys.userIds);
+    final isHost = isSelfCall ?? false;
+
+    if (callId.isNotEmpty) {
+      if (!isCallConnected) {
+        if (isHost) {
+          endReasonText = "Call cancelled";
+          final payload = {
+            "callId": callId,
+            "fromUserId": currentUserId,
+            "reason": "cancelled",
+          };
+          SocketConnection.socket?.emit("call-cancelled", payload);
+        } else {
+          endReasonText = "Call declined";
+          final payload = {
+            "callId": callId,
+            "fromUserId": currentUserId,
+            "reason": "rejected",
+          };
+          SocketConnection.socket?.emit("call-rejected", payload);
+        }
+      } else {
+        endReasonText = "Call ended";
+        final payload = {
+          "callId": callId,
+          "fromUserId": currentUserId,
+          "reason": "ended",
+        };
+        SocketConnection.socket?.emit("call-ended", payload);
+      }
     }
+
+    CallingKitService.endAllCalls();
+    _safeNavigateBack();
+    _endCallGlobally();
   }
 
   void onToggleAudio() {

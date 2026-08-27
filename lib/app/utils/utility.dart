@@ -28,6 +28,7 @@ import 'package:lottie/lottie.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -39,6 +40,46 @@ abstract class Utility {
   static List<String> onlineOfflineUserList = [];
   static ProfileData? profileData;
   static AudioPlayer audioPlayer = AudioPlayer();
+
+  static Map<String, String> deviceContactsMap = {};
+
+  static String normalizePhoneNumber(String? phone) {
+    if (phone == null) return "";
+    final digits = phone.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.length > 10) {
+      return digits.substring(digits.length - 10);
+    }
+    return digits;
+  }
+
+  static String? getContactNameForPhone(String? phone) {
+    if (phone == null || phone.trim().isEmpty) return null;
+    final normalized = normalizePhoneNumber(phone);
+    if (normalized.isEmpty) return null;
+    return deviceContactsMap[normalized];
+  }
+
+  static Future<void> loadDeviceContacts() async {
+    try {
+      final hasPermission = await Permission.contacts.isGranted;
+      if (hasPermission) {
+        final contacts = await FlutterContacts.getContacts(withProperties: true);
+        for (var contact in contacts) {
+          final name = contact.displayName.trim();
+          if (name.isNotEmpty) {
+            for (var phone in contact.phones) {
+              final norm = normalizePhoneNumber(phone.number);
+              if (norm.isNotEmpty) {
+                deviceContactsMap[norm] = name;
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint("Error loading device contacts into map: $e");
+    }
+  }
 
   static Map<String, dynamic>? tryParseJson(dynamic value) {
     if (value is Map<String, dynamic>) {
@@ -546,14 +587,87 @@ abstract class Utility {
     return d12;
   }
 
-  static String getTimeStempToTime(tod) {
-    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(tod);
-    String formattedTime = DateFormat('hh:mm').format(dateTime);
-    return formattedTime;
+  /// WhatsApp-style chat list timestamp formatter:
+  /// - Today: 12-hour format with AM/PM (e.g., 08:55 AM, 03:20 PM, 12:05 AM, 12:00 PM)
+  /// - Yesterday: "Yesterday"
+  /// - Older: DD/MM/YYYY (e.g., 25/08/2026)
+  /// Correctly handles local timezone conversions.
+  static String formatChatListDate(dynamic timestamp) {
+    if (timestamp == null) return "";
+    DateTime? date;
+    if (timestamp is DateTime) {
+      date = timestamp.toLocal();
+    } else if (timestamp is int) {
+      if (timestamp <= 0) return "";
+      if (timestamp < 10000000000) {
+        date = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000).toLocal();
+      } else {
+        date = DateTime.fromMillisecondsSinceEpoch(timestamp).toLocal();
+      }
+    } else if (timestamp is String) {
+      if (timestamp.trim().isEmpty || timestamp == "0") return "";
+      final intVal = int.tryParse(timestamp);
+      if (intVal != null) {
+        if (intVal < 10000000000) {
+          date = DateTime.fromMillisecondsSinceEpoch(intVal * 1000).toLocal();
+        } else {
+          date = DateTime.fromMillisecondsSinceEpoch(intVal).toLocal();
+        }
+      } else {
+        try {
+          date = DateTime.parse(timestamp).toLocal();
+        } catch (_) {
+          return "";
+        }
+      }
+    }
+
+    if (date == null) return "";
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final msgDate = DateTime(date.year, date.month, date.day);
+
+    if (msgDate == today) {
+      return DateFormat('hh:mm a').format(date);
+    } else if (msgDate == yesterday) {
+      return 'Yesterday';
+    } else {
+      return DateFormat('dd/MM/yyyy').format(date);
+    }
+  }
+
+  static String getTimeStempToTime(dynamic tod) {
+    return formatChatListDate(tod);
   }
 
   static String getTimeStempToTimeHHMMAA(tod) {
-    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(tod);
+    if (tod == null) return "";
+    DateTime? dateTime;
+    if (tod is DateTime) {
+      dateTime = tod.toLocal();
+    } else if (tod is int) {
+      if (tod <= 0) return "";
+      if (tod < 10000000000) {
+        dateTime = DateTime.fromMillisecondsSinceEpoch(tod * 1000).toLocal();
+      } else {
+        dateTime = DateTime.fromMillisecondsSinceEpoch(tod).toLocal();
+      }
+    } else if (tod is String) {
+      final intVal = int.tryParse(tod);
+      if (intVal != null) {
+        dateTime = DateTime.fromMillisecondsSinceEpoch(
+            intVal < 10000000000 ? intVal * 1000 : intVal).toLocal();
+      } else {
+        try {
+          dateTime = DateTime.parse(tod).toLocal();
+        } catch (_) {
+          return "";
+        }
+      }
+    }
+    if (dateTime == null) return "";
     String formattedTime = DateFormat('hh:mm a').format(dateTime);
     return formattedTime;
   }

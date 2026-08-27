@@ -32,6 +32,7 @@ class _SharedMediascreenState extends State<SharedMediascreen>
       initState: (state) {
         var controller = Get.find<ChatController>();
         controller.brodId = Get.arguments[0] ?? "";
+        controller.userId = Get.arguments[0] ?? "";
         controller.mediaTitle = Get.arguments[2] ?? "";
       },
       builder: (controller) {

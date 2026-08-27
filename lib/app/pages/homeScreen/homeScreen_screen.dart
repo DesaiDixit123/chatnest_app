@@ -63,13 +63,9 @@ class _HomeScreenScreenState extends State<HomeScreenScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
-    // if (state == AppLifecycleState.resumed) {
-    //   await Get.find<HomeScreenController>().postOnlineOffline(true);
-    //   print("Apps Resume...");
-    // } else {
-    //   await Get.find<HomeScreenController>().postOnlineOffline(false);
-    //   print("Apps Disconnect...");
-    // }
+    if (state == AppLifecycleState.resumed) {
+      Get.find<HomeScreenController>().getProfile();
+    }
   }
 
   @override
@@ -109,25 +105,35 @@ class _HomeScreenScreenState extends State<HomeScreenScreen>
                                   ? RouteManagement.goToProfileScreen()
                                   : RouteManagement.goTocreateProfileView();
                             },
-                            child: CachedNetworkImage(
-                              width: Dimens.thirty,
-                              height: Dimens.thirty,
-                              imageUrl: ApiWrapper.imageUrl +
-                                  (controller.profilePic ?? ""),
-                              fit: BoxFit.cover,
-                              maxHeightDiskCache: 90,
-                              maxWidthDiskCache: 90,
-                              placeholder: (context, url) => Image.asset(
-                                AssetConstants.usera,
-                                height: Dimens.thirty,
-                                width: Dimens.thirty,
-                              ),
-                              errorWidget: (context, url, error) => Image.asset(
-                                AssetConstants.usera,
-                                height: Dimens.thirty,
-                                width: Dimens.thirty,
-                              ),
-                            ),
+                            child: (controller.isProfile == true &&
+                                    ApiWrapper.isValidImageUrl(
+                                        controller.profilePic))
+                                ? CachedNetworkImage(
+                                    width: Dimens.thirty,
+                                    height: Dimens.thirty,
+                                    imageUrl: ApiWrapper.getFullImageUrl(
+                                        controller.profilePic),
+                                    fit: BoxFit.cover,
+                                    maxHeightDiskCache: 90,
+                                    maxWidthDiskCache: 90,
+                                    placeholder: (context, url) => Image.asset(
+                                      AssetConstants.usera,
+                                      height: Dimens.thirty,
+                                      width: Dimens.thirty,
+                                    ),
+                                    errorWidget: (context, url, error) =>
+                                        Image.asset(
+                                      AssetConstants.usera,
+                                      height: Dimens.thirty,
+                                      width: Dimens.thirty,
+                                    ),
+                                  )
+                                : Image.asset(
+                                    AssetConstants.usera,
+                                    height: Dimens.thirty,
+                                    width: Dimens.thirty,
+                                    fit: BoxFit.cover,
+                                  ),
                           ),
                         ),
                       ),
