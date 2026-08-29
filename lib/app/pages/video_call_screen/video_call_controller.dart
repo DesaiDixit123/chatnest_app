@@ -141,6 +141,16 @@ class VideoCallController extends GetxController {
     final id = (data is Map ? (data['callId'] ?? data['callid']) : data).toString();
     if (id.isNotEmpty && id != callId) return;
     print("[ANTIGRAVITY_DEBUG] VideoCallController: Remote call ended received");
+    final fromUserId = (data is Map ? (data['fromUserId'] ?? data['fromid'] ?? data['leftUserId']) : "").toString();
+    final currentUserId = Get.find<Repository>().getStringValue(LocalKeys.userIds);
+
+    if (users.length > 2 || remoteParticipantsCount > 1 || callMembersMap.length > 1) {
+      print("[ANTIGRAVITY_DEBUG] Multi-party conference active: treating call-ended as participant left: $fromUserId");
+      if (fromUserId.isNotEmpty && fromUserId != currentUserId) {
+        handleParticipantLeft(fromUserId, callId: id);
+      }
+      return;
+    }
     handleRemoteCallTermination(reason: "Call ended");
   }
 
@@ -1162,25 +1172,14 @@ class VideoCallController extends GetxController {
           SocketConnection.socket?.emit("call-rejected", payload);
         }
       } else {
-        final isConference = (users.length > 2) || (isSelfCall == true && users.length >= 2) || (callMembersMap.length > 1);
-        if (isConference && remoteParticipantsCount >= 1) {
-          endReasonText = "Left conference";
-          final payload = {
-            "callId": callId,
-            "fromUserId": currentUserId,
-            "leftUserId": currentUserId,
-            "reason": "left",
-          };
-          SocketConnection.socket?.emit("user-left", payload);
-        } else {
-          endReasonText = "Call ended";
-          final payload = {
-            "callId": callId,
-            "fromUserId": currentUserId,
-            "reason": "ended",
-          };
-          SocketConnection.socket?.emit("call-ended", payload);
-        }
+        endReasonText = "Left call";
+        final payload = {
+          "callId": callId,
+          "fromUserId": currentUserId,
+          "leftUserId": currentUserId,
+          "reason": "left",
+        };
+        SocketConnection.socket?.emit("user-left", payload);
       }
     }
 

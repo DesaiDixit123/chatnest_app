@@ -188,20 +188,37 @@ abstract class SocketConnection {
     socket?.on("call-ended", (data) async {
       print("[ANTIGRAVITY_DEBUG] Top-level call-ended socket event: $data");
       final id = (data is Map ? (data['callId'] ?? data['callid'] ?? data['data']?['callid']) : data).toString();
+      final fromUserId = (data is Map ? (data['fromUserId'] ?? data['fromid'] ?? data['leftUserId']) : "").toString();
+      final currentUserId = Get.isRegistered<Repository>() ? Get.find<Repository>().getStringValue(LocalKeys.userIds) : "";
+
       if (Get.isRegistered<AudioCallController>()) {
         final ctrl = Get.find<AudioCallController>();
         if (id.isEmpty || ctrl.callId == id) {
-          Utility.audioPlayer.stop();
-          await CallingKitService.endAllCalls();
-          ctrl.handleRemoteCallTermination(reason: "Call ended");
+          if (ctrl.users.length > 2 || ctrl.remoteParticipantsCount > 1 || ctrl.callMembersMap.length > 1) {
+            print("[ANTIGRAVITY_DEBUG] Multi-party conference active: ignoring top-level call-ended and handling participant left: $fromUserId");
+            if (fromUserId.isNotEmpty && fromUserId != currentUserId) {
+              ctrl.handleParticipantLeft(fromUserId, callId: id);
+            }
+          } else {
+            Utility.audioPlayer.stop();
+            await CallingKitService.endAllCalls();
+            ctrl.handleRemoteCallTermination(reason: "Call ended");
+          }
         }
       }
       if (Get.isRegistered<VideoCallController>()) {
         final ctrl = Get.find<VideoCallController>();
         if (id.isEmpty || ctrl.callId == id) {
-          Utility.audioPlayer.stop();
-          await CallingKitService.endAllCalls();
-          ctrl.handleRemoteCallTermination(reason: "Call ended");
+          if (ctrl.users.length > 2 || ctrl.remoteParticipantsCount > 1 || ctrl.callMembersMap.length > 1) {
+            print("[ANTIGRAVITY_DEBUG] Multi-party conference active: ignoring top-level call-ended and handling participant left: $fromUserId");
+            if (fromUserId.isNotEmpty && fromUserId != currentUserId) {
+              ctrl.handleParticipantLeft(fromUserId, callId: id);
+            }
+          } else {
+            Utility.audioPlayer.stop();
+            await CallingKitService.endAllCalls();
+            ctrl.handleRemoteCallTermination(reason: "Call ended");
+          }
         }
       }
     });
@@ -658,6 +675,23 @@ abstract class SocketConnection {
           data['event'] == "oncallended") {
         print("[ANTIGRAVITY_DEBUG] Call ended/rejected/cancelled event received: ${data['event']}");
         final eventCallId = (data['data']?['calldata']?['id'] ?? data['data']?['calldata']?['_id'] ?? data['data']?['callid'] ?? data['data']?['callId'] ?? data['data']?['id'] ?? "").toString();
+        final isConference = _toBool(data['data']?['calldata']?['isgroupcall']) ||
+            _toBool(data['data']?['isgroupcall']) ||
+            ((data['data']?['calldata']?['members'] as List?)?.length ?? 0) > 2 ||
+            (Get.isRegistered<AudioCallController>() && (Get.find<AudioCallController>().users.length > 2 || Get.find<AudioCallController>().callMembersMap.length > 1 || Get.find<AudioCallController>().remoteParticipantsCount >= 2)) ||
+            (Get.isRegistered<VideoCallController>() && (Get.find<VideoCallController>().users.length > 2 || Get.find<VideoCallController>().callMembersMap.length > 1 || Get.find<VideoCallController>().remoteParticipantsCount >= 2));
+
+        String fromUserId = "";
+        try {
+          final fromIdRaw = data['data']?['fromid'];
+          if (fromIdRaw is Map) {
+            fromUserId = (fromIdRaw['userid'] ?? fromIdRaw['_id'] ?? fromIdRaw['id'] ?? "").toString();
+          } else if (fromIdRaw is String && fromIdRaw.startsWith("{")) {
+            final parsed = jsonDecode(fromIdRaw);
+            fromUserId = (parsed['userid'] ?? parsed['_id'] ?? parsed['id'] ?? "").toString();
+          }
+        } catch (_) {}
+
         final String reason = data['event'] == "oncallrejected"
             ? "Call declined"
             : (data['event'] == "oncallcancelled" ? "Call cancelled" : "Call ended");
@@ -665,17 +699,29 @@ abstract class SocketConnection {
         if (Get.isRegistered<VideoCallController>()) {
           final ctrl = Get.find<VideoCallController>();
           if (eventCallId.isEmpty || ctrl.callId == eventCallId) {
-            Utility.audioPlayer.stop();
-            CallingKitService.endAllCalls();
-            ctrl.handleRemoteCallTermination(reason: reason);
+            if (isConference && ctrl.remoteParticipantsCount > 1) {
+              if (fromUserId.isNotEmpty) {
+                ctrl.handleParticipantLeft(fromUserId, callId: eventCallId);
+              }
+            } else {
+              Utility.audioPlayer.stop();
+              CallingKitService.endAllCalls();
+              ctrl.handleRemoteCallTermination(reason: reason);
+            }
           }
         }
         if (Get.isRegistered<AudioCallController>()) {
           final ctrl = Get.find<AudioCallController>();
           if (eventCallId.isEmpty || ctrl.callId == eventCallId) {
-            Utility.audioPlayer.stop();
-            CallingKitService.endAllCalls();
-            ctrl.handleRemoteCallTermination(reason: reason);
+            if (isConference && ctrl.remoteParticipantsCount > 1) {
+              if (fromUserId.isNotEmpty) {
+                ctrl.handleParticipantLeft(fromUserId, callId: eventCallId);
+              }
+            } else {
+              Utility.audioPlayer.stop();
+              CallingKitService.endAllCalls();
+              ctrl.handleRemoteCallTermination(reason: reason);
+            }
           }
         }
         if (Get.isRegistered<MeetingCallController>()) {
