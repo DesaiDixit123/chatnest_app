@@ -210,11 +210,9 @@ class AudioCallController extends GetxController {
       targetUid = int.tryParse(uidStr);
       callMembersMap.remove(leftUserId);
     }
-    if (targetUid == null) {
-      targetUid = _generateNumericUid(leftUserId);
-    }
+    final numericUid = _generateNumericUid(leftUserId);
 
-    users.removeWhere((u) => u.uid == targetUid);
+    users.removeWhere((u) => (targetUid != null && u.uid == targetUid) || u.uid == numericUid);
     _updateCallManagerParticipantNames();
     update();
 
@@ -982,8 +980,8 @@ class AudioCallController extends GetxController {
           SocketConnection.socket?.emit("call-rejected", payload);
         }
       } else {
-        final isConference = (users.length > 2) || (isSelfCall == true && users.length >= 2);
-        if (isConference && remoteParticipantsCount >= 2) {
+        final isConference = (users.length > 2) || (isSelfCall == true && users.length >= 2) || (callMembersMap.length > 1);
+        if (isConference && remoteParticipantsCount >= 1) {
           endReasonText = "Left conference";
           final payload = {
             "callId": callId,

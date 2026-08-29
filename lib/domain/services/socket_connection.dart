@@ -609,7 +609,11 @@ abstract class SocketConnection {
       } else if (data['event'] == "onuserleavethecall") {
         final eventCallId = (data['data']?['calldata']?['id'] ?? data['data']?['calldata']?['_id'] ?? data['data']?['callid'] ?? data['data']?['callId'] ?? "").toString();
         Utility.audioPlayer.stop();
-        final isGroup = _toBool(data['data']?['calldata']?['isgroupcall']) || _toBool(data['data']?['isgroupcall']) || ((data['data']?['calldata']?['members'] as List?)?.length ?? 0) > 2;
+        final isGroup = _toBool(data['data']?['calldata']?['isgroupcall']) ||
+            _toBool(data['data']?['isgroupcall']) ||
+            ((data['data']?['calldata']?['members'] as List?)?.length ?? 0) > 2 ||
+            (Get.isRegistered<AudioCallController>() && (Get.find<AudioCallController>().users.length > 2 || Get.find<AudioCallController>().callMembersMap.length > 1 || Get.find<AudioCallController>().remoteParticipantsCount >= 2)) ||
+            (Get.isRegistered<VideoCallController>() && (Get.find<VideoCallController>().users.length > 2 || Get.find<VideoCallController>().callMembersMap.length > 1 || Get.find<VideoCallController>().remoteParticipantsCount >= 2));
 
         String leftUserId = "";
         try {
