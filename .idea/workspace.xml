@@ -5,16 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3d1044c7-54cf-4965-b0f7-d7ddbf059396" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/other.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/festom_field_flutter.iml" beforeDir="false" afterPath="$PROJECT_DIR$/festom_field_flutter.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/app/pages/audio_call_screen/audio_call_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/audio_call_screen/audio_call_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/app/pages/audio_call_screen/audio_call_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/audio_call_screen/audio_call_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/app/pages/chat_screen/chat_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/chat_screen/chat_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/app/pages/video_call_screen/video_call_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/video_call_screen/video_call_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/app/pages/video_call_screen/video_call_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/video_call_screen/video_call_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/app/utils/utility.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/utils/utility.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
