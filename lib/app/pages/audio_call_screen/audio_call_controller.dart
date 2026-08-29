@@ -1126,7 +1126,7 @@ class AudioCallController extends GetxController {
     }
   }
 
-  void showAddParticipantModal(BuildContext context) {
+  void showAddParticipantSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
