@@ -215,7 +215,6 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                                       isMe ? "You" : (gridUser.name ?? "User");
                                   if (!isMe && (resolvedName == "User" || resolvedName.trim().isEmpty)) {
                                     String? memberUserId;
-                                    // 1. Exact UID match
                                     controller.callMembersMap.forEach((k, v) {
                                       if (v['uid'] == gridUser.uid.toString()) {
                                         memberUserId = k;
@@ -226,27 +225,6 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                                       }
                                     });
 
-                                    // 2. Unmatched remote members in callMembersMap
-                                    if (resolvedName == "User" || resolvedName.isEmpty) {
-                                      final currentUserId = Get.find<Repository>().getStringValue(LocalKeys.userIds);
-                                      for (var entry in controller.callMembersMap.entries) {
-                                        if (entry.key != currentUserId) {
-                                          final cand = (entry.value['name'] ?? entry.value['mobile'] ?? "").toString().trim();
-                                          if (cand.isNotEmpty && cand != "User") {
-                                            resolvedName = cand;
-                                            memberUserId = entry.key;
-                                            break;
-                                          }
-                                        }
-                                      }
-                                    }
-
-                                    // 3. Queued remote members
-                                    if ((resolvedName == "User" || resolvedName.isEmpty) && controller.queuedRemoteMembersById.isNotEmpty) {
-                                      resolvedName = controller.queuedRemoteMembersById.values.first.name ?? "User";
-                                    }
-
-                                    // 4. Utility.resolveUserDisplay
                                     final res = Utility.resolveUserDisplay(
                                       userId: memberUserId,
                                       profileimage: gridUser.bannerImg,

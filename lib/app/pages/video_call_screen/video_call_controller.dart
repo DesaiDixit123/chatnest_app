@@ -607,18 +607,6 @@ class VideoCallController extends GetxController {
         "mobile": resolved['mobile'] ?? "",
       };
 
-      // Also update any existing AgoraUser in users set that currently shows "User"
-      for (AgoraUser u in users) {
-        if (u.uid != currentUid) {
-          if (u.uid == uid || u.name == "User" || u.name == null || u.name!.isEmpty) {
-            u.name = memberName;
-            if (memberImage.isNotEmpty) {
-              u.bannerImg = memberImage;
-            }
-          }
-        }
-      }
-
       final currentUserId = Get.find<Repository>().getStringValue(LocalKeys.userIds);
       if (userId != currentUserId) {
         if (userImage == null || userImage!.isEmpty) {
@@ -645,7 +633,61 @@ class VideoCallController extends GetxController {
         queuedRemoteMemberOrder.remove(userId);
       }
     }
+    _syncUsersWithCallMembers();
     update();
+  }
+
+  void _syncUsersWithCallMembers() {
+    final currentUserId = Get.find<Repository>().getStringValue(LocalKeys.userIds);
+
+    // 1. Match by exact UID
+    for (AgoraUser u in users) {
+      if (u.uid != currentUid) {
+        callMembersMap.forEach((key, val) {
+          if (val['uid'] == u.uid.toString()) {
+            final name = (val['name'] ?? val['mobile'] ?? "").toString().trim();
+            if (name.isNotEmpty && name != "User") {
+              u.name = name;
+            }
+            final img = (val['image'] ?? "").toString().trim();
+            if (img.isNotEmpty) {
+              u.bannerImg = img;
+            }
+          }
+        });
+      }
+    }
+
+    // 2. For any remote user who still has name == "User" or empty, match with unclaimed member
+    for (AgoraUser u in users) {
+      if (u.uid != currentUid && (u.name == null || u.name!.isEmpty || u.name == "User")) {
+        for (var entry in callMembersMap.entries) {
+          if (entry.key != currentUserId) {
+            final memberName = (entry.value['name'] ?? entry.value['mobile'] ?? "").toString().trim();
+            final isAlreadyAssigned = users.any((other) => other != u && other.name == memberName && memberName.isNotEmpty && memberName != "User");
+            if (!isAlreadyAssigned && memberName.isNotEmpty && memberName != "User") {
+              u.name = memberName;
+              u.bannerImg = (entry.value['image'] ?? "").toString().trim();
+              entry.value['uid'] = u.uid.toString();
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    // 3. Fallback to queuedRemoteMembersById if still User
+    for (AgoraUser u in users) {
+      if (u.uid != currentUid && (u.name == null || u.name!.isEmpty || u.name == "User")) {
+        for (var q in queuedRemoteMembersById.values) {
+          final isAlreadyAssigned = users.any((other) => other != u && other.name == q.name);
+          if (!isAlreadyAssigned && q.name != null && q.name!.isNotEmpty && q.name != "User") {
+            u.name = q.name;
+            break;
+          }
+        }
+      }
+    }
   }
 
   Future<void> _initAgoraRtcEngine() async {
@@ -854,6 +896,9 @@ class VideoCallController extends GetxController {
                 ),
               ),
             );
+
+            _syncUsersWithCallMembers();
+
             if (remoteParticipantsCount > 0) {
               _startCallDurationTimer();
             }

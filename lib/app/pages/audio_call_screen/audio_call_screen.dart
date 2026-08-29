@@ -172,58 +172,32 @@ class _AudioCallScreenState extends State<AudioCallScreen> {
           displayName = res['name'] ?? "You";
           if (displayName == "User") displayName = "You";
           displayImg = res['image'] ?? "";
-        } else if (displayName.isEmpty || displayName == "User" || displayImg.isEmpty) {
-          String? memberUserId;
-          // 1. Try exact UID match
-          controller.callMembersMap.forEach((k, v) {
-            if (v['uid'] == user.uid.toString()) {
-              memberUserId = k;
-              if (displayName.isEmpty || displayName == "User") {
-                displayName = (v['name'] ?? v['mobile'] ?? "").toString().trim();
-              }
-              if (displayImg.isEmpty) {
-                displayImg = (v['image'] ?? "").toString().trim();
-              }
-            }
-          });
-
-          // 2. Try unmatched remote members in callMembersMap
-          if (displayName.isEmpty || displayName == "User") {
-            final currentUserId = Get.find<Repository>().getStringValue(LocalKeys.userIds);
-            for (var entry in controller.callMembersMap.entries) {
-              if (entry.key != currentUserId) {
-                final candName = (entry.value['name'] ?? entry.value['mobile'] ?? "").toString().trim();
-                if (candName.isNotEmpty && candName != "User") {
-                  displayName = candName;
-                  if (displayImg.isEmpty) {
-                    displayImg = (entry.value['image'] ?? "").toString().trim();
-                  }
-                  memberUserId = entry.key;
-                  break;
+        } else {
+          if (displayName.isEmpty || displayName == "User" || displayImg.isEmpty) {
+            String? memberUserId;
+            controller.callMembersMap.forEach((k, v) {
+              if (v['uid'] == user.uid.toString()) {
+                memberUserId = k;
+                if (displayName.isEmpty || displayName == "User") {
+                  displayName = (v['name'] ?? v['mobile'] ?? "").toString().trim();
+                }
+                if (displayImg.isEmpty) {
+                  displayImg = (v['image'] ?? "").toString().trim();
                 }
               }
-            }
-          }
+            });
 
-          // 3. Try pendingInvitees
-          if (displayName.isEmpty || displayName == "User") {
-            if (controller.pendingInvitees.isNotEmpty) {
-              displayName = controller.pendingInvitees.first.name;
-              memberUserId = controller.pendingInvitees.first.userId;
+            final res = Utility.resolveUserDisplay(
+              userId: memberUserId,
+              fullname: displayName == "User" ? null : displayName,
+              profileimage: displayImg,
+            );
+            if (displayName.isEmpty || displayName == "User") {
+              displayName = res['name'] ?? "User";
             }
-          }
-
-          // 4. Resolve via Utility.resolveUserDisplay
-          final res = Utility.resolveUserDisplay(
-            userId: memberUserId,
-            fullname: displayName == "User" ? null : displayName,
-            profileimage: displayImg,
-          );
-          if (displayName.isEmpty || displayName == "User") {
-            displayName = res['name'] ?? "User";
-          }
-          if (displayImg.isEmpty && res['image'] != null && res['image']!.isNotEmpty) {
-            displayImg = res['image']!;
+            if (displayImg.isEmpty && res['image'] != null && res['image']!.isNotEmpty) {
+              displayImg = res['image']!;
+            }
           }
         }
         
