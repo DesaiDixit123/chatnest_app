@@ -37,13 +37,53 @@ class _AudioCallScreenState extends State<AudioCallScreen> {
     AudioCallController controller,
   ) {
     final remoteUser = _remoteUser(controller);
-    final imagePath = (remoteUser?.bannerImg?.isNotEmpty ?? false)
+    String imagePath = (remoteUser?.bannerImg?.isNotEmpty ?? false)
         ? remoteUser!.bannerImg!
         : (controller.userImage ?? "");
     final remoteName = remoteUser?.name?.trim() ?? "";
-    final displayName = remoteName.isNotEmpty && remoteName != "User"
+    String displayName = remoteName.isNotEmpty && remoteName != "User"
         ? remoteName
         : controller.userName;
+
+    if (displayName.isEmpty || displayName == "User") {
+      if (controller.pendingInvitees.isNotEmpty) {
+        final pending = controller.pendingInvitees.first;
+        if (pending.name.isNotEmpty && pending.name != "User") {
+          displayName = pending.name;
+        }
+      }
+    }
+
+    if (displayName.isEmpty || displayName == "User") {
+      final currentUserId = Get.find<Repository>().getStringValue(LocalKeys.userIds);
+      controller.callMembersMap.forEach((key, val) {
+        if (key != currentUserId && (displayName.isEmpty || displayName == "User")) {
+          final mName = (val['name'] ?? "").toString().trim();
+          final mMobile = (val['mobile'] ?? "").toString().trim();
+          if (mName.isNotEmpty && mName != "User") {
+            displayName = mName;
+          } else if (mMobile.isNotEmpty) {
+            displayName = mMobile;
+          }
+          if (imagePath.isEmpty) {
+            imagePath = (val['image'] ?? "").toString().trim();
+          }
+        }
+      });
+    }
+
+    if (displayName.isEmpty || displayName == "User" || imagePath.isEmpty) {
+      final res = Utility.resolveUserDisplay(
+        fullname: displayName == "User" ? null : displayName,
+        profileimage: imagePath,
+      );
+      if (displayName.isEmpty || displayName == "User") {
+        displayName = res['name'] ?? "User";
+      }
+      if (imagePath.isEmpty && res['image'] != null && res['image']!.isNotEmpty) {
+        imagePath = res['image']!;
+      }
+    }
 
     return Center(
       child: Column(
@@ -119,6 +159,73 @@ class _AudioCallScreenState extends State<AudioCallScreen> {
         final user = controller.users.toList()[index];
         final bool isHost = controller.isSelfCall ?? false;
         final bool isMe = user.uid == controller.currentUid;
+
+        String displayName = (user.name ?? "").trim();
+        String displayImg = (user.bannerImg ?? "").trim();
+
+        if (isMe) {
+          final res = Utility.resolveUserDisplay(
+            fullname: Utility.profileData?.fullname,
+            nickname: Utility.profileData?.nickname,
+            profileimage: Utility.profileData?.profileimage,
+          );
+          displayName = res['name'] ?? "You";
+          if (displayName == "User") displayName = "You";
+          displayImg = res['image'] ?? "";
+        } else if (displayName.isEmpty || displayName == "User" || displayImg.isEmpty) {
+          String? memberUserId;
+          // 1. Try exact UID match
+          controller.callMembersMap.forEach((k, v) {
+            if (v['uid'] == user.uid.toString()) {
+              memberUserId = k;
+              if (displayName.isEmpty || displayName == "User") {
+                displayName = (v['name'] ?? v['mobile'] ?? "").toString().trim();
+              }
+              if (displayImg.isEmpty) {
+                displayImg = (v['image'] ?? "").toString().trim();
+              }
+            }
+          });
+
+          // 2. Try unmatched remote members in callMembersMap
+          if (displayName.isEmpty || displayName == "User") {
+            final currentUserId = Get.find<Repository>().getStringValue(LocalKeys.userIds);
+            for (var entry in controller.callMembersMap.entries) {
+              if (entry.key != currentUserId) {
+                final candName = (entry.value['name'] ?? entry.value['mobile'] ?? "").toString().trim();
+                if (candName.isNotEmpty && candName != "User") {
+                  displayName = candName;
+                  if (displayImg.isEmpty) {
+                    displayImg = (entry.value['image'] ?? "").toString().trim();
+                  }
+                  memberUserId = entry.key;
+                  break;
+                }
+              }
+            }
+          }
+
+          // 3. Try pendingInvitees
+          if (displayName.isEmpty || displayName == "User") {
+            if (controller.pendingInvitees.isNotEmpty) {
+              displayName = controller.pendingInvitees.first.name;
+              memberUserId = controller.pendingInvitees.first.userId;
+            }
+          }
+
+          // 4. Resolve via Utility.resolveUserDisplay
+          final res = Utility.resolveUserDisplay(
+            userId: memberUserId,
+            fullname: displayName == "User" ? null : displayName,
+            profileimage: displayImg,
+          );
+          if (displayName.isEmpty || displayName == "User") {
+            displayName = res['name'] ?? "User";
+          }
+          if (displayImg.isEmpty && res['image'] != null && res['image']!.isNotEmpty) {
+            displayImg = res['image']!;
+          }
+        }
         
         return Container(
           decoration: BoxDecoration(
@@ -134,13 +241,13 @@ class _AudioCallScreenState extends State<AudioCallScreen> {
                     CircleAvatar(
                       radius: 40,
                       backgroundImage:
-                          user.bannerImg != null && user.bannerImg!.isNotEmpty
-                              ? NetworkImage("${ApiWrapper.imageUrl}${user.bannerImg}")
+                          displayImg.isNotEmpty
+                              ? NetworkImage("${ApiWrapper.imageUrl}$displayImg")
                               : const AssetImage(AssetConstants.usera) as ImageProvider,
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      user.name ?? "User",
+                      displayName.isEmpty ? "User" : displayName,
                       style: Styles.black70014,
                     ),
                   ],

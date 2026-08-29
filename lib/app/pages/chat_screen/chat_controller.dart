@@ -1939,16 +1939,28 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
             MessageType.error, () => Get.back(), 'Okay');
         return;
       }
+      final resolvedUser = Utility.resolveUserDisplay(
+        userId: receiverId.toString(),
+        fullname: response.data.calldata.touser?.fullname,
+        nickname: response.data.calldata.touser?.nickname,
+        mobile: response.data.calldata.touser?.mobile,
+        profileimage: response.data.calldata.touser?.profileimage,
+      );
+      final finalUserName = (resolvedUser['name']?.isNotEmpty == true && resolvedUser['name'] != "User")
+          ? resolvedUser['name']!
+          : (response.data.calldata.touser?.mobile ?? "User");
+      final finalUserImage = (resolvedUser['image']?.isNotEmpty == true)
+          ? resolvedUser['image']!
+          : (response.data.calldata.touser?.profileimage ?? "");
+
       if (isAudioCall) {
         RouteManagement.goToAudioCallScreen(
           response.data.calldata.agorameta?.channelName ?? "",
           response.data.calldata.agorameta?.token ?? "",
           response.data.calldata.id ?? "",
           true,
-          response.data.calldata.touser?.profileimage ?? "",
-          (response.data.calldata.touser?.fullname?.isNotEmpty ?? false)
-              ? response.data.calldata.touser?.fullname ?? ""
-              : (response.data.calldata.touser?.nickname ?? ""),
+          finalUserImage,
+          finalUserName,
           true,
         );
       } else {
@@ -1957,10 +1969,8 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
           response.data.calldata.agorameta?.token ?? "",
           response.data.calldata.id ?? "",
           true,
-          response.data.calldata.touser?.profileimage ?? "",
-          (response.data.calldata.touser?.fullname?.isNotEmpty ?? false)
-              ? response.data.calldata.touser?.fullname ?? ""
-              : (response.data.calldata.touser?.nickname ?? ""),
+          finalUserImage,
+          finalUserName,
           true,
         );
       }
@@ -2566,14 +2576,30 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
             MessageType.error, () => Get.back(), 'Okay');
         return;
       }
+      final resolvedUser = Utility.resolveUserDisplay(
+        userId: receiverId,
+        fullname: response.data.calldata.touser?.fullname,
+        nickname: response.data.calldata.touser?.nickname,
+        mobile: response.data.calldata.touser?.mobile,
+        profileimage: response.data.calldata.touser?.profileimage,
+      );
+      final finalUserName = (resolvedUser['name']?.isNotEmpty == true && resolvedUser['name'] != "User")
+          ? resolvedUser['name']!
+          : ((response.data.calldata.touser?.mobile?.isNotEmpty == true)
+              ? response.data.calldata.touser!.mobile!
+              : (response.data.fromusername?.isNotEmpty == true ? response.data.fromusername : "User"));
+      final finalUserImage = (resolvedUser['image']?.isNotEmpty == true)
+          ? resolvedUser['image']!
+          : (response.data.calldata.touser?.profileimage ?? "");
+
       if (isAudioCall) {
         RouteManagement.goToAudioCallScreen(
           response.data.calldata.agorameta?.channelName ?? "",
           response.data.calldata.agorameta?.token ?? "",
           response.data.calldata.id ?? "",
           true,
-          response.data.calldata.touser?.profileimage ?? "",
-          response.data.fromusername,
+          finalUserImage,
+          finalUserName,
           true,
         );
       } else {
@@ -2582,8 +2608,8 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
             response.data.calldata.agorameta?.token ?? "",
             response.data.calldata.id ?? "",
             true,
-            response.data.calldata.touser?.profileimage ?? "",
-            response.data.fromusername,
+            finalUserImage,
+            finalUserName,
             true);
       }
       // postSendFcmApi(response.data, "onincominggroupcall");

@@ -47,7 +47,7 @@ class SendOtpData {
   factory SendOtpData.fromJson(Map<String, dynamic> json) => SendOtpData(
         key: json["key"] ?? "",
         userid: json["userid"] ?? "",
-        demoOtp: json["demo_otp"] ?? "",   // ✅ MAP API FIELD
+        demoOtp: (json["demo_otp"] ?? json["otpLogin"] ?? json["OtpLOgin"] ?? "").toString(),
       );
 
   Map<String, dynamic> toJson() => {

@@ -81,6 +81,113 @@ abstract class Utility {
     }
   }
 
+  static Map<String, String> resolveUserDisplay({
+    String? userId,
+    dynamic fullname,
+    dynamic nickname,
+    dynamic mobile,
+    dynamic profileimage,
+  }) {
+    String name = "";
+    String image = (profileimage ?? "").toString().trim();
+    String phone = (mobile ?? "").toString().trim();
+
+    // 1. Check direct fullname or nickname
+    final full = (fullname ?? "").toString().trim();
+    final nick = (nickname ?? "").toString().trim();
+    if (full.isNotEmpty && full.toLowerCase() != "user") {
+      name = full;
+    } else if (nick.isNotEmpty && nick.toLowerCase() != "user") {
+      name = nick;
+    }
+
+    // 2. Check if name passed is already a contact number or contains digits
+    if (name.isNotEmpty && RegExp(r'^[+0-9\s-]+$').hasMatch(name) && phone.isEmpty) {
+      phone = name;
+    }
+
+    // 3. Try resolving from device phonebook if phone is present
+    if (phone.isNotEmpty) {
+      final contactName = getContactNameForPhone(phone);
+      if (contactName != null && contactName.trim().isNotEmpty) {
+        name = contactName.trim();
+      }
+    }
+
+    // 4. Look up in ChatController allFriends or chatPagingController
+    if (name.isEmpty || name.toLowerCase() == "user" || image.isEmpty) {
+      if (Get.isRegistered<ChatController>()) {
+        final chatCtrl = Get.find<ChatController>();
+        final List<MyFriendDatum> list = [
+          ...chatCtrl.allFriends,
+          ...(chatCtrl.chatPagingController.itemList ?? <MyFriendDatum>[]),
+        ];
+        final normPhone = normalizePhoneNumber(phone);
+        final friend = list.firstWhereOrNull((f) =>
+            (userId != null && userId.isNotEmpty && f.userid == userId) ||
+            (normPhone.isNotEmpty && f.mobile != null && normalizePhoneNumber(f.mobile) == normPhone));
+        if (friend != null) {
+          if (name.isEmpty || name.toLowerCase() == "user") {
+            final fName = (friend.fullname?.trim().isNotEmpty == true
+                ? friend.fullname
+                : friend.nickname)?.trim() ?? "";
+            if (fName.isNotEmpty && fName.toLowerCase() != "user") {
+              name = fName;
+            }
+          }
+          if (image.isEmpty && friend.profileimage != null && friend.profileimage!.isNotEmpty) {
+            image = friend.profileimage!;
+          }
+          if (phone.isEmpty && friend.mobile != null && friend.mobile!.isNotEmpty) {
+            phone = friend.mobile!;
+          }
+        }
+      }
+    }
+
+    // 5. Look up in CallController contactsList
+    if (name.isEmpty || name.toLowerCase() == "user" || image.isEmpty) {
+      if (Get.isRegistered<CallController>()) {
+        final callCtrl = Get.find<CallController>();
+        final normPhone = normalizePhoneNumber(phone);
+        final callContact = callCtrl.contactsList.firstWhereOrNull((c) =>
+            (userId != null && userId.isNotEmpty && (c.userid == userId || c.chatNestUser?.id == userId)) ||
+            (normPhone.isNotEmpty && c.mobile != null && normalizePhoneNumber(c.mobile) == normPhone));
+        if (callContact != null) {
+          if (name.isEmpty || name.toLowerCase() == "user") {
+            final cName = (callContact.name?.trim().isNotEmpty == true
+                ? callContact.name
+                : callContact.chatNestUser?.username)?.trim() ?? "";
+            if (cName.isNotEmpty && cName.toLowerCase() != "user") {
+              name = cName;
+            }
+          }
+          if (image.isEmpty && callContact.chatNestUser?.profileImage != null && callContact.chatNestUser!.profileImage!.isNotEmpty) {
+            image = callContact.chatNestUser!.profileImage!;
+          }
+          if (phone.isEmpty && callContact.mobile != null && callContact.mobile!.isNotEmpty) {
+            phone = callContact.mobile!;
+          }
+        }
+      }
+    }
+
+    // 6. If name is STILL empty or "User", show the contact number!
+    if (name.isEmpty || name.toLowerCase() == "user") {
+      if (phone.isNotEmpty) {
+        name = phone;
+      } else {
+        name = "User";
+      }
+    }
+
+    return {
+      "name": name,
+      "image": image,
+      "mobile": phone,
+    };
+  }
+
   static Map<String, dynamic>? tryParseJson(dynamic value) {
     if (value is Map<String, dynamic>) {
       return value;

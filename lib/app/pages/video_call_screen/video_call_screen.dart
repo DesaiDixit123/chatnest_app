@@ -152,10 +152,41 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                           fallbackRemoteName = (args[5] ?? "User").toString();
                         }
                       }
-                      final mainName = ((mainUser?.name ?? "").trim().isNotEmpty
+                      String mainName = ((mainUser?.name ?? "").trim().isNotEmpty
                               ? (mainUser?.name ?? "").trim()
                               : (hasRemote ? fallbackRemoteName : "You"))
                           .trim();
+                      if (hasRemote && (mainName.isEmpty || mainName == "User")) {
+                        if (controller.queuedRemoteMembersById.isNotEmpty) {
+                          final queued = controller.queuedRemoteMembersById.values.first;
+                          if (queued.name != null && queued.name!.isNotEmpty && queued.name != "User") {
+                            mainName = queued.name!;
+                          }
+                        }
+                        if (mainName.isEmpty || mainName == "User") {
+                          final currentUserId = Get.find<Repository>().getStringValue(LocalKeys.userIds);
+                          controller.callMembersMap.forEach((k, v) {
+                            if (k != currentUserId && (mainName.isEmpty || mainName == "User")) {
+                              final mName = (v['name'] ?? "").toString().trim();
+                              final mMobile = (v['mobile'] ?? "").toString().trim();
+                              if (mName.isNotEmpty && mName != "User") {
+                                mainName = mName;
+                              } else if (mMobile.isNotEmpty) {
+                                mainName = mMobile;
+                              }
+                            }
+                          });
+                        }
+                        if (mainName.isEmpty || mainName == "User") {
+                          final res = Utility.resolveUserDisplay(
+                            fullname: fallbackRemoteName == "User" ? null : fallbackRemoteName,
+                            profileimage: mainUser?.bannerImg,
+                          );
+                          if (res['name'] != null && res['name']!.isNotEmpty && res['name'] != "User") {
+                            mainName = res['name']!;
+                          }
+                        }
+                      }
                       final resolvedMainName =
                           (mainUser?.uid == controller.currentUid &&
                                   (mainName.isEmpty || mainName == "User"))
@@ -179,12 +210,52 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                                 itemBuilder: (context, index) {
                                   final gridUser =
                                       controller.users.elementAt(index);
-                                  final resolvedName =
-                                      gridUser.uid == controller.currentUid
-                                          ? "You"
-                                          : (gridUser.name ?? "User");
-                                  final bool isHost = controller.isSelfCall ?? false;
                                   final bool isMe = gridUser.uid == controller.currentUid;
+                                  String resolvedName =
+                                      isMe ? "You" : (gridUser.name ?? "User");
+                                  if (!isMe && (resolvedName == "User" || resolvedName.trim().isEmpty)) {
+                                    String? memberUserId;
+                                    // 1. Exact UID match
+                                    controller.callMembersMap.forEach((k, v) {
+                                      if (v['uid'] == gridUser.uid.toString()) {
+                                        memberUserId = k;
+                                        final cand = (v['name'] ?? v['mobile'] ?? "").toString().trim();
+                                        if (cand.isNotEmpty && cand != "User") {
+                                          resolvedName = cand;
+                                        }
+                                      }
+                                    });
+
+                                    // 2. Unmatched remote members in callMembersMap
+                                    if (resolvedName == "User" || resolvedName.isEmpty) {
+                                      final currentUserId = Get.find<Repository>().getStringValue(LocalKeys.userIds);
+                                      for (var entry in controller.callMembersMap.entries) {
+                                        if (entry.key != currentUserId) {
+                                          final cand = (entry.value['name'] ?? entry.value['mobile'] ?? "").toString().trim();
+                                          if (cand.isNotEmpty && cand != "User") {
+                                            resolvedName = cand;
+                                            memberUserId = entry.key;
+                                            break;
+                                          }
+                                        }
+                                      }
+                                    }
+
+                                    // 3. Queued remote members
+                                    if ((resolvedName == "User" || resolvedName.isEmpty) && controller.queuedRemoteMembersById.isNotEmpty) {
+                                      resolvedName = controller.queuedRemoteMembersById.values.first.name ?? "User";
+                                    }
+
+                                    // 4. Utility.resolveUserDisplay
+                                    final res = Utility.resolveUserDisplay(
+                                      userId: memberUserId,
+                                      profileimage: gridUser.bannerImg,
+                                    );
+                                    if (res['name'] != null && res['name']!.isNotEmpty && res['name'] != "User") {
+                                      resolvedName = res['name']!;
+                                    }
+                                  }
+                                  final bool isHost = controller.isSelfCall ?? false;
                                   
                                   return Stack(
                                     fit: StackFit.expand,

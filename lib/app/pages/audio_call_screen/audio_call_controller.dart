@@ -43,18 +43,17 @@ class AudioCallController extends GetxController {
       isCall = false;
       isSelfCall = false;
     }
-
-    if (userName == "User" || userName.trim().isEmpty) {
-      final fallback = (Utility.callLogsData['fromusername'] ?? Utility.callLogsData['name'] ?? Utility.callLogsData['fromUserName'] ?? "").toString();
-      if (fallback.isNotEmpty) {
-        userName = fallback;
-      }
-    }
+ 
+    final resolved = Utility.resolveUserDisplay(
+      fullname: (userName == "User" || userName.trim().isEmpty) ? null : userName,
+      profileimage: userImage,
+      mobile: Utility.callLogsData['mobile'] ??
+          Utility.callLogsData['mobile_number'] ??
+          (args is List && args.length > 5 ? args[5] : null),
+    );
+    userName = resolved['name'] ?? "User";
     if (userImage == null || userImage!.isEmpty) {
-      final fallbackImg = (Utility.callLogsData['banner'] ?? Utility.callLogsData['img'] ?? Utility.callLogsData['profileimage'] ?? "").toString();
-      if (fallbackImg.isNotEmpty) {
-        userImage = fallbackImg;
-      }
+      userImage = resolved['image'];
     }
 
     _registerSocketListeners();
@@ -209,13 +208,14 @@ class AudioCallController extends GetxController {
     } catch (_) {}
   }
 
-  String _preferredName(dynamic fullname, dynamic nickname) {
-    final full = (fullname ?? "").toString().trim();
-    if (full.isNotEmpty) {
-      return full.split(RegExp(r'\s+')).first;
-    }
-    final nick = (nickname ?? "").toString().trim();
-    return nick.isEmpty ? "User" : nick;
+  String _preferredName(dynamic fullname, dynamic nickname, {dynamic mobile, String? userId}) {
+    final resolved = Utility.resolveUserDisplay(
+      userId: userId,
+      fullname: fullname,
+      nickname: nickname,
+      mobile: mobile,
+    );
+    return resolved['name'] ?? "User";
   }
 
   void startTimer() {
@@ -335,8 +335,8 @@ class AudioCallController extends GetxController {
 
   void cacheCallMembers(List members) {
     for (final m in members) {
-      final user = m["memberid"];
-      if (user == null) {
+      final user = m["memberid"] ?? m;
+      if (user == null || user is! Map) {
         continue;
       }
       final userId = (user["_id"] ?? "").toString();
@@ -345,18 +345,40 @@ class AudioCallController extends GetxController {
       }
       
       final uid = _generateNumericUid(userId);
-      final memberName = _preferredName(user["fullname"], user["nickname"]);
-      final memberImage = (user["profileimage"] ?? "").toString();
+      final resolved = Utility.resolveUserDisplay(
+        userId: userId,
+        fullname: user["fullname"],
+        nickname: user["nickname"],
+        mobile: user["mobile"] ?? user["mobile_number"],
+        profileimage: user["profileimage"],
+      );
+      final memberName = (resolved['name']?.isNotEmpty == true && resolved['name'] != "User")
+          ? resolved['name']!
+          : (resolved['mobile']?.isNotEmpty == true ? resolved['mobile']! : "User");
+      final memberImage = resolved['image'] ?? "";
 
       callMembersMap[userId] = {
         "name": memberName,
         "image": memberImage,
         "uid": uid.toString(),
+        "mobile": resolved['mobile'] ?? "",
       };
+
+      // Also update any existing AgoraUser in users set that currently shows "User"
+      for (AgoraUser u in users) {
+        if (u.uid != currentUid) {
+          if (u.uid == uid || u.name == "User" || u.name == null || u.name!.isEmpty) {
+            u.name = memberName;
+            if (memberImage.isNotEmpty) {
+              u.bannerImg = memberImage;
+            }
+          }
+        }
+      }
 
       final currentUserId = Get.find<Repository>().getStringValue(LocalKeys.userIds);
       if (userId != currentUserId) {
-        if (userName == "User" || userName.trim().isEmpty) {
+        if (userName == "User" || userName.trim().isEmpty || RegExp(r'^[+0-9\s-]+$').hasMatch(userName)) {
           if (memberName.isNotEmpty && memberName != "User") {
             userName = memberName;
           }
@@ -373,7 +395,7 @@ class AudioCallController extends GetxController {
         pendingInvitees.add(
           PendingInvitee(
             userId: userId,
-            name: _displayFirstName(user["fullname"] ?? user["nickname"]),
+            name: memberName,
             status: "Ringing",
             uid: uid,
           ),
@@ -387,10 +409,10 @@ class AudioCallController extends GetxController {
 
   String _displayFirstName(String? name) {
     final cleaned = (name ?? "").trim();
-    if (cleaned.isEmpty) {
+    if (cleaned.isEmpty || cleaned == "User") {
       return "User";
     }
-    return cleaned.split(RegExp(r'\s+')).first;
+    return cleaned;
   }
 
   void _addPendingInvitee(String userId, String name) {
@@ -643,7 +665,7 @@ class AudioCallController extends GetxController {
             String resolvedName = "User";
             String resolvedBanner = "";
 
-            // Direct Lookup in callMembersMap
+            // 1. Direct Lookup in callMembersMap
             String? foundUserId;
             callMembersMap.forEach((key, value) {
               if (value['uid'] == remoteUid.toString()) {
@@ -653,16 +675,65 @@ class AudioCallController extends GetxController {
               }
             });
 
+            // 2. If not matched by exact UID, match first unclaimed remote member from callMembersMap
+            if (foundUserId == null || resolvedName == "User") {
+              final currentUserId = Get.find<Repository>().getStringValue(LocalKeys.userIds);
+              for (var entry in callMembersMap.entries) {
+                if (entry.key != currentUserId) {
+                  final alreadyUsed = users.any((u) => u.name == entry.value['name'] && (entry.value['name'] != null && entry.value['name'] != "User"));
+                  if (!alreadyUsed) {
+                    foundUserId = entry.key;
+                    final candName = (entry.value['name']?.isNotEmpty == true && entry.value['name'] != "User")
+                        ? entry.value['name']!
+                        : (entry.value['mobile']?.isNotEmpty == true ? entry.value['mobile']! : "User");
+                    if (candName != "User") {
+                      resolvedName = candName;
+                      resolvedBanner = entry.value['image'] ?? "";
+                      entry.value['uid'] = remoteUid.toString();
+                      break;
+                    }
+                  }
+                }
+              }
+            }
+
+            // 3. If still User, check pendingInvitees
+            if (resolvedName == "User" && pendingInvitees.isNotEmpty) {
+              for (var p in pendingInvitees) {
+                if (!users.any((u) => u.name == p.name)) {
+                  resolvedName = p.name;
+                  foundUserId = p.userId;
+                  break;
+                }
+              }
+            }
+
             if (foundUserId != null) {
               print("[ANTIGRAVITY_DEBUG] Resolved remote user via UID map: $resolvedName ($remoteUid)");
               _removePendingInviteeByUserId(foundUserId);
             } else {
               print("[ANTIGRAVITY_DEBUG] Could not resolve remote user via UID map for $remoteUid. Using fallback.");
-              // Fallback for 1-to-1 calls where members list might be sparse or if joining logic is old
               final existingRemoteCount = users.where((u) => u.uid != currentUid).length;
               if (existingRemoteCount == 0) {
-                resolvedName = userName.trim().isEmpty ? "User" : userName.trim();
-                resolvedBanner = userImage ?? "";
+                final res = Utility.resolveUserDisplay(
+                  fullname: userName,
+                  profileimage: userImage,
+                );
+                resolvedName = res['name'] ?? (userName.trim().isEmpty ? "User" : userName.trim());
+                resolvedBanner = res['image'] ?? (userImage ?? "");
+              }
+            }
+
+            if (resolvedName == "User" || resolvedName.isEmpty) {
+              final res = Utility.resolveUserDisplay(
+                userId: foundUserId,
+                profileimage: resolvedBanner,
+              );
+              if (res['name'] != null && res['name']!.isNotEmpty && res['name'] != "User") {
+                resolvedName = res['name']!;
+              }
+              if (resolvedBanner.isEmpty && res['image'] != null && res['image']!.isNotEmpty) {
+                resolvedBanner = res['image']!;
               }
             }
 

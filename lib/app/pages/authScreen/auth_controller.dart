@@ -96,6 +96,9 @@ class LoginController extends GetxController
       if (response?.status == 200) {
         sendOtpData = response?.data;
         demoOtp = response?.data?.demoOtp;
+        print('\n========================================');
+        print('📱 [OTP RECEIVED] Mobile: ${phonenumbercontroller.text} | OTP: ${demoOtp ?? sendOtpData?.demoOtp}');
+        print('========================================\n');
         RouteManagement.goToOtpView("", false, "");
         update();
       } else {
