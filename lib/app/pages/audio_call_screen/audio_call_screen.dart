@@ -224,12 +224,37 @@ class _AudioCallScreenState extends State<AudioCallScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircleAvatar(
-                      radius: 40,
-                      backgroundImage: displayImg.isNotEmpty
-                          ? CachedNetworkImageProvider("${ApiWrapper.imageUrl}$displayImg")
-                          : const AssetImage(AssetConstants.usera) as ImageProvider,
-                      onBackgroundImageError: (_, __) {},
+                    SizedBox(
+                      height: 80,
+                      width: 80,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(40),
+                        child: displayImg.isNotEmpty
+                            ? CachedNetworkImage(
+                                height: 80,
+                                width: 80,
+                                imageUrl: ApiWrapper.imageUrl + displayImg,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => Image.asset(
+                                  AssetConstants.usera,
+                                  height: 80,
+                                  width: 80,
+                                  fit: BoxFit.cover,
+                                ),
+                                errorWidget: (context, url, error) => Image.asset(
+                                  AssetConstants.usera,
+                                  height: 80,
+                                  width: 80,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : Image.asset(
+                                AssetConstants.usera,
+                                height: 80,
+                                width: 80,
+                                fit: BoxFit.cover,
+                              ),
+                      ),
                     ),
                     const SizedBox(height: 10),
                     Text(
