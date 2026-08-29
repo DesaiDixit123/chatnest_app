@@ -573,6 +573,20 @@ abstract class SocketConnection {
       } else if (data['event'] == "onuserjointhecall") {
         print("[ANTIGRAVITY_DEBUG] User joined the call socket event received: $data");
         Utility.audioPlayer.stop();
+
+        final rawData = data['data'] ?? data;
+        final calldata = rawData is Map ? (rawData['calldata'] ?? rawData['callData']) : null;
+        final members = calldata is Map ? calldata['members'] : null;
+
+        if (members != null && members is List && members.isNotEmpty) {
+          if (Get.isRegistered<AudioCallController>()) {
+            Get.find<AudioCallController>().cacheCallMembers(members);
+          }
+          if (Get.isRegistered<VideoCallController>()) {
+            Get.find<VideoCallController>().cacheCallMembers(members);
+          }
+        }
+
         if (Get.isRegistered<AudioCallController>()) {
           Get.find<AudioCallController>().handleRemoteUserJoined();
         }

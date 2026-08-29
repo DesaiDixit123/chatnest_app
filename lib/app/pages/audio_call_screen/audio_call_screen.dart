@@ -45,19 +45,30 @@ class _AudioCallScreenState extends State<AudioCallScreen> {
         ? remoteName
         : controller.userName;
 
+    String? targetUserId;
+    if (remoteUser != null) {
+      controller.callMembersMap.forEach((k, v) {
+        if (v['uid'] == remoteUser.uid.toString()) {
+          targetUserId = k;
+        }
+      });
+    }
+
     if (displayName.isEmpty || displayName == "User") {
       if (controller.pendingInvitees.isNotEmpty) {
         final pending = controller.pendingInvitees.first;
+        targetUserId ??= pending.userId;
         if (pending.name.isNotEmpty && pending.name != "User") {
           displayName = pending.name;
         }
       }
     }
 
+    final currentUserId = Get.find<Repository>().getStringValue(LocalKeys.userIds);
     if (displayName.isEmpty || displayName == "User") {
-      final currentUserId = Get.find<Repository>().getStringValue(LocalKeys.userIds);
       controller.callMembersMap.forEach((key, val) {
         if (key != currentUserId && (displayName.isEmpty || displayName == "User")) {
+          targetUserId ??= key;
           final mName = (val['name'] ?? "").toString().trim();
           final mMobile = (val['mobile'] ?? "").toString().trim();
           if (mName.isNotEmpty && mName != "User") {
@@ -74,6 +85,7 @@ class _AudioCallScreenState extends State<AudioCallScreen> {
 
     if (displayName.isEmpty || displayName == "User" || imagePath.isEmpty) {
       final res = Utility.resolveUserDisplay(
+        userId: targetUserId,
         fullname: displayName == "User" ? null : displayName,
         profileimage: imagePath,
       );
@@ -214,10 +226,10 @@ class _AudioCallScreenState extends State<AudioCallScreen> {
                   children: [
                     CircleAvatar(
                       radius: 40,
-                      backgroundImage:
-                          displayImg.isNotEmpty
-                              ? NetworkImage("${ApiWrapper.imageUrl}$displayImg")
-                              : const AssetImage(AssetConstants.usera) as ImageProvider,
+                      backgroundImage: displayImg.isNotEmpty
+                          ? CachedNetworkImageProvider("${ApiWrapper.imageUrl}$displayImg")
+                          : const AssetImage(AssetConstants.usera) as ImageProvider,
+                      onBackgroundImageError: (_, __) {},
                     ),
                     const SizedBox(height: 10),
                     Text(

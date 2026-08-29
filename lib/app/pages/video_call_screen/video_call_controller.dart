@@ -576,13 +576,64 @@ class VideoCallController extends GetxController {
     }
   }
 
+  void onGlobalProfileFetched(String userId, Map<String, String> profile) {
+    final name = (profile['name'] ?? "").trim();
+    final img = (profile['image'] ?? "").trim();
+    final mob = (profile['mobile'] ?? "").trim();
+    final uid = _generateNumericUid(userId);
+
+    final resolvedName = (name.isNotEmpty && name != "User") ? name : (mob.isNotEmpty ? mob : "User");
+
+    callMembersMap[userId] = {
+      "name": resolvedName,
+      "image": img,
+      "uid": uid.toString(),
+      "mobile": mob,
+    };
+
+    final currentUserId = Get.find<Repository>().getStringValue(LocalKeys.userIds);
+    if (userId != currentUserId) {
+      if (userImage == null || userImage!.isEmpty) {
+        if (img.isNotEmpty) {
+          userImage = img;
+        }
+      }
+    }
+
+    for (AgoraUser u in users) {
+      if (u.uid == uid || (u.uid != currentUid && (u.name == "User" || u.name == null || u.name!.isEmpty || u.name == mob))) {
+        if (resolvedName != "User") {
+          u.name = resolvedName;
+        }
+        if (img.isNotEmpty) {
+          u.bannerImg = img;
+        }
+      }
+    }
+
+    _syncUsersWithCallMembers();
+    update();
+  }
+
   void cacheCallMembers(List members) {
     for (final m in members) {
-      final user = m["memberid"] ?? m;
-      if (user == null || user is! Map) {
-        continue;
+      dynamic user = m is Map ? (m["memberid"] ?? m) : m;
+      String userId = "";
+      String rawFullname = "";
+      String rawNickname = "";
+      String rawMobile = "";
+      String rawImage = "";
+
+      if (user is Map) {
+        userId = (user["_id"] ?? user["userid"] ?? user["id"] ?? "").toString();
+        rawFullname = (user["fullname"] ?? "").toString();
+        rawNickname = (user["nickname"] ?? "").toString();
+        rawMobile = (user["mobile"] ?? user["mobile_number"] ?? "").toString();
+        rawImage = (user["profileimage"] ?? "").toString();
+      } else if (user is String && user.isNotEmpty) {
+        userId = user;
       }
-      final userId = (user["_id"] ?? "").toString();
+
       if (userId.isEmpty) {
         continue;
       }
@@ -590,22 +641,26 @@ class VideoCallController extends GetxController {
       final uid = _generateNumericUid(userId);
       final resolved = Utility.resolveUserDisplay(
         userId: userId,
-        fullname: user["fullname"],
-        nickname: user["nickname"],
-        mobile: user["mobile"] ?? user["mobile_number"],
-        profileimage: user["profileimage"],
+        fullname: rawFullname,
+        nickname: rawNickname,
+        mobile: rawMobile,
+        profileimage: rawImage,
       );
       final memberName = (resolved['name']?.isNotEmpty == true && resolved['name'] != "User")
           ? resolved['name']!
           : (resolved['mobile']?.isNotEmpty == true ? resolved['mobile']! : "User");
-      final memberImage = resolved['image'] ?? "";
+      final memberImage = resolved['image'] ?? rawImage;
 
       callMembersMap[userId] = {
         "name": memberName,
         "image": memberImage,
         "uid": uid.toString(),
-        "mobile": resolved['mobile'] ?? "",
+        "mobile": resolved['mobile'] ?? rawMobile,
       };
+
+      if (userId.length >= 12 && (memberName == "User" || memberImage.isEmpty)) {
+        Utility.fetchAndCacheUserProfile(userId);
+      }
 
       final currentUserId = Get.find<Repository>().getStringValue(LocalKeys.userIds);
       if (userId != currentUserId) {
@@ -616,7 +671,7 @@ class VideoCallController extends GetxController {
         }
       }
 
-      final status = (m["status"] ?? "").toString().toLowerCase();
+      final status = (m is Map ? (m["status"] ?? "") : "").toString().toLowerCase();
       if (status == "ringing") {
         if (!queuedRemoteMemberOrder.contains(userId)) {
           queuedRemoteMemberOrder.add(userId);
@@ -854,6 +909,10 @@ class VideoCallController extends GetxController {
                   break;
                 }
               }
+            }
+
+            if (foundUserId != null && foundUserId!.length >= 12 && (resolvedName == "User" || resolvedBanner.isEmpty)) {
+              Utility.fetchAndCacheUserProfile(foundUserId!);
             }
 
             if (resolvedName == "User" || resolvedName.isEmpty) {

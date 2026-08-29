@@ -81,6 +81,68 @@ abstract class Utility {
     }
   }
 
+  /// Global in-memory cache for user profile data (userId -> Map of user profile fields)
+  static final Map<String, Map<String, String>> globalUserProfiles = {};
+  static final Set<String> _pendingProfileFetches = {};
+
+  /// Directly fetch user profile from ChatNest backend API (/friends/getone) by unique user ID
+  static Future<Map<String, String>?> fetchAndCacheUserProfile(String userId) async {
+    final cleanId = userId.trim();
+    if (cleanId.isEmpty || cleanId == "0" || _pendingProfileFetches.contains(cleanId)) {
+      return globalUserProfiles[cleanId];
+    }
+    _pendingProfileFetches.add(cleanId);
+    try {
+      if (Get.isRegistered<Repository>()) {
+        final repo = Get.find<Repository>();
+        final response = await repo.getOneFriends(userid: cleanId, isLoading: false);
+        if (response != null && response.data != null) {
+          final data = response.data!;
+          final fn = (data.fullname ?? "").trim();
+          final nn = (data.nickname ?? "").trim();
+          final mob = (data.mobile ?? "").trim();
+          final img = (data.profileimage ?? "").trim();
+
+          String resolvedName = "";
+          if (fn.isNotEmpty && fn.toLowerCase() != "user") {
+            resolvedName = fn;
+          } else if (nn.isNotEmpty && nn.toLowerCase() != "user") {
+            resolvedName = nn;
+          } else if (mob.isNotEmpty) {
+            final contact = getContactNameForPhone(mob);
+            resolvedName = (contact != null && contact.trim().isNotEmpty) ? contact.trim() : mob;
+          } else {
+            resolvedName = "User";
+          }
+
+          final profile = {
+            "name": resolvedName,
+            "image": img,
+            "mobile": mob,
+            "fullname": fn,
+            "nickname": nn,
+          };
+          globalUserProfiles[cleanId] = profile;
+          _pendingProfileFetches.remove(cleanId);
+
+          // Update active call controllers if present
+          if (Get.isRegistered<AudioCallController>()) {
+            Get.find<AudioCallController>().onGlobalProfileFetched(cleanId, profile);
+          }
+          if (Get.isRegistered<VideoCallController>()) {
+            Get.find<VideoCallController>().onGlobalProfileFetched(cleanId, profile);
+          }
+          return profile;
+        }
+      }
+    } catch (e) {
+      debugPrint("[ANTIGRAVITY_DEBUG] Error fetching user profile globally: $e");
+    } finally {
+      _pendingProfileFetches.remove(cleanId);
+    }
+    return globalUserProfiles[cleanId];
+  }
+
   static Map<String, String> resolveUserDisplay({
     String? userId,
     dynamic fullname,
@@ -88,11 +150,12 @@ abstract class Utility {
     dynamic mobile,
     dynamic profileimage,
   }) {
+    final cleanUserId = (userId ?? "").trim();
     String name = "";
     String image = (profileimage ?? "").toString().trim();
     String phone = (mobile ?? "").toString().trim();
 
-    // 1. Check direct fullname or nickname
+    // 1. Direct fullname or nickname passed from caller
     final full = (fullname ?? "").toString().trim();
     final nick = (nickname ?? "").toString().trim();
     if (full.isNotEmpty && full.toLowerCase() != "user") {
@@ -101,13 +164,43 @@ abstract class Utility {
       name = nick;
     }
 
-    // 2. Check if name passed is already a contact number or contains digits
-    if (name.isNotEmpty && RegExp(r'^[+0-9\s-]+$').hasMatch(name) && phone.isEmpty) {
-      phone = name;
+    // 2. Global user profile cache lookup (Source of Truth by ChatNest User ID)
+    if (cleanUserId.isNotEmpty) {
+      final cached = globalUserProfiles[cleanUserId];
+      if (cached != null) {
+        if (name.isEmpty || name.toLowerCase() == "user") {
+          final cName = (cached['name'] ?? "").trim();
+          if (cName.isNotEmpty && cName.toLowerCase() != "user") {
+            name = cName;
+          }
+        }
+        if (image.isEmpty) {
+          final cImg = (cached['image'] ?? "").trim();
+          if (cImg.isNotEmpty) {
+            image = cImg;
+          }
+        }
+        if (phone.isEmpty) {
+          final cMob = (cached['mobile'] ?? "").trim();
+          if (cMob.isNotEmpty) {
+            phone = cMob;
+          }
+        }
+      } else {
+        if (name.isNotEmpty && name.toLowerCase() != "user") {
+          globalUserProfiles[cleanUserId] = {
+            "name": name,
+            "image": image,
+            "mobile": phone,
+            "fullname": full,
+            "nickname": nick,
+          };
+        }
+      }
     }
 
     // 3. Try resolving from device phonebook if phone is present
-    if (phone.isNotEmpty) {
+    if (phone.isNotEmpty && (name.isEmpty || name.toLowerCase() == "user")) {
       final contactName = getContactNameForPhone(phone);
       if (contactName != null && contactName.trim().isNotEmpty) {
         name = contactName.trim();
@@ -124,7 +217,7 @@ abstract class Utility {
         ];
         final normPhone = normalizePhoneNumber(phone);
         final friend = list.firstWhereOrNull((f) =>
-            (userId != null && userId.isNotEmpty && f.userid == userId) ||
+            (cleanUserId.isNotEmpty && f.userid == cleanUserId) ||
             (normPhone.isNotEmpty && f.mobile != null && normalizePhoneNumber(f.mobile) == normPhone));
         if (friend != null) {
           if (name.isEmpty || name.toLowerCase() == "user") {
@@ -151,7 +244,7 @@ abstract class Utility {
         final callCtrl = Get.find<CallController>();
         final normPhone = normalizePhoneNumber(phone);
         final callContact = callCtrl.contactsList.firstWhereOrNull((c) =>
-            (userId != null && userId.isNotEmpty && (c.userid == userId || c.chatNestUser?.id == userId)) ||
+            (cleanUserId.isNotEmpty && (c.userid == cleanUserId || c.chatNestUser?.id == cleanUserId)) ||
             (normPhone.isNotEmpty && c.mobile != null && normalizePhoneNumber(c.mobile) == normPhone));
         if (callContact != null) {
           if (name.isEmpty || name.toLowerCase() == "user") {
@@ -172,7 +265,12 @@ abstract class Utility {
       }
     }
 
-    // 6. If name is STILL empty or "User", show the contact number!
+    // 6. If cleanUserId is valid MongoDB ObjectId and still unresolved, fetch globally from backend!
+    if (cleanUserId.length >= 12 && (name.isEmpty || name.toLowerCase() == "user" || image.isEmpty)) {
+      fetchAndCacheUserProfile(cleanUserId);
+    }
+
+    // 7. If name is STILL empty or "User", show the contact number!
     if (name.isEmpty || name.toLowerCase() == "user") {
       if (phone.isNotEmpty) {
         name = phone;
