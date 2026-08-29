@@ -200,11 +200,12 @@ class VideoCall extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
+            ],
           ),
         ),
-      ],
-    );
+      ),
+    ],
+  );
   }
 
   String callTiming() {
@@ -269,7 +270,7 @@ class VideoCall extends StatelessWidget {
         final names = <String>[];
         for (var m in members) {
           final resolved = Utility.resolveUserDisplay(
-            userId: m.memberid?.id ?? m.memberid?.userid,
+            userId: m.memberid?.id,
             fullname: m.memberid?.fullname,
             nickname: m.memberid?.nickname,
             mobile: m.memberid?.mobile,
