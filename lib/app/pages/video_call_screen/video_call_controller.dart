@@ -9,6 +9,7 @@ import 'package:chatnest/app/app.dart';
 import 'package:chatnest/app/navigators/app_pages.dart';
 import 'package:chatnest/data/helpers/api_wrapper.dart';
 import 'package:chatnest/domain/domain.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -182,6 +183,33 @@ class VideoCallController extends GetxController {
     Future.delayed(const Duration(milliseconds: 600), () {
       _safeNavigateBack();
     });
+  }
+
+  void handleParticipantLeft(String leftUserId, {String? callId}) {
+    if (callId != null && callId.isNotEmpty && this.callId.isNotEmpty && this.callId != callId) {
+      return;
+    }
+    print("[ANTIGRAVITY_DEBUG] VideoCallController handleParticipantLeft: userId=$leftUserId");
+    if (leftUserId.isEmpty) return;
+
+    int? targetUid;
+    if (callMembersMap.containsKey(leftUserId)) {
+      final uidStr = callMembersMap[leftUserId]?['uid'] ?? "";
+      targetUid = int.tryParse(uidStr);
+      callMembersMap.remove(leftUserId);
+    }
+    if (targetUid == null) {
+      targetUid = _generateNumericUid(leftUserId);
+    }
+
+    users.removeWhere((u) => u.uid == targetUid);
+    _updateCallManagerParticipantNames();
+    update();
+
+    if (remoteParticipantsCount == 0 && isCallConnected) {
+      _stopCallDurationTimer();
+      _autoLeaveIfAlone();
+    }
   }
 
   void _safeNavigateBack() {
@@ -385,15 +413,52 @@ class VideoCallController extends GetxController {
                       itemCount: chatController.allFriends.length,
                       itemBuilder: (context, index) {
                         final friend = chatController.allFriends[index];
+                        final resolved = Utility.resolveUserDisplay(
+                          userId: friend.userid,
+                          fullname: friend.fullname,
+                          nickname: friend.nickname,
+                          mobile: friend.mobile,
+                          profileimage: friend.profileimage,
+                        );
+                        final displayName = resolved['name'] ?? "User";
+                        final displayImage = resolved['image'] ?? "";
+                        final subtitleText = (friend.nickname?.trim().isNotEmpty == true && friend.nickname != displayName)
+                            ? friend.nickname!.trim()
+                            : (friend.mobile?.trim().isNotEmpty == true ? friend.mobile!.trim() : "");
 
                         return ListTile(
-                          leading: CircleAvatar(
-                            backgroundImage: NetworkImage(
-                              "${ApiWrapper.imageUrl}${friend.profileimage ?? ""}",
+                          leading: SizedBox(
+                            height: 44,
+                            width: 44,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(22),
+                              child: displayImage.isNotEmpty
+                                  ? CachedNetworkImage(
+                                      height: 44,
+                                      width: 44,
+                                      imageUrl: displayImage.startsWith("http")
+                                          ? displayImage
+                                          : ApiWrapper.imageUrl + displayImage,
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) => Image.asset(
+                                        AssetConstants.usera,
+                                        fit: BoxFit.cover,
+                                      ),
+                                      errorWidget: (context, url, error) => Image.asset(
+                                        AssetConstants.usera,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    )
+                                  : Image.asset(
+                                      AssetConstants.usera,
+                                      fit: BoxFit.cover,
+                                    ),
                             ),
                           ),
-                          title: Text(friend.fullname ?? "Unknown"),
-                          subtitle: Text(friend.nickname ?? ""),
+                          title: Text(displayName, style: Styles.black70014),
+                          subtitle: subtitleText.isNotEmpty
+                              ? Text(subtitleText, style: Styles.greyColor888840012)
+                              : null,
                           trailing: IconButton(
                             icon: const Icon(Icons.person_add),
                             onPressed: () {
@@ -1099,13 +1164,25 @@ class VideoCallController extends GetxController {
           SocketConnection.socket?.emit("call-rejected", payload);
         }
       } else {
-        endReasonText = "Call ended";
-        final payload = {
-          "callId": callId,
-          "fromUserId": currentUserId,
-          "reason": "ended",
-        };
-        SocketConnection.socket?.emit("call-ended", payload);
+        final isConference = (users.length > 2) || (isSelfCall == true && users.length >= 2);
+        if (isConference && remoteParticipantsCount >= 2) {
+          endReasonText = "Left conference";
+          final payload = {
+            "callId": callId,
+            "fromUserId": currentUserId,
+            "leftUserId": currentUserId,
+            "reason": "left",
+          };
+          SocketConnection.socket?.emit("user-left", payload);
+        } else {
+          endReasonText = "Call ended";
+          final payload = {
+            "callId": callId,
+            "fromUserId": currentUserId,
+            "reason": "ended",
+          };
+          SocketConnection.socket?.emit("call-ended", payload);
+        }
       }
     }
 

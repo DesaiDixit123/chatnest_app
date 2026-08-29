@@ -205,6 +205,18 @@ abstract class SocketConnection {
       }
     });
 
+    socket?.on("user-left", (data) async {
+      print("[ANTIGRAVITY_DEBUG] Top-level user-left socket event: $data");
+      final callId = (data is Map ? (data['callId'] ?? data['callid']) : "").toString();
+      final leftUserId = (data is Map ? (data['leftUserId'] ?? data['fromUserId']) : "").toString();
+      if (Get.isRegistered<AudioCallController>()) {
+        Get.find<AudioCallController>().handleParticipantLeft(leftUserId, callId: callId);
+      }
+      if (Get.isRegistered<VideoCallController>()) {
+        Get.find<VideoCallController>().handleParticipantLeft(leftUserId, callId: callId);
+      }
+    });
+
     socket?.on("stop-ringtone", (data) async {
       Utility.audioPlayer.stop();
     });
@@ -596,7 +608,22 @@ abstract class SocketConnection {
       } else if (data['event'] == "onuserleavethecall") {
         final eventCallId = (data['data']?['calldata']?['id'] ?? data['data']?['calldata']?['_id'] ?? data['data']?['callid'] ?? data['data']?['callId'] ?? "").toString();
         Utility.audioPlayer.stop();
-        final isGroup = _toBool(data['data']?['calldata']?['isgroupcall']) || _toBool(data['data']?['isgroupcall']);
+        final isGroup = _toBool(data['data']?['calldata']?['isgroupcall']) || _toBool(data['data']?['isgroupcall']) || ((data['data']?['calldata']?['members'] as List?)?.length ?? 0) > 2;
+
+        String leftUserId = "";
+        try {
+          final fromIdRaw = data['data']?['fromid'];
+          if (fromIdRaw is Map) {
+            leftUserId = (fromIdRaw['userid'] ?? fromIdRaw['_id'] ?? fromIdRaw['id'] ?? "").toString();
+          } else if (fromIdRaw is String && fromIdRaw.startsWith("{")) {
+            final parsed = jsonDecode(fromIdRaw);
+            leftUserId = (parsed['userid'] ?? parsed['_id'] ?? parsed['id'] ?? "").toString();
+          }
+        } catch (_) {}
+        if (leftUserId.isEmpty) {
+          leftUserId = (data['data']?['kickeduserid'] ?? data['data']?['fromUserId'] ?? "").toString();
+        }
+
         if (!isGroup) {
           if (Get.isRegistered<VideoCallController>()) {
             final ctrl = Get.find<VideoCallController>();
@@ -611,6 +638,13 @@ abstract class SocketConnection {
               CallingKitService.endAllCalls();
               ctrl.handleRemoteCallTermination(reason: "Call ended");
             }
+          }
+        } else {
+          if (Get.isRegistered<VideoCallController>()) {
+            Get.find<VideoCallController>().handleParticipantLeft(leftUserId, callId: eventCallId);
+          }
+          if (Get.isRegistered<AudioCallController>()) {
+            Get.find<AudioCallController>().handleParticipantLeft(leftUserId, callId: eventCallId);
           }
         }
       } else if (data['event'] == "oncallendedbyhost" ||
