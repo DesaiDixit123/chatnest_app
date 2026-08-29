@@ -209,83 +209,15 @@ class AudioCall extends StatelessWidget {
   }
 
   String callTiming() {
-    var connected = chatListsDocData.callid?.members
-        ?.any((element) => element.status == "connected");
-
-    var disConnected = chatListsDocData.callid?.members
-        ?.any((element) => element.status == "disconnected");
-
-    if ((connected ?? false) && (disConnected ?? false)) {
-      var startAt;
-      var endAt;
-
-      var startIndex = chatListsDocData.callid?.members
-          ?.indexWhere((element) => element.status == "connected");
-      if (startIndex?.isNegative == false) {
-        startAt = chatListsDocData.callid?.members?[startIndex ?? 0].startedAt;
-      }
-
-      var endIndex = chatListsDocData.callid?.members
-          ?.indexWhere((element) => element.status == "disconnected");
-      if (endIndex?.isNegative == false) {
-        endAt = chatListsDocData.callid?.members?[endIndex ?? 0].endedAt;
-      }
-
-      DateTime dateTime1 = DateTime.fromMillisecondsSinceEpoch(startAt);
-      DateTime dateTime2 = DateTime.fromMillisecondsSinceEpoch(endAt);
-
-      Duration diff = dateTime2.difference(dateTime1);
-      print(diff);
-      if (diff.inDays > 0) {
-        return "${diff.inDays} ${diff.inDays == 1 ? "day" : "days"} ago";
-      }
-      if (diff.inHours > 0) {
-        return "${diff.inHours} ${diff.inHours == 1 ? "hour" : "hours"} ago";
-      }
-      if (diff.inMinutes > 0) {
-        return "${diff.inMinutes} ${diff.inMinutes == 1 ? "minute" : "minutes"} ago";
-      }
-      if (diff.inSeconds > 0) {
-        return "${diff.inSeconds} ${diff.inSeconds == 1 ? "s" : "s"}";
-      }
-      return "No answer";
-    } else {
-      var isCheack = chatListsDocData.callid?.members?.any(
-          (element) => element.status == "ringing" && element.startedAt == 0);
-
-      if (isCheack ?? false) {
-        return "Missed call";
-      } else {
-        return "No answer";
-      }
-    }
+    return Utility.getCallTimingAndStatus(
+      callid: chatListsDocData.callid,
+      isSend: isSend,
+    );
   }
 
   String callTitle() {
-    final members = chatListsDocData.callid?.members;
-    final isConference = (chatListsDocData.callid?.isgroupcall ?? false) ||
-        ((members?.length ?? 0) > 2);
-    if (isConference) {
-      if (members != null && members.length > 2) {
-        final names = <String>[];
-        for (var m in members) {
-          final resolved = Utility.resolveUserDisplay(
-            userId: m.memberid?.id,
-            fullname: m.memberid?.fullname,
-            nickname: m.memberid?.nickname,
-            mobile: m.memberid?.mobile,
-          );
-          final n = resolved['name'] ?? "";
-          if (n.isNotEmpty && n != "User" && !names.contains(n)) {
-            names.add(n);
-          }
-        }
-        if (names.isNotEmpty) {
-          return "${'conference_call'.tr}: ${names.join(', ')}";
-        }
-      }
-      return "conference_call".tr;
-    }
-    return "audio_call".tr;
+    return Utility.getCallCardTitle(
+      callid: chatListsDocData.callid,
+    );
   }
 }

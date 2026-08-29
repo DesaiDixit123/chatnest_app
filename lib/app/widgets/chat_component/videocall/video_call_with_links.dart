@@ -536,8 +536,8 @@ class ReplayVideoCallWithLinks extends StatelessWidget {
   }
 
   String callTitle() {
-    final isConference = (chatListsDocData.callid?.isgroupcall ?? false) ||
-        ((chatListsDocData.callid?.members?.length ?? 0) > 2);
-    return isConference ? "conference_call".tr : "video_call".tr;
+    return Utility.getCallCardTitle(
+      callid: chatListsDocData.callid,
+    );
   }
 }

@@ -143,6 +143,132 @@ abstract class Utility {
     return globalUserProfiles[cleanId];
   }
 
+  static String formatDuration(int totalSeconds) {
+    if (totalSeconds < 0) totalSeconds = 0;
+    final hours = totalSeconds ~/ 3600;
+    final minutes = (totalSeconds % 3600) ~/ 60;
+    final seconds = totalSeconds % 60;
+    if (hours > 0) {
+      return "$hours:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}";
+    }
+    return "${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}";
+  }
+
+  static String getCallTimingAndStatus({
+    required dynamic callid,
+    required bool isSend,
+    String? currentUserId,
+  }) {
+    if (callid == null) return "No answer";
+
+    final myId = currentUserId ?? (Get.isRegistered<Repository>() ? Get.find<Repository>().getStringValue(LocalKeys.userIds) : "");
+    final isOutgoing = isSend ||
+        (callid.initiatedby?.id != null && callid.initiatedby?.id == myId) ||
+        (callid.from?.id != null && callid.from?.id == myId);
+    final members = (callid.members is List) ? callid.members : [];
+
+    // 1. Check if call is CURRENTLY ACTIVE in CallManagerService
+    if (Get.isRegistered<CallManagerService>()) {
+      final callManager = Get.find<CallManagerService>();
+      if (callManager.isCallIdActive(callid.id)) {
+        if (callManager.connectedAt.value != null) {
+          final diffSec = DateTime.now().difference(callManager.connectedAt.value!).inSeconds;
+          return "Ongoing (${formatDuration(diffSec)})";
+        }
+        return "Ongoing";
+      }
+    }
+
+    // 2. Check if call was ANSWERED/CONNECTED
+    int minStartedAt = 0;
+    int maxEndedAt = 0;
+    bool wasConnected = false;
+
+    for (var m in members) {
+      final s = (m.startedAt is num) ? (m.startedAt as num).toInt() : 0;
+      final e = (m.endedAt is num) ? (m.endedAt as num).toInt() : 0;
+      if (s > 0) {
+        wasConnected = true;
+        if (minStartedAt == 0 || s < minStartedAt) {
+          minStartedAt = s;
+        }
+      }
+      if (e > 0) {
+        if (maxEndedAt == 0 || e > maxEndedAt) {
+          maxEndedAt = e;
+        }
+      }
+    }
+
+    final callStatus = (callid.status ?? "").toString().toLowerCase().trim();
+    if (callStatus == "connected" || callStatus == "active") {
+      if (wasConnected && minStartedAt > 0) {
+        final diffSec = ((DateTime.now().millisecondsSinceEpoch - minStartedAt) / 1000).floor();
+        return "Ongoing (${formatDuration(diffSec)})";
+      }
+      return "Ongoing";
+    }
+
+    if (wasConnected && minStartedAt > 0) {
+      if (maxEndedAt > minStartedAt) {
+        final durationSec = ((maxEndedAt - minStartedAt) / 1000).round();
+        return formatDuration(durationSec > 0 ? durationSec : 1);
+      } else if (callid.updatedAt != null && callid.updatedAt is DateTime) {
+        final durationSec = ((callid.updatedAt.millisecondsSinceEpoch - minStartedAt) / 1000).round();
+        if (durationSec > 0) {
+          return formatDuration(durationSec);
+        }
+      }
+      return "00:01";
+    }
+
+    // 3. Not answered -> determine exact outcome
+    if (callStatus == "rejected" || members.any((m) => m.status == "rejected")) {
+      return "Declined";
+    }
+
+    if (callStatus == "cancelled") {
+      return isOutgoing ? "Cancelled" : "Missed call";
+    }
+
+    if (!isOutgoing) {
+      return "Missed call";
+    }
+
+    return "No answer";
+  }
+
+  static String getCallCardTitle({
+    required dynamic callid,
+  }) {
+    if (callid == null) return "Audio Call";
+    final members = (callid.members is List) ? callid.members : [];
+    final isConference = (callid.isgroupcall ?? false) || (members.length > 2);
+    final isVideo = callid.isvideocall ?? false;
+
+    if (isConference) {
+      final names = <String>[];
+      for (var m in members) {
+        final resolved = Utility.resolveUserDisplay(
+          userId: m.memberid?.id,
+          fullname: m.memberid?.fullname,
+          nickname: m.memberid?.nickname,
+          mobile: m.memberid?.mobile,
+        );
+        final n = resolved['name'] ?? "";
+        if (n.isNotEmpty && n != "User" && !names.contains(n)) {
+          names.add(n);
+        }
+      }
+      if (names.isNotEmpty) {
+        return "${'conference_call'.tr}: ${names.join(', ')}";
+      }
+      return "conference_call".tr;
+    }
+
+    return isVideo ? "video_call".tr : "audio_call".tr;
+  }
+
   static Map<String, String> resolveUserDisplay({
     String? userId,
     dynamic fullname,
