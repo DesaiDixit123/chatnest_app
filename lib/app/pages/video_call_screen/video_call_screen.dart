@@ -110,19 +110,23 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
       child: GetBuilder<VideoCallController>(initState: (state) async {
       var controller = Get.find<VideoCallController>();
       Future.delayed(Duration.zero, () async {
-        if (await Utility.cameraPermissionCheack(context) &&
-            // ignore: use_build_context_synchronously
-            await Utility.microphonePermissionCheack(context)) {
-          controller.timer?.cancel();
-          if (Get.arguments[3] ?? false) {
-            controller.counter = 30;
-            controller.startTimer();
+        if (!controller.isInitialized) {
+          if (await Utility.cameraPermissionCheack(context) &&
+              // ignore: use_build_context_synchronously
+              await Utility.microphonePermissionCheack(context)) {
+            controller.timer?.cancel();
+            if (Get.arguments[3] ?? false) {
+              controller.counter = 30;
+              controller.startTimer();
+            }
+            controller.token = Get.arguments[1];
+            controller.channelName = Get.arguments[0];
+            controller.isMicEnabled = true;
+            controller.isVideoEnabled = true;
+            await controller.initialize();
           }
-          controller.token = Get.arguments[1];
-          controller.channelName = Get.arguments[0];
-          controller.isMicEnabled = true;
-          controller.isVideoEnabled = true;
-          controller.initialize();
+        } else {
+          await controller.initialize();
         }
       });
     }, builder: (controller) {
@@ -339,6 +343,28 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                           Positioned(
                             top: 14,
                             left: 14,
+                            child: GestureDetector(
+                              onTap: () {
+                                Get.find<CallManagerService>().minimizeCall();
+                                Get.back();
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: const BoxDecoration(
+                                  color: Colors.black45,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.arrow_back_ios_new_rounded,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            top: 14,
+                            left: 56,
                             child: Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 10,

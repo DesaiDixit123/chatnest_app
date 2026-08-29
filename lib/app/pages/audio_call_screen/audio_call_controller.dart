@@ -81,6 +81,7 @@ class AudioCallController extends GetxController {
   Timer? callDurationTimer;
   bool isCall = false;
   bool isCallConnected = false;
+  bool isInitialized = false;
   bool _isAutoEndingCall = false;
   bool _isEnding = false;
   String? endReasonText;
@@ -88,6 +89,21 @@ class AudioCallController extends GetxController {
   Duration callDuration = Duration.zero;
 
   String callId = "";
+
+  void _updateCallManagerParticipantNames() {
+    try {
+      final names = <String>[];
+      for (var u in users) {
+        final n = (u.name ?? "").trim();
+        if (n.isNotEmpty && n != "User" && !names.contains(n)) {
+          names.add(n);
+        }
+      }
+      if (names.isNotEmpty && Get.isRegistered<CallManagerService>()) {
+        Get.find<CallManagerService>().updateParticipants(names);
+      }
+    } catch (_) {}
+  }
 
   void _registerSocketListeners() {
     if (callId.isNotEmpty) {
@@ -507,6 +523,7 @@ class AudioCallController extends GetxController {
         }
       }
     }
+    _updateCallManagerParticipantNames();
   }
 
   String _displayFirstName(String? name) {
@@ -626,27 +643,31 @@ class AudioCallController extends GetxController {
     _addAgoraEventHandlers();
 
     final callManager = Get.find<CallManagerService>();
-    bool wasAlreadyActive = callManager.isCallActive && callManager.activeChannelName.value == channelName;
+    bool wasAlreadyActive = callManager.isCallActive &&
+        callManager.activeCallId.value == callId &&
+        isInitialized;
 
-    if (!wasAlreadyActive) {
-      await agoraEngine?.joinChannel(
-        token: token,
-        channelId: channelName,
-        uid: _generateNumericUid(Utility.profileData?.id ?? "0"),
-        options: ChannelMediaOptions(
-          clientRoleType: ClientRoleType.clientRoleBroadcaster,
-          channelProfile: ChannelProfileType.channelProfileCommunication,
-          publishMicrophoneTrack: isMicEnabled,
-          publishCameraTrack: isVideoEnabled,
-        ),
-      );
-    } else {
-      print("[ANTIGRAVITY_DEBUG] Re-attaching to existing call session");
-      // Even if already active, we want to ensure the currentUid is set for the new screen
-      currentUid = _generateNumericUid(Utility.profileData?.id ?? "0");
-      // If we are re-attaching, we might already have users.
-      // CallManager doesn't store users list, but the Agora event handlers will re-populate it as data flows.
+    if (wasAlreadyActive) {
+      print("[ANTIGRAVITY_DEBUG] Re-attaching to existing active audio call session");
+      _syncUsersWithCallMembers();
+      _updateCallManagerParticipantNames();
+      update();
+      return;
     }
+
+    isInitialized = true;
+
+    await agoraEngine?.joinChannel(
+      token: token,
+      channelId: channelName,
+      uid: _generateNumericUid(Utility.profileData?.id ?? "0"),
+      options: ChannelMediaOptions(
+        clientRoleType: ClientRoleType.clientRoleBroadcaster,
+        channelProfile: ChannelProfileType.channelProfileCommunication,
+        publishMicrophoneTrack: isMicEnabled,
+        publishCameraTrack: isVideoEnabled,
+      ),
+    );
 
     // Register with CallManagerService
     callManager.registerCall(
@@ -659,7 +680,7 @@ class AudioCallController extends GetxController {
       userImage: userImage ?? "",
     );
 
-    // If caller, reset connectedAt so Ringing... is shown
+    // If caller, reset connectedAt so Ringing... is shown only on initial dial
     if (isSelfCall == true) {
       callManager.connectedAt.value = null;
       isCallConnected = false;
@@ -667,6 +688,7 @@ class AudioCallController extends GetxController {
     } else if (callManager.connectedAt.value != null) {
       _startCallDurationTimer();
     }
+    _updateCallManagerParticipantNames();
   }
 
   int _generateNumericUid(String str) {

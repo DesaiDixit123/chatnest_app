@@ -6,20 +6,24 @@ import 'package:get/get.dart';
 class AudioCallBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<AudioCallController>(
-      () => AudioCallController(
-        Get.put(
-          AudioCallPresenter(
-            Get.put(
-              AudioCallUsecases(
-                Get.find(),
+    if (!Get.isRegistered<AudioCallController>()) {
+      Get.put<AudioCallController>(
+        AudioCallController(
+          Get.put(
+            AudioCallPresenter(
+              Get.put(
+                AudioCallUsecases(
+                  Get.find(),
+                ),
+                permanent: true,
               ),
-              permanent: true,
             ),
+            permanent: true,
           ),
+          api: Get.find<ApiWrapper>(),
         ),
-        api: Get.find<ApiWrapper>(), // ✅ REQUIRED
-      ),
-    );
+        permanent: true,
+      );
+    }
   }
 }

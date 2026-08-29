@@ -318,68 +318,45 @@ class _AudioCallScreenState extends State<AudioCallScreen> {
       },
       child: GetBuilder<AudioCallController>(initState: (state) async {
       var controller = Get.find<AudioCallController>();
-      if (await Utility.microphonePermissionCheack(context)) {
-        controller.timer?.cancel();
-        if (Get.arguments[3] ?? false) {
-          controller.counter = 30;
-          controller.startTimer();
+      if (!controller.isInitialized) {
+        if (await Utility.microphonePermissionCheack(context)) {
+          controller.timer?.cancel();
+          if (Get.arguments[3] ?? false) {
+            controller.counter = 30;
+            controller.startTimer();
+          }
+          controller.token = Get.arguments[1];
+          controller.channelName = Get.arguments[0];
+          controller.isMicEnabled = true;
+          controller.isVideoEnabled = true;
+          await controller.initialize();
         }
-        controller.token = Get.arguments[1];
-        controller.channelName = Get.arguments[0];
-        controller.isMicEnabled = true;
-        controller.isVideoEnabled = true;
-        controller.initialize();
+      } else {
+        await controller.initialize();
       }
     }, builder: (controller) {
       return Scaffold(
         backgroundColor: Colors.white,
-        // appBar: AppBar(
-        //   automaticallyImplyLeading: false,
-        //   backgroundColor: Colors.black,
-        //   surfaceTintColor: Colors.black,
-        //   centerTitle: false,
-        //   title: Row(
-        //     children: [
-        //       const Icon(
-        //         Icons.meeting_room_rounded,
-        //         color: Colors.white54,
-        //       ),
-        //       const SizedBox(width: 6.0),
-        //       const Text(
-        //         'Channel name: ',
-        //         style: TextStyle(
-        //           color: Colors.white54,
-        //           fontSize: 16.0,
-        //         ),
-        //       ),
-        //     ],
-        //   ),
-        //   actions: [
-        //     Padding(
-        //       padding: const EdgeInsets.only(right: 8.0),
-        //       child: Row(
-        //         mainAxisSize: MainAxisSize.min,
-        //         children: [
-        //           const Icon(
-        //             Icons.people_alt_rounded,
-        //             color: Colors.white54,
-        //           ),
-        //           const SizedBox(width: 6.0),
-        //           Text(
-        //             controller.users.length.toString(),
-        //             style: const TextStyle(
-        //               color: Colors.white54,
-        //               fontSize: 16.0,
-        //             ),
-        //           ),
-        //         ],
-        //       ),
-        //     )
-        //   ],
-        // ),
         body: SafeArea(
           child: Column(
             children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 8.0, top: 4.0, bottom: 2.0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      color: Colors.black87,
+                      size: 22,
+                    ),
+                    onPressed: () {
+                      Get.find<CallManagerService>().minimizeCall();
+                      Get.back();
+                    },
+                  ),
+                ),
+              ),
               if (controller.pendingInvitees.isNotEmpty)
                 Container(
                   width: double.infinity,

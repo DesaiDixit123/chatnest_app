@@ -123,6 +123,7 @@ class FloatingCallWidget extends StatelessWidget {
   }
 
   String _getCallTitle(CallManagerService callManager) {
+    final names = callManager.activeParticipantNames;
     final name = callManager.activeUserName.value;
     final type = callManager.activeCallType.value;
     
@@ -130,6 +131,9 @@ class FloatingCallWidget extends StatelessWidget {
     if (type == CallType.meeting) typeStr = "Meeting";
     if (type == CallType.video) typeStr = "Video Call";
 
+    if (names.length > 1) {
+      return "Conference: ${names.join(', ')}";
+    }
     if (name.isNotEmpty && name != "User") {
       return "$typeStr with $name";
     }

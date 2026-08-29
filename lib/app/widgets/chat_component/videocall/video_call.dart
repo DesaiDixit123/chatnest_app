@@ -30,7 +30,16 @@ class VideoCall extends StatelessWidget {
         ),
         Padding(
           padding: Dimens.edgeInsetsBottom10,
-          child: Column(
+          child: GestureDetector(
+            onTap: () {
+              if (Get.isRegistered<CallManagerService>()) {
+                final callManager = Get.find<CallManagerService>();
+                if (callManager.isCallIdActive(chatListsDocData.callid?.id)) {
+                  callManager.returnToCall();
+                }
+              }
+            },
+            child: Column(
             crossAxisAlignment:
                 isSend ? CrossAxisAlignment.end : CrossAxisAlignment.start,
             mainAxisAlignment:
@@ -191,7 +200,7 @@ class VideoCall extends StatelessWidget {
                   ),
                 ),
               ),
-            ],
+            ),
           ),
         ),
       ],
@@ -252,8 +261,30 @@ class VideoCall extends StatelessWidget {
   }
 
   String callTitle() {
+    final members = chatListsDocData.callid?.members;
     final isConference = (chatListsDocData.callid?.isgroupcall ?? false) ||
-        ((chatListsDocData.callid?.members?.length ?? 0) > 2);
-    return isConference ? "conference_call".tr : "video_call".tr;
+        ((members?.length ?? 0) > 2);
+    if (isConference) {
+      if (members != null && members.length > 2) {
+        final names = <String>[];
+        for (var m in members) {
+          final resolved = Utility.resolveUserDisplay(
+            userId: m.memberid?.id ?? m.memberid?.userid,
+            fullname: m.memberid?.fullname,
+            nickname: m.memberid?.nickname,
+            mobile: m.memberid?.mobile,
+          );
+          final n = resolved['name'] ?? "";
+          if (n.isNotEmpty && n != "User" && !names.contains(n)) {
+            names.add(n);
+          }
+        }
+        if (names.isNotEmpty) {
+          return "${'conference_call'.tr}: ${names.join(', ')}";
+        }
+      }
+      return "conference_call".tr;
+    }
+    return "video_call".tr;
   }
 }

@@ -69,6 +69,7 @@ class VideoCallController extends GetxController {
   Timer? callDurationTimer;
   bool isCall = false;
   bool isCallConnected = false;
+  bool isInitialized = false;
   bool _isAutoEndingCall = false;
   bool _isEnding = false;
   String? endReasonText;
@@ -76,6 +77,21 @@ class VideoCallController extends GetxController {
 
   String? userImage;
   bool? isSelfCall;
+
+  void _updateCallManagerParticipantNames() {
+    try {
+      final names = <String>[];
+      for (var u in users) {
+        final n = (u.name ?? "").trim();
+        if (n.isNotEmpty && n != "User" && !names.contains(n)) {
+          names.add(n);
+        }
+      }
+      if (names.isNotEmpty && Get.isRegistered<CallManagerService>()) {
+        Get.find<CallManagerService>().updateParticipants(names);
+      }
+    } catch (_) {}
+  }
 
   void _registerSocketListeners() {
     if (callId.isNotEmpty) {
@@ -521,33 +537,37 @@ class VideoCallController extends GetxController {
 
     final callManager = Get.find<CallManagerService>();
     bool wasAlreadyActive = callManager.isCallActive &&
-        callManager.activeChannelName.value == channelName;
+        callManager.activeCallId.value == callId &&
+        isInitialized;
 
-    if (!wasAlreadyActive) {
-      // Explicitly start preview for local video
-      print("[ANTIGRAVITY_DEBUG] Starting preview...");
-      await agoraEngine?.startPreview();
-
-      print("[ANTIGRAVITY_DEBUG] Joining Channel...");
-      await agoraEngine?.joinChannel(
-        token: token,
-        channelId: channelName,
-        uid: _generateNumericUid(Utility.profileData?.id ?? "0"),
-        options: const ChannelMediaOptions(
-          clientRoleType: ClientRoleType.clientRoleBroadcaster,
-          channelProfile: ChannelProfileType.channelProfileCommunication,
-          publishMicrophoneTrack: true,
-          publishCameraTrack: true,
-          autoSubscribeAudio: true,
-          autoSubscribeVideo: true,
-        ),
-      );
-    } else {
+    if (wasAlreadyActive) {
       print("[ANTIGRAVITY_DEBUG] Re-attaching to existing video call session");
-      currentUid = _generateNumericUid(Utility.profileData?.id ?? "0");
-      // Preview might already be running, but we ensure it's on for the new screen
-      await agoraEngine?.startPreview();
+      _syncUsersWithCallMembers();
+      _updateCallManagerParticipantNames();
+      update();
+      return;
     }
+
+    isInitialized = true;
+
+    // Explicitly start preview for local video
+    print("[ANTIGRAVITY_DEBUG] Starting preview...");
+    await agoraEngine?.startPreview();
+
+    print("[ANTIGRAVITY_DEBUG] Joining Channel...");
+    await agoraEngine?.joinChannel(
+      token: token,
+      channelId: channelName,
+      uid: _generateNumericUid(Utility.profileData?.id ?? "0"),
+      options: const ChannelMediaOptions(
+        clientRoleType: ClientRoleType.clientRoleBroadcaster,
+        channelProfile: ChannelProfileType.channelProfileCommunication,
+        publishMicrophoneTrack: true,
+        publishCameraTrack: true,
+        autoSubscribeAudio: true,
+        autoSubscribeVideo: true,
+      ),
+    );
 
     // Register with CallManagerService
     String fallbackName = "User";
@@ -555,7 +575,6 @@ class VideoCallController extends GetxController {
       fallbackName = ((Get.arguments as List)[5] ?? "User").toString();
     }
 
-    Get.find<CallManagerService>();
     callManager.registerCall(
       type: CallType.video,
       channelName: channelName,
@@ -566,7 +585,7 @@ class VideoCallController extends GetxController {
       userImage: userImage ?? "",
     );
 
-    // If caller, reset connectedAt so Ringing... is shown
+    // If caller, reset connectedAt so Ringing... is shown only on initial dial
     if (isSelfCall == true) {
       callManager.connectedAt.value = null;
       isCallConnected = false;
@@ -574,6 +593,7 @@ class VideoCallController extends GetxController {
     } else if (callManager.connectedAt.value != null) {
       _startCallDurationTimer();
     }
+    _updateCallManagerParticipantNames();
   }
 
   void onGlobalProfileFetched(String userId, Map<String, String> profile) {
@@ -743,6 +763,7 @@ class VideoCallController extends GetxController {
         }
       }
     }
+    _updateCallManagerParticipantNames();
   }
 
   Future<void> _initAgoraRtcEngine() async {
