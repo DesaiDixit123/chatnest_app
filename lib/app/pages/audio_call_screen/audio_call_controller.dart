@@ -514,16 +514,15 @@ class AudioCallController extends GetxController {
 
       final status = (m is Map ? (m["status"] ?? "") : "").toString().toLowerCase();
       if (status == "ringing") {
-        if (!pendingInvitees.any((element) => element.userId == userId)) {
-          pendingInvitees.add(
-            PendingInvitee(
-              userId: userId,
-              name: memberName,
-              status: "Ringing",
-              uid: uid,
-            ),
-          );
-        }
+        pendingInvitees.removeWhere((element) => element.userId == userId);
+        pendingInvitees.add(
+          PendingInvitee(
+            userId: userId,
+            name: memberName,
+            status: "Ringing",
+            uid: uid,
+          ),
+        );
       } else {
         pendingInvitees.removeWhere((element) => element.userId == userId);
       }
@@ -1117,10 +1116,12 @@ class AudioCallController extends GetxController {
   }
 
   final ApiWrapper api;
-  bool _isAddingParticipant = false;
+  bool isAddingParticipant = false;
+
   Future<void> addParticipant(String userId, String displayName) async {
-    if (_isAddingParticipant) return;
-    _isAddingParticipant = true;
+    if (isAddingParticipant) return;
+    isAddingParticipant = true;
+
     try {
       final body = {
         "callid": callId,
@@ -1152,7 +1153,7 @@ class AudioCallController extends GetxController {
         );
       }
     } finally {
-      _isAddingParticipant = false;
+      isAddingParticipant = false;
     }
   }
 

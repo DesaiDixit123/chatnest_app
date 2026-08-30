@@ -508,14 +508,17 @@ class VideoCallController extends GetxController {
     );
   }
 
-  bool _isAddingParticipant = false;
+  bool isAddingParticipant = false;
+
   Future<void> addParticipants(List<String> userIds) async {
-    if (_isAddingParticipant) return;
     if (callId.isEmpty) {
       debugPrint("❌ callId is empty, cannot add participants");
       return;
     }
-    _isAddingParticipant = true;
+
+    if (isAddingParticipant) return;
+    isAddingParticipant = true;
+
     try {
       final body = {
         "callid": callId,
@@ -545,7 +548,7 @@ class VideoCallController extends GetxController {
         );
       }
     } finally {
-      _isAddingParticipant = false;
+      isAddingParticipant = false;
     }
   }
 

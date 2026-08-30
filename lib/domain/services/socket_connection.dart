@@ -810,9 +810,10 @@ abstract class SocketConnection {
       } else if (data['event'] == "onincomingindividualcall") {
         print("[ANTIGRAVITY_DEBUG] Incoming Call Data: $data");
 
-        var callDataRoot = data['data'];
+        var callDataRoot = data['data'] ?? {};
         var callDataNested = callDataRoot['calldata'] ?? {};
-        var callAgoraMeta = callDataNested['agorameta'] ?? {};
+        var callAgoraMeta = (callDataNested['agorameta'] is Map ? callDataNested['agorameta'] : null) ??
+            (callDataRoot['agorameta'] is Map ? callDataRoot['agorameta'] : null) ?? {};
         final bool isVideoCall = _toBool(callDataRoot['isvideocall']) ||
             _toBool(callDataNested['isvideocall']);
         final bool isAudioCall = _toBool(callDataRoot['isaudiocall']) ||
@@ -823,21 +824,20 @@ abstract class SocketConnection {
         Get.forceAppUpdate();
         FirebaseApi.currentUuid = const Uuid().v4();
 
-        // Extract credentials with fallback to nested calldata
-        String agorachannelName = callDataRoot['agorachannelName'] ??
-            callDataNested['agorachannelName'] ??
-            callAgoraMeta['channelName'] ??
-            callDataNested['_id'] ??
-            "";
-        String agoratoken = callDataRoot['agoratoken'] ??
-            callDataNested['agoratoken'] ??
-            callAgoraMeta['token'] ??
-            "";
+        // Standardize canonical callId and channel name
         String callid = (callDataRoot['callid'] ??
             callDataNested['callid'] ??
             callDataNested['_id'] ??
-            agorachannelName ??
-            "").toString();
+            callDataRoot['_id'] ??
+            "").toString().trim();
+        String agorachannelName = (callDataRoot['agorachannelName'] ??
+            callDataNested['agorachannelName'] ??
+            callAgoraMeta['channelName'] ??
+            callid).toString().trim();
+        String agoratoken = (callDataRoot['agoratoken'] ??
+            callDataNested['agoratoken'] ??
+            callAgoraMeta['token'] ??
+            "").toString().trim();
         String fromid = (callDataRoot['fromid'] ??
             callDataNested['from'] ??
             callDataRoot['from'] ??
