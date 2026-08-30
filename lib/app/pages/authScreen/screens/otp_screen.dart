@@ -1,4 +1,5 @@
 import 'package:chatnest/app/app.dart';
+import 'package:chatnest/domain/domain.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
