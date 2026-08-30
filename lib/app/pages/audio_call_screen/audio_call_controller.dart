@@ -139,6 +139,16 @@ class AudioCallController extends GetxController {
     final id = (data is Map ? (data['callId'] ?? data['callid']) : data).toString();
     if (id.isNotEmpty && id != callId) return;
     print("[ANTIGRAVITY_DEBUG] AudioCallController: Remote call rejected received");
+    final fromUserId = (data is Map ? (data['fromUserId'] ?? data['fromid'] ?? data['leftUserId']) : "").toString();
+    final currentUserId = Get.find<Repository>().getStringValue(LocalKeys.userIds);
+
+    if (users.length > 2 || remoteParticipantsCount > 1 || callMembersMap.length > 1) {
+      print("[ANTIGRAVITY_DEBUG] Multi-party conference active: ignoring call-rejected and handling participant left: $fromUserId");
+      if (fromUserId.isNotEmpty && fromUserId != currentUserId) {
+        handleParticipantLeft(fromUserId, callId: id);
+      }
+      return;
+    }
     handleRemoteCallTermination(reason: "Call declined");
   }
 
@@ -146,6 +156,16 @@ class AudioCallController extends GetxController {
     final id = (data is Map ? (data['callId'] ?? data['callid']) : data).toString();
     if (id.isNotEmpty && id != callId) return;
     print("[ANTIGRAVITY_DEBUG] AudioCallController: Remote call cancelled received");
+    final fromUserId = (data is Map ? (data['fromUserId'] ?? data['fromid'] ?? data['leftUserId']) : "").toString();
+    final currentUserId = Get.find<Repository>().getStringValue(LocalKeys.userIds);
+
+    if (users.length > 2 || remoteParticipantsCount > 1 || callMembersMap.length > 1) {
+      print("[ANTIGRAVITY_DEBUG] Multi-party conference active: ignoring call-cancelled and handling participant left: $fromUserId");
+      if (fromUserId.isNotEmpty && fromUserId != currentUserId) {
+        handleParticipantLeft(fromUserId, callId: id);
+      }
+      return;
+    }
     handleRemoteCallTermination(reason: "Call cancelled");
   }
 
@@ -965,6 +985,8 @@ class AudioCallController extends GetxController {
     if (_isEnding) return;
     _isEnding = true;
 
+    final wasConnected = isCallConnected || remoteParticipantsCount > 0 || users.where((u) => u.uid != currentUid).isNotEmpty;
+
     Utility.audioPlayer.stop();
     timer?.cancel();
     _stopCallDurationTimer();
@@ -973,7 +995,7 @@ class AudioCallController extends GetxController {
     final isHost = isSelfCall ?? false;
 
     if (callId.isNotEmpty) {
-      if (!isCallConnected) {
+      if (!wasConnected) {
         if (isHost) {
           endReasonText = "Call cancelled";
           final payload = {

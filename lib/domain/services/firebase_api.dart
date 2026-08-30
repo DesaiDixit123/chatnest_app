@@ -918,16 +918,48 @@ class FirebaseApi {
           type == "oncallrejected" ||
           type == "oncallended") {
         print("📩 Call ended/rejected/cancelled FCM received: $type");
-        Utility.audioPlayer.stop();
-        await CallingKitService.endAllCalls();
+        final callId = (data['callid'] ?? data['callId'] ?? "").toString();
+        String fromUserId = "";
+        try {
+          final fromIdRaw = data['fromid'];
+          if (fromIdRaw is Map) {
+            fromUserId = (fromIdRaw['userid'] ?? fromIdRaw['_id'] ?? fromIdRaw['id'] ?? "").toString();
+          } else if (fromIdRaw is String && fromIdRaw.startsWith("{")) {
+            final parsed = jsonDecode(fromIdRaw);
+            fromUserId = (parsed['userid'] ?? parsed['_id'] ?? parsed['id'] ?? "").toString();
+          }
+        } catch (_) {}
+
         final String reason = type == "oncallrejected"
             ? "Call declined"
             : (type == "oncallcancelled" ? "Call cancelled" : "Call ended");
         if (Get.isRegistered<VideoCallController>()) {
-          Get.find<VideoCallController>().handleRemoteCallTermination(reason: reason);
+          final ctrl = Get.find<VideoCallController>();
+          if (callId.isEmpty || ctrl.callId == callId) {
+            if (ctrl.users.length > 2 || ctrl.remoteParticipantsCount > 1 || ctrl.callMembersMap.length > 1) {
+              if (fromUserId.isNotEmpty) {
+                ctrl.handleParticipantLeft(fromUserId, callId: callId);
+              }
+            } else {
+              Utility.audioPlayer.stop();
+              await CallingKitService.endAllCalls();
+              ctrl.handleRemoteCallTermination(reason: reason);
+            }
+          }
         }
         if (Get.isRegistered<AudioCallController>()) {
-          Get.find<AudioCallController>().handleRemoteCallTermination(reason: reason);
+          final ctrl = Get.find<AudioCallController>();
+          if (callId.isEmpty || ctrl.callId == callId) {
+            if (ctrl.users.length > 2 || ctrl.remoteParticipantsCount > 1 || ctrl.callMembersMap.length > 1) {
+              if (fromUserId.isNotEmpty) {
+                ctrl.handleParticipantLeft(fromUserId, callId: callId);
+              }
+            } else {
+              Utility.audioPlayer.stop();
+              await CallingKitService.endAllCalls();
+              ctrl.handleRemoteCallTermination(reason: reason);
+            }
+          }
         }
       } else if (type == "onuserleavethecall") {
         final callId = (data['callid'] ?? data['callId'] ?? "").toString();

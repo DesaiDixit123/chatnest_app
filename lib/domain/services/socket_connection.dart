@@ -146,20 +146,37 @@ abstract class SocketConnection {
     socket?.on("call-rejected", (data) async {
       print("[ANTIGRAVITY_DEBUG] Top-level call-rejected socket event: $data");
       final id = (data is Map ? (data['callId'] ?? data['callid'] ?? data['data']?['callid']) : data).toString();
+      final fromUserId = (data is Map ? (data['fromUserId'] ?? data['fromid'] ?? data['leftUserId']) : "").toString();
+      final currentUserId = Get.isRegistered<Repository>() ? Get.find<Repository>().getStringValue(LocalKeys.userIds) : "";
+
       if (Get.isRegistered<AudioCallController>()) {
         final ctrl = Get.find<AudioCallController>();
         if (id.isEmpty || ctrl.callId == id) {
-          Utility.audioPlayer.stop();
-          await CallingKitService.endAllCalls();
-          ctrl.handleRemoteCallTermination(reason: "Call declined");
+          if (ctrl.users.length > 2 || ctrl.remoteParticipantsCount > 1 || ctrl.callMembersMap.length > 1) {
+            print("[ANTIGRAVITY_DEBUG] Multi-party conference active: ignoring top-level call-rejected and handling participant left: $fromUserId");
+            if (fromUserId.isNotEmpty && fromUserId != currentUserId) {
+              ctrl.handleParticipantLeft(fromUserId, callId: id);
+            }
+          } else {
+            Utility.audioPlayer.stop();
+            await CallingKitService.endAllCalls();
+            ctrl.handleRemoteCallTermination(reason: "Call declined");
+          }
         }
       }
       if (Get.isRegistered<VideoCallController>()) {
         final ctrl = Get.find<VideoCallController>();
         if (id.isEmpty || ctrl.callId == id) {
-          Utility.audioPlayer.stop();
-          await CallingKitService.endAllCalls();
-          ctrl.handleRemoteCallTermination(reason: "Call declined");
+          if (ctrl.users.length > 2 || ctrl.remoteParticipantsCount > 1 || ctrl.callMembersMap.length > 1) {
+            print("[ANTIGRAVITY_DEBUG] Multi-party conference active: ignoring top-level call-rejected and handling participant left: $fromUserId");
+            if (fromUserId.isNotEmpty && fromUserId != currentUserId) {
+              ctrl.handleParticipantLeft(fromUserId, callId: id);
+            }
+          } else {
+            Utility.audioPlayer.stop();
+            await CallingKitService.endAllCalls();
+            ctrl.handleRemoteCallTermination(reason: "Call declined");
+          }
         }
       }
     });
@@ -167,20 +184,37 @@ abstract class SocketConnection {
     socket?.on("call-cancelled", (data) async {
       print("[ANTIGRAVITY_DEBUG] Top-level call-cancelled socket event: $data");
       final id = (data is Map ? (data['callId'] ?? data['callid'] ?? data['data']?['callid']) : data).toString();
+      final fromUserId = (data is Map ? (data['fromUserId'] ?? data['fromid'] ?? data['leftUserId']) : "").toString();
+      final currentUserId = Get.isRegistered<Repository>() ? Get.find<Repository>().getStringValue(LocalKeys.userIds) : "";
+
       if (Get.isRegistered<AudioCallController>()) {
         final ctrl = Get.find<AudioCallController>();
         if (id.isEmpty || ctrl.callId == id) {
-          Utility.audioPlayer.stop();
-          await CallingKitService.endAllCalls();
-          ctrl.handleRemoteCallTermination(reason: "Call cancelled");
+          if (ctrl.users.length > 2 || ctrl.remoteParticipantsCount > 1 || ctrl.callMembersMap.length > 1) {
+            print("[ANTIGRAVITY_DEBUG] Multi-party conference active: ignoring top-level call-cancelled and handling participant left: $fromUserId");
+            if (fromUserId.isNotEmpty && fromUserId != currentUserId) {
+              ctrl.handleParticipantLeft(fromUserId, callId: id);
+            }
+          } else {
+            Utility.audioPlayer.stop();
+            await CallingKitService.endAllCalls();
+            ctrl.handleRemoteCallTermination(reason: "Call cancelled");
+          }
         }
       }
       if (Get.isRegistered<VideoCallController>()) {
         final ctrl = Get.find<VideoCallController>();
         if (id.isEmpty || ctrl.callId == id) {
-          Utility.audioPlayer.stop();
-          await CallingKitService.endAllCalls();
-          ctrl.handleRemoteCallTermination(reason: "Call cancelled");
+          if (ctrl.users.length > 2 || ctrl.remoteParticipantsCount > 1 || ctrl.callMembersMap.length > 1) {
+            print("[ANTIGRAVITY_DEBUG] Multi-party conference active: ignoring top-level call-cancelled and handling participant left: $fromUserId");
+            if (fromUserId.isNotEmpty && fromUserId != currentUserId) {
+              ctrl.handleParticipantLeft(fromUserId, callId: id);
+            }
+          } else {
+            Utility.audioPlayer.stop();
+            await CallingKitService.endAllCalls();
+            ctrl.handleRemoteCallTermination(reason: "Call cancelled");
+          }
         }
       }
     });
