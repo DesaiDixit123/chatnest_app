@@ -514,14 +514,16 @@ class AudioCallController extends GetxController {
 
       final status = (m is Map ? (m["status"] ?? "") : "").toString().toLowerCase();
       if (status == "ringing") {
-        pendingInvitees.add(
-          PendingInvitee(
-            userId: userId,
-            name: memberName,
-            status: "Ringing",
-            uid: uid,
-          ),
-        );
+        if (!pendingInvitees.any((element) => element.userId == userId)) {
+          pendingInvitees.add(
+            PendingInvitee(
+              userId: userId,
+              name: memberName,
+              status: "Ringing",
+              uid: uid,
+            ),
+          );
+        }
       } else {
         pendingInvitees.removeWhere((element) => element.userId == userId);
       }
@@ -1115,35 +1117,42 @@ class AudioCallController extends GetxController {
   }
 
   final ApiWrapper api;
+  bool _isAddingParticipant = false;
   Future<void> addParticipant(String userId, String displayName) async {
-    final body = {
-      "callid": callId,
-      "members": [userId],
-    };
+    if (_isAddingParticipant) return;
+    _isAddingParticipant = true;
+    try {
+      final body = {
+        "callid": callId,
+        "members": [userId],
+      };
 
-    final response = await api.makeRequest(
-      "call/addmembers",
-      Request.post,
-      body,
-      true,
-      api.defaultHeaders,
-    );
-
-    if (response.statusCode == 200 && !response.hasError) {
-      final json = jsonDecode(response.data);
-
-      // 🔥 CACHE ALL MEMBERS FROM BACKEND
-      cacheCallMembers(json["Data"]["members"]);
-      _addPendingInvitee(userId, displayName);
-
-      Get.back();
-
-      Utility.showMessage(
-        "Participant added successfully",
-        MessageType.success,
-        () {},
-        "OK",
+      final response = await api.makeRequest(
+        "call/addmembers",
+        Request.post,
+        body,
+        true,
+        api.defaultHeaders,
       );
+
+      if (response.statusCode == 200 && !response.hasError) {
+        final json = jsonDecode(response.data);
+
+        // 🔥 CACHE ALL MEMBERS FROM BACKEND
+        cacheCallMembers(json["Data"]["members"]);
+        _addPendingInvitee(userId, displayName);
+
+        Get.back();
+
+        Utility.showMessage(
+          "Participant added successfully",
+          MessageType.success,
+          () {},
+          "OK",
+        );
+      }
+    } finally {
+      _isAddingParticipant = false;
     }
   }
 

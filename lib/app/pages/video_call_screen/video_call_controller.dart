@@ -508,38 +508,44 @@ class VideoCallController extends GetxController {
     );
   }
 
+  bool _isAddingParticipant = false;
   Future<void> addParticipants(List<String> userIds) async {
+    if (_isAddingParticipant) return;
     if (callId.isEmpty) {
       debugPrint("❌ callId is empty, cannot add participants");
       return;
     }
+    _isAddingParticipant = true;
+    try {
+      final body = {
+        "callid": callId,
+        "members": userIds,
+      };
 
-    final body = {
-      "callid": callId,
-      "members": userIds,
-    };
-
-    final response = await api.makeRequest(
-      "call/addmembers",
-      Request.post,
-      body,
-      true,
-      api.defaultHeaders,
-    );
-
-    if (response.statusCode == 200 && !response.hasError) {
-      final json = jsonDecode(response.data);
-
-      cacheCallMembers(json["Data"]["members"]);
-
-      Get.back();
-
-      Utility.showMessage(
-        "Participants added successfully",
-        MessageType.success,
-        () {},
-        "OK",
+      final response = await api.makeRequest(
+        "call/addmembers",
+        Request.post,
+        body,
+        true,
+        api.defaultHeaders,
       );
+
+      if (response.statusCode == 200 && !response.hasError) {
+        final json = jsonDecode(response.data);
+
+        cacheCallMembers(json["Data"]["members"]);
+
+        Get.back();
+
+        Utility.showMessage(
+          "Participants added successfully",
+          MessageType.success,
+          () {},
+          "OK",
+        );
+      }
+    } finally {
+      _isAddingParticipant = false;
     }
   }
 
