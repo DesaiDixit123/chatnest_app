@@ -379,6 +379,8 @@ class AudioCallController extends GetxController {
       if (callId.isNotEmpty) {
         await postChatLeaveCall(callId);
       }
+      CallingKitService.endAllCalls();
+      _safeNavigateBack();
       await Get.find<CallManagerService>().endCall();
     } finally {
       _isAutoEndingCall = false;
