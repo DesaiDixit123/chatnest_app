@@ -20,6 +20,7 @@ class LoginBinding extends Bindings {
           ),
         ),
       ),
+      fenix: true,
     );
   }
 }
