@@ -86,9 +86,10 @@ class LoginController extends GetxController
         fcmToken = await firebaseMessaging.getToken();
       }
       print('📤 Sending FCM Token to Backend: $fcmToken');
+      final cleanMobile = phonenumbercontroller.text.trim().replaceAll(RegExp(r'\s+'), '');
       var response = await loginPresenter.sendOtpApi(
         isLoading: isLoading,
-        mobile: phonenumbercontroller.text.trim(),
+        mobile: cleanMobile,
         countryCode: dailcode,
         fcmToken: fcmToken ?? "",
       );
@@ -96,12 +97,14 @@ class LoginController extends GetxController
       if (response?.status == 200) {
         sendOtpData = response?.data;
         demoOtp = response?.data?.demoOtp;
-        final mobileNumber = phonenumbercontroller.text.trim();
-        final sessionKey = sendOtpData?.key ?? "";
         print('\n========================================');
-        print('📱 [OTP RECEIVED] Mobile: $mobileNumber | OTP: ${demoOtp ?? sendOtpData?.demoOtp}');
+        print('📱 [OTP RECEIVED] Mobile: $cleanMobile | OTP: ${demoOtp ?? sendOtpData?.demoOtp}');
         print('========================================\n');
-        RouteManagement.goToOtpView(sessionKey, false, mobileNumber);
+        RouteManagement.goToOtpView(
+          sendOtpData?.key ?? "",
+          false,
+          cleanMobile,
+        );
         update();
       } else {
         Utility.errorMessage(response?.message ?? "");
@@ -112,24 +115,27 @@ class LoginController extends GetxController
   Future<void> verifyOtpApi({
     bool isLoading = true,
   }) async {
-    final isvalid = otpFormKey.currentState?.validate() ?? true;
+    final isvalid = otpFormKey.currentState!.validate();
     if (isvalid) {
       String mobileNumber = phonenumbercontroller.text.trim();
       String sessionKey = sendOtpData?.key ?? "";
 
-      if (Get.arguments != null && Get.arguments is List) {
+      if (Get.arguments is List && (Get.arguments as List).isNotEmpty) {
         final args = Get.arguments as List;
-        if (sessionKey.isEmpty && args.isNotEmpty && args[0] != null) {
+        if (sessionKey.isEmpty && (args[0] ?? "").toString().isNotEmpty) {
           sessionKey = args[0].toString();
         }
-        if (mobileNumber.isEmpty && args.length > 2 && args[2] != null) {
-          mobileNumber = args[2].toString();
+        if (mobileNumber.isEmpty && args.length > 2 && (args[2] ?? "").toString().isNotEmpty) {
+          mobileNumber = args[2].toString().trim();
         }
       }
 
+      final cleanMobile = mobileNumber.replaceAll(RegExp(r'\s+'), '');
+      debugPrint('📱 Verifying OTP: mobile=$cleanMobile, key=$sessionKey, otp=${otpTextEditingController.text}');
+
       var response = await loginPresenter.verifyOtpApi(
         isLoading: isLoading,
-        mobile: mobileNumber,
+        mobile: cleanMobile,
         key: sessionKey,
         otp: otpTextEditingController.text.trim(),
       );
@@ -139,7 +145,7 @@ class LoginController extends GetxController
         update();
       } else {
         Utility.closeDialog();
-        Utility.snacBar(response?.message ?? "otp_error_msg".tr, ColorsValue.maincolor1);
+        Utility.snacBar((response?.message ?? "otp_error_msg".tr).trim(), ColorsValue.maincolor1);
       }
     }
   }
@@ -147,18 +153,15 @@ class LoginController extends GetxController
   Future<void> postChangeNumberVerify({
     bool isLoading = true,
   }) async {
-    final isvalid = otpFormKey.currentState?.validate() ?? true;
+    final isvalid = otpFormKey.currentState!.validate();
     if (isvalid) {
-      String mobile = "";
-      String key = "";
-      if (Get.arguments != null && Get.arguments is List) {
-        final args = Get.arguments as List;
-        if (args.isNotEmpty && args[0] != null) key = args[0].toString();
-        if (args.length > 2 && args[2] != null) mobile = args[2].toString();
-      }
+      final args = Get.arguments is List ? Get.arguments as List : [];
+      final key = args.isNotEmpty ? (args[0] ?? "").toString() : (sendOtpData?.key ?? "");
+      final mobile = args.length > 2 ? (args[2] ?? "").toString() : phonenumbercontroller.text;
+
       var response = await loginPresenter.postChangeNumberVerify(
         isLoading: isLoading,
-        mobile: mobile,
+        mobile: mobile.replaceAll(RegExp(r'\s+'), ''),
         key: key,
         otp: otpTextEditingController.text.trim(),
       );
@@ -168,7 +171,7 @@ class LoginController extends GetxController
         update();
       } else {
         Utility.closeDialog();
-        Utility.snacBar(response?.message ?? "otp_error_msg".tr, ColorsValue.maincolor1);
+        Utility.snacBar((response?.message ?? "otp_error_msg".tr).trim(), ColorsValue.maincolor1);
       }
     }
   }

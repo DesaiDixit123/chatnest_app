@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:http/http.dart' as http;
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:chatnest/app/app.dart';
@@ -7,8 +8,10 @@ import 'package:chatnest/app/navigators/routes_management.dart';
 import 'package:chatnest/data/data.dart';
 import 'package:chatnest/device/repositories/device_repositories.dart';
 import 'package:chatnest/domain/services/call_manager_service.dart';
+import 'package:chatnest/domain/services/socket_connection.dart';
 import 'package:chatnest/domain/repositories/local_storage_keys.dart';
 import 'package:chatnest/domain/services/CallingKitService.dart';
+import 'package:chatnest/domain/services/call_ringtone_manager.dart';
 import 'package:chatnest/domain/usecases/video_call_usecases.dart';
 import '../repositories/repository.dart';
 import '../models/models.dart';
@@ -253,14 +256,32 @@ class FirebaseApi {
   }
 
   static String _extractEventCallId(CallEvent? event) {
-    final extra = event?.body['extra'];
-    if (extra is Map) {
-      final id = (extra['callId'] ?? "").toString();
-      if (id.isNotEmpty) {
-        return id;
-      }
+    if (event == null) {
+      return (Utility.callLogsData['callId'] ?? Utility.callLogsData['callid'] ?? _latestIncomingCallId ?? "").toString();
     }
-    return (Utility.callLogsData['callId'] ?? "").toString();
+    final body = event.body;
+    if (body is Map) {
+      final extra = body['extra'];
+      if (extra is Map) {
+        final id = (extra['callId'] ?? extra['callid'] ?? extra['_id'] ?? "").toString().trim();
+        if (id.isNotEmpty) return id;
+      } else if (extra is String && extra.trim().startsWith('{')) {
+        try {
+          final parsed = jsonDecode(extra);
+          if (parsed is Map) {
+            final id = (parsed['callId'] ?? parsed['callid'] ?? parsed['_id'] ?? "").toString().trim();
+            if (id.isNotEmpty) return id;
+          }
+        } catch (_) {}
+      }
+
+      final directCallId = (body['callId'] ?? body['callid'] ?? "").toString().trim();
+      if (directCallId.isNotEmpty) return directCallId;
+
+      final bodyId = (body['id'] ?? "").toString().trim();
+      if (bodyId.isNotEmpty) return bodyId;
+    }
+    return (Utility.callLogsData['callId'] ?? Utility.callLogsData['callid'] ?? _latestIncomingCallId ?? "").toString();
   }
 
   static bool _hasActiveCallController() {
@@ -287,45 +308,104 @@ class FirebaseApi {
     return false;
   }
 
-  static bool _shouldHandleEndOrDecline(String callId) {
-    if (!_hasActiveCallController()) {
-      // When no active controller exists, only handle end/decline
-      // for the most recently shown incoming call.
-      return callId.isNotEmpty && callId == _latestIncomingCallId;
-    }
-    return _isActiveControllerCall(callId);
-  }
-
   static Future<void> _leaveCallById(String callId) async {
     if (callId.isEmpty) {
       return;
     }
-    if (Get.isRegistered<AudioCallController>()) {
-      final audioController = Get.find<AudioCallController>();
-      if (audioController.callId == callId) {
-        await audioController.postChatLeaveCall(callId);
-        return;
+
+    await CallRingtoneManager.stopRingtone(callId: callId, reason: "declined");
+
+    print("\n[CALL][DECLINE]");
+    print("callId=$callId");
+    print("[CALL][DECLINE_SEND]");
+    print("callId=$callId\n");
+
+    await ensureServicesInitialized();
+
+    String currentUserId = "";
+    String authToken = "";
+    try {
+      if (Get.isRegistered<Repository>()) {
+        currentUserId = Get.find<Repository>().getStringValue(LocalKeys.userIds);
+        authToken = Get.find<Repository>().getStringValue(LocalKeys.authToken);
       }
+      if (authToken.isEmpty && Hive.isBoxOpen(StringConstants.appName)) {
+        authToken = (Hive.box<dynamic>(StringConstants.appName).get(LocalKeys.authToken) ?? "").toString();
+      }
+      if (currentUserId.isEmpty && Hive.isBoxOpen(StringConstants.appName)) {
+        currentUserId = (Hive.box<dynamic>(StringConstants.appName).get(LocalKeys.userIds) ?? "").toString();
+      }
+      if (currentUserId.isEmpty && Utility.profileData?.id != null) {
+        currentUserId = Utility.profileData!.id!;
+      }
+    } catch (_) {}
+
+    // 1. Emit explicit WebSocket event if socket is connected
+    try {
+      final payload = {
+        "type": "CALL_DECLINED",
+        "callId": callId,
+        "fromUserId": currentUserId,
+        "status": "declined",
+        "reason": "rejected",
+        "timestamp": DateTime.now().millisecondsSinceEpoch,
+      };
+      print("[CALL][DECLINED_SENT]");
+      print("callId=$callId payload=$payload\n");
+      SocketConnection.socket?.emit("call-rejected", payload);
+    } catch (e) {
+      print("[CALL] Error emitting socket call-rejected: $e");
     }
-    if (Get.isRegistered<VideoCallController>()) {
-      final videoController = Get.find<VideoCallController>();
-      if (videoController.callId == callId) {
-        await videoController.postChatLeaveCall(callId);
-        return;
+
+    // 2. Call backend leavecall API
+    try {
+      if (Get.isRegistered<AudioCallController>() && Get.find<AudioCallController>().callId == callId) {
+        await Get.find<AudioCallController>().postChatLeaveCall(callId);
+      } else if (Get.isRegistered<VideoCallController>() && Get.find<VideoCallController>().callId == callId) {
+        await Get.find<VideoCallController>().postChatLeaveCall(callId);
+      } else if (Get.isRegistered<ConnectHelper>()) {
+        await Get.find<ConnectHelper>().postChatLeaveCall(callid: callId);
+      } else {
+        await ConnectHelper().postChatLeaveCall(callid: callId);
+      }
+    } catch (e) {
+      print("[CALL] Error calling postChatLeaveCall API: $e");
+    }
+
+    // 3. Direct HTTP fallback in background
+    print("[CALL][LEAVE_AUTH] token_exists=${authToken.isNotEmpty} length=${authToken.length}");
+    if (authToken.isNotEmpty) {
+      try {
+        final url = Uri.parse("https://api.cochat.click/apis/v2/call/leavecall");
+        final resp = await http.post(
+          url,
+          headers: {
+            'Content-Type': 'application/json',
+            'authorization': 'Token $authToken',
+          },
+          body: jsonEncode({"callid": callId}),
+        ).timeout(const Duration(seconds: 8));
+        print("[CALL][DIRECT_LEAVE_HTTP_STATUS] status=${resp.statusCode} body=${resp.body}");
+      } catch (e) {
+        print("[CALL] Direct HTTP leavecall error: $e");
       }
     }
 
-    await Get.put<VideoCallController>(
-      VideoCallController(
-        Get.put(
-          VideoCallPresenter(
-            Get.put(VideoCallUsecases(Get.find()), permanent: true),
-          ),
-          permanent: true,
-        ),
-        api: ApiWrapper(),
-      ),
-    ).postChatLeaveCall(callId);
+    // 4. Clear active call controller if present
+    try {
+      if (Get.isRegistered<AudioCallController>() && Get.find<AudioCallController>().callId == callId) {
+        Get.find<AudioCallController>().handleRemoteCallTermination(reason: "Call declined");
+      }
+      if (Get.isRegistered<VideoCallController>() && Get.find<VideoCallController>().callId == callId) {
+        Get.find<VideoCallController>().handleRemoteCallTermination(reason: "Call declined");
+      }
+      if (Get.isRegistered<CallManagerService>()) {
+        await Get.find<CallManagerService>().endCall();
+      }
+    } catch (_) {}
+
+    print("[CALL][CLEANUP]");
+    print("callId=$callId\n");
   }
 
   static bool _isAcceptingCall = false;
@@ -497,6 +577,87 @@ class FirebaseApi {
     }
   }
 
+  static bool _isCallkitListenerInitialized = false;
+
+  static void ensureCallkitEventListener() {
+    if (_isCallkitListenerInitialized) return;
+    if (!CallingKitService.shouldObserveEvents) return;
+    _isCallkitListenerInitialized = true;
+
+    print("[CALL][LISTENER] Registering FlutterCallkitIncoming.onEvent listener");
+    FlutterCallkitIncoming.onEvent.listen((CallEvent? event) async {
+      print("[ANTIGRAVITY_DEBUG] CallEvent Received: ${event?.event}");
+      print("[ANTIGRAVITY_DEBUG] CallEvent Body: ${event?.body}");
+
+      if (event?.body['extra'] != null) {
+        Utility.callLogsData = Map<String, dynamic>.from(
+          event?.body['extra'],
+        );
+      }
+
+      switch (event?.event) {
+        case Event.actionCallIncoming:
+          final incomingCallId = _extractEventCallId(event);
+          if (incomingCallId.isNotEmpty) {
+            _latestIncomingCallId = incomingCallId;
+          }
+          break;
+        case Event.actionCallAccept:
+          final extraData = event?.body['extra'] != null
+              ? Map<String, dynamic>.from(event!.body['extra'])
+              : Utility.callLogsData;
+          final acceptedCallId = (extraData['callId'] ?? extraData['callid'] ?? "").toString();
+          if (acceptedCallId.isNotEmpty) {
+            _acceptedCallIds.add(acceptedCallId);
+          }
+          await CallRingtoneManager.stopRingtone(callId: acceptedCallId, reason: "accepted");
+          await handleAcceptedCallData(extraData);
+          if (acceptedCallId.isNotEmpty && acceptedCallId == _latestIncomingCallId) {
+            _latestIncomingCallId = null;
+          }
+          break;
+        case Event.actionCallEnded:
+          print("[ANTIGRAVITY_DEBUG] Call Ended Event from CallKit");
+          final eventCallId = _extractEventCallId(event);
+          if ((eventCallId.isNotEmpty && _acceptedCallIds.contains(eventCallId)) ||
+              _isActiveCallOpen(eventCallId) ||
+              (Get.isRegistered<CallManagerService>() && Get.find<CallManagerService>().isCallActive)) {
+            print("[ANTIGRAVITY_DEBUG] CallKit activity ended after ACCEPT/ACTIVE for callId: $eventCallId. Preserving in-app call session!");
+            break;
+          }
+          await CallRingtoneManager.stopRingtone(callId: eventCallId, reason: "callkit_ended");
+          if (eventCallId.isNotEmpty) {
+            await _leaveCallById(eventCallId);
+          }
+          if (eventCallId == _latestIncomingCallId) {
+            _latestIncomingCallId = null;
+          }
+          break;
+        case Event.actionCallDecline:
+          print("[ANTIGRAVITY_DEBUG] Call Declined Event from CallKit");
+          final eventCallId = _extractEventCallId(event);
+          await CallRingtoneManager.stopRingtone(callId: eventCallId, reason: "declined");
+          if (eventCallId.isNotEmpty) {
+            await _leaveCallById(eventCallId);
+          }
+          if (eventCallId == _latestIncomingCallId) {
+            _latestIncomingCallId = null;
+          }
+          break;
+        case Event.actionCallTimeout:
+          print("[ANTIGRAVITY_DEBUG] Call Timeout Event");
+          final timeoutCallId = _extractEventCallId(event);
+          await CallRingtoneManager.stopRingtone(callId: timeoutCallId, reason: "timeout");
+          if (timeoutCallId.isNotEmpty) {
+            await _leaveCallById(timeoutCallId);
+          }
+          break;
+        default:
+          break;
+      }
+    });
+  }
+
   static bool _isActiveCallOpen(String callId) {
     if (callId.isEmpty) return false;
     if (Get.isRegistered<AudioCallController>() && Get.find<AudioCallController>().callId == callId) {
@@ -519,7 +680,9 @@ class FirebaseApi {
     banner,
     userName, {
     String? fromid,
+    String source = "incoming",
   }) async {
+    ensureCallkitEventListener();
     final String currentCallId = (callid != null && callid.toString().trim().isNotEmpty)
         ? callid.toString().trim()
         : (agorachannelName != null && agorachannelName.toString().trim().isNotEmpty)
@@ -529,22 +692,25 @@ class FirebaseApi {
         ? agorachannelName.toString().trim()
         : currentCallId;
 
-    // Strict deduplication by both callId and channel to guarantee NO double ring from Socket and FCM
-    if (_processedCallIds.contains(currentCallId) ||
-        _processedCallIds.contains(channelKey) ||
-        _isActiveCallOpen(currentCallId) ||
-        _isActiveCallOpen(channelKey)) {
-      print(
-        "[ANTIGRAVITY_DEBUG] Ignoring duplicate incoming call for callId: $currentCallId, channel: $channelKey",
-      );
+    if (_isActiveCallOpen(currentCallId) || _isActiveCallOpen(channelKey)) {
+      print("\n[RING][DUPLICATE_IGNORED]");
+      print("callId=$currentCallId source=$source reason=call_already_active_in_app\n");
       return;
     }
-    _processedCallIds.add(currentCallId);
-    _processedCallIds.add(channelKey);
-    Future.delayed(const Duration(seconds: 15), () {
-      _processedCallIds.remove(currentCallId);
-      _processedCallIds.remove(channelKey);
-    });
+
+    if (!CallRingtoneManager.shouldStartRingtone(
+      currentCallId,
+      channelKey: channelKey,
+      source: source,
+    )) {
+      return;
+    }
+
+    CallRingtoneManager.markRingtoneStarted(
+      currentCallId,
+      channelKey: channelKey,
+      source: source,
+    );
 
     _latestIncomingCallId = currentCallId;
     final isVideoCall = callType.toString().toLowerCase() == "yes" || callType.toString().toLowerCase() == "video";
@@ -737,7 +903,7 @@ class FirebaseApi {
       syncFcmTokenWithBackend(newToken);
     });
 
-    // MethodChannel listener for MainActivity ACTION_CALL_ACCEPT intents
+    // MethodChannel listener for MainActivity ACTION_CALL_ACCEPT and ACTION_CALL_DECLINE intents
     const MethodChannel('HelloWorld').setMethodCallHandler((call) async {
       if (call.method == 'CALL_ACCEPTED_INTENT') {
         final data = call.arguments;
@@ -749,81 +915,19 @@ class FirebaseApi {
           }
           await handleAcceptedCallData(data);
         }
+      } else if (call.method == 'CALL_DECLINED_INTENT') {
+        final data = call.arguments;
+        if (data != null && data is Map) {
+          print("[ANTIGRAVITY_DEBUG] Received CALL_DECLINED_INTENT from native: $data");
+          final callId = (data['callId'] ?? data['callid'] ?? data['id'] ?? "").toString();
+          if (callId.isNotEmpty) {
+            await _leaveCallById(callId);
+          }
+        }
       }
     });
 
-    if (CallingKitService.shouldObserveEvents) {
-      FlutterCallkitIncoming.onEvent.listen((CallEvent? event) async {
-        print("[ANTIGRAVITY_DEBUG] CallEvent Received: ${event?.event}");
-        print("[ANTIGRAVITY_DEBUG] CallEvent Body: ${event?.body}");
-
-        if (event?.body['extra'] != null) {
-          Utility.callLogsData = Map<String, dynamic>.from(
-            event?.body['extra'],
-          );
-        }
-
-        switch (event?.event) {
-          case Event.actionCallIncoming:
-            final incomingCallId = _extractEventCallId(event);
-            if (incomingCallId.isNotEmpty) {
-              _latestIncomingCallId = incomingCallId;
-            }
-            break;
-          case Event.actionCallAccept:
-            final extraData = event?.body['extra'] != null
-                ? Map<String, dynamic>.from(event!.body['extra'])
-                : Utility.callLogsData;
-            final acceptedCallId = (extraData['callId'] ?? extraData['callid'] ?? "").toString();
-            if (acceptedCallId.isNotEmpty) {
-              _acceptedCallIds.add(acceptedCallId);
-            }
-            await handleAcceptedCallData(extraData);
-            if (acceptedCallId.isNotEmpty && acceptedCallId == _latestIncomingCallId) {
-              _latestIncomingCallId = null;
-            }
-            break;
-          case Event.actionCallEnded:
-            print("[ANTIGRAVITY_DEBUG] Call Ended Event from CallKit");
-            final eventCallId = _extractEventCallId(event);
-            if ((eventCallId.isNotEmpty && _acceptedCallIds.contains(eventCallId)) ||
-                _isActiveCallOpen(eventCallId) ||
-                (Get.isRegistered<CallManagerService>() && Get.find<CallManagerService>().isCallActive)) {
-              print("[ANTIGRAVITY_DEBUG] CallKit activity ended after ACCEPT/ACTIVE for callId: $eventCallId. Preserving in-app call session!");
-              break;
-            }
-            await CallingKitService.endAllCalls();
-            if (_shouldHandleEndOrDecline(eventCallId)) {
-              await _leaveCallById(eventCallId);
-            }
-            if (eventCallId == _latestIncomingCallId) {
-              _latestIncomingCallId = null;
-            }
-            break;
-          case Event.actionCallDecline:
-            print("[ANTIGRAVITY_DEBUG] Call Declined Event from CallKit");
-            final eventCallId = _extractEventCallId(event);
-            await CallingKitService.endAllCalls();
-            if (_shouldHandleEndOrDecline(eventCallId)) {
-              await _leaveCallById(eventCallId);
-            }
-            if (eventCallId == _latestIncomingCallId) {
-              _latestIncomingCallId = null;
-            }
-            break;
-          case Event.actionCallTimeout:
-            print("[ANTIGRAVITY_DEBUG] Call Timeout Event");
-            final timeoutCallId = _extractEventCallId(event);
-            await CallingKitService.endAllCalls();
-            if (_shouldHandleEndOrDecline(timeoutCallId)) {
-              await _leaveCallById(timeoutCallId);
-            }
-            break;
-          default:
-            break;
-        }
-      });
-    }
+    ensureCallkitEventListener();
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
       print('📩 ===== FOREGROUND MESSAGE RECEIVED =====');
@@ -886,8 +990,16 @@ class FirebaseApi {
                 hostData['nickname'] ??
                 "").toString();
 
-        // If the call screen is already open via socket, don't show duplicate CallKit UI
-        if (!_isActiveCallOpen(callid)) {
+        print("\n[CALL]");
+        print("CALL RECEIVED callId = $callid\n");
+
+        // Mutually exclusive: If app is in foreground and Socket is active, the foreground socket handles the call.
+        // FCM foreground listener drops incoming call triggers to prevent double ringing.
+        final bool isSocketConnected = SocketConnection.socket != null && SocketConnection.socket!.connected;
+        if (isSocketConnected) {
+          print("\n[CALL][FCM_FOREGROUND_DROPPED_SOCKET_ACTIVE]");
+          print("callId=$callid (Socket is handling foreground incoming call)\n");
+        } else if (!_isActiveCallOpen(callid)) {
           final callUuid = const Uuid().v4();
           currentUuid = callUuid;
           if (type == 'onincomingmeetingcall') {
@@ -900,6 +1012,7 @@ class FirebaseApi {
               banner,
               fromusername.isEmpty ? "Meeting" : fromusername,
               fromid: fromid,
+              source: "fcm_foreground_fallback",
             );
           } else {
             showCallkitIncoming(
@@ -911,6 +1024,7 @@ class FirebaseApi {
               banner,
               fromusername,
               fromid: fromid,
+              source: "fcm_foreground_fallback",
             );
           }
         }
@@ -934,16 +1048,17 @@ class FirebaseApi {
         final String reason = type == "oncallrejected"
             ? "Call declined"
             : (type == "oncallcancelled" ? "Call cancelled" : "Call ended");
+
+        await CallRingtoneManager.stopRingtone(callId: callId, reason: reason);
+
         if (Get.isRegistered<VideoCallController>()) {
           final ctrl = Get.find<VideoCallController>();
           if (callId.isEmpty || ctrl.callId == callId) {
-            if (ctrl.users.length > 2 || ctrl.remoteParticipantsCount > 1 || ctrl.callMembersMap.length > 1) {
+            if (ctrl.isMultiPartyConference) {
               if (fromUserId.isNotEmpty) {
                 ctrl.handleParticipantLeft(fromUserId, callId: callId);
               }
             } else {
-              Utility.audioPlayer.stop();
-              await CallingKitService.endAllCalls();
               ctrl.handleRemoteCallTermination(reason: reason);
             }
           }
@@ -951,13 +1066,11 @@ class FirebaseApi {
         if (Get.isRegistered<AudioCallController>()) {
           final ctrl = Get.find<AudioCallController>();
           if (callId.isEmpty || ctrl.callId == callId) {
-            if (ctrl.users.length > 2 || ctrl.remoteParticipantsCount > 1 || ctrl.callMembersMap.length > 1) {
+            if (ctrl.isMultiPartyConference) {
               if (fromUserId.isNotEmpty) {
                 ctrl.handleParticipantLeft(fromUserId, callId: callId);
               }
             } else {
-              Utility.audioPlayer.stop();
-              await CallingKitService.endAllCalls();
               ctrl.handleRemoteCallTermination(reason: reason);
             }
           }
@@ -966,12 +1079,18 @@ class FirebaseApi {
         final callId = (data['callid'] ?? data['callId'] ?? "").toString();
         final hasActiveCall = _isActiveControllerCall(callId);
         if (!hasActiveCall && (isVideoCall || !isVideoCall)) {
-          await CallingKitService.endAllCalls();
+          await CallRingtoneManager.stopRingtone(callId: callId, reason: "user_left");
         }
       } else if (type == "onuserjointhecall") {
         print("📩 Ignored onuserjointhecall in foreground");
       } else {
-        if (Platform.isAndroid) {
+        // Prevent accidental chat notification with sound for any unhandled call payloads
+        final bool hasCallPayload = data.containsKey('callid') ||
+            data.containsKey('callId') ||
+            data.containsKey('meetingid') ||
+            data.containsKey('agorachannelName') ||
+            type.contains('call');
+        if (Platform.isAndroid && !hasCallPayload) {
           AwesomeNotifications().createNotification(
             content: NotificationContent(
               id: UniqueKey().hashCode,
@@ -1153,6 +1272,7 @@ Future<void> onActionReceivedMethod(ReceivedAction receivedAction) async {
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await FirebaseApi.ensureServicesInitialized();
+  FirebaseApi.ensureCallkitEventListener();
   print('📩 ===== BACKGROUND MESSAGE RECEIVED =====');
   final data = FirebaseApi._normalizeMessageData(message.data);
   final String type = (data['type'] ?? data['event'] ?? "")
@@ -1243,6 +1363,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       banner,
       fromusername.isEmpty ? "User" : fromusername,
       fromid: fromid,
+      source: "fcm_background",
     );
   } else if (type == "oncallendedbyhost" ||
       type == "oncallcancelled" ||
@@ -1250,7 +1371,12 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       type == "oncallended" ||
       type == "onuserleavethecall") {
     print("📩 Background call termination received: $type");
-    await CallingKitService.endAllCalls();
+    final String termCallId = (data['callid'] ??
+        data['callId'] ??
+        (data['calldata'] is Map ? (data['calldata']['callid'] ?? data['calldata']['_id']) : null) ??
+        data['meetingid'] ??
+        "").toString();
+    await CallRingtoneManager.stopRingtone(callId: termCallId, reason: type);
   } else if (type == "onuserjointhecall") {
     print("📩 Ignored onuserjointhecall in background");
   }

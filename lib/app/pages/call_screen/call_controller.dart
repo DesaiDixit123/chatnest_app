@@ -258,6 +258,32 @@ class CallController extends GetxController {
     update();
   }
 
+  Future<void> postHistoryByCall(String callId) async {
+    isCallHistoryLoading = true;
+    callHistoryErrorMessage = "";
+    callHistoryByUserList.clear();
+    update();
+
+    debugPrint('📞 CallController: postHistoryByCall(callId=$callId)');
+    var response = await callPresenter.postHistoryByCall(
+      callid: callId,
+      isLoading: false,
+    );
+
+    isCallHistoryLoading = false;
+    if (response != null && response.status == 200) {
+      callHistoryByUserList.addAll(response.data ?? []);
+      debugPrint('📞 CallController: postHistoryByCall loaded ${callHistoryByUserList.length} items');
+    } else if (response != null) {
+      callHistoryErrorMessage = (response.message ?? "").trim();
+      debugPrint('❌ CallController: postHistoryByCall error: $callHistoryErrorMessage');
+    } else {
+      callHistoryErrorMessage = "Unable to load call history";
+      debugPrint('❌ CallController: postHistoryByCall response was null');
+    }
+    update();
+  }
+
   List<ContactListData> contactsList = [];
   List<ContactListData> searchContactsList = [];
   bool isContactsSyncLoading = false;

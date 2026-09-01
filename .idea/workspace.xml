@@ -5,7 +5,44 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3d1044c7-54cf-4965-b0f7-d7ddbf059396" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/android/app/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/android/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/app/src/main/kotlin/com/festumevento/cochat/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/android/app/src/main/kotlin/com/festumevento/cochat/MainActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/festom_field_flutter.iml" beforeDir="false" afterPath="$PROJECT_DIR$/festom_field_flutter.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/navigators/routes_management.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/navigators/routes_management.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/audio_call_screen/audio_call_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/audio_call_screen/audio_call_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/audio_call_screen/audio_call_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/audio_call_screen/audio_call_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/authScreen/auth_binding.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/authScreen/auth_binding.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/authScreen/auth_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/authScreen/auth_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/authScreen/screens/otp_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/authScreen/screens/otp_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/call_screen/call_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/call_screen/call_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/call_screen/call_presenter.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/call_screen/call_presenter.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/call_screen/screen/call_info_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/call_screen/screen/call_info_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/call_screen/screen/call_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/call_screen/screen/call_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/chat_screen/chat_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/chat_screen/chat_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/chat_screen/chat_presenter.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/chat_screen/chat_presenter.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/meeting_call_page/meeting_call_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/meeting_call_page/meeting_call_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/meeting_call_page/meeting_call_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/meeting_call_page/meeting_call_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/video_call_screen/video_call_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/video_call_screen/video_call_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/pages/video_call_screen/video_call_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/pages/video_call_screen/video_call_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/utils/utility.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/utils/utility.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/widgets/chat_component/audio_call/audio_call.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/widgets/chat_component/audio_call/audio_call.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app/widgets/chat_component/videocall/video_call.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app/widgets/chat_component/videocall/video_call.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/data/helpers/connect_helper.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/data/helpers/connect_helper.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/data/helpers/end_points.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/data/helpers/end_points.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/data/repositories/data_repositories.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/data/repositories/data_repositories.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/domain/models/call_history_by_user_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/domain/models/call_history_by_user_model.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/domain/models/call_history_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/domain/models/call_history_model.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/domain/models/chat_lists_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/domain/models/chat_lists_model.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/domain/models/get_call_initiated_data_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/domain/models/get_call_initiated_data_model.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/domain/repositories/repository.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/domain/repositories/repository.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/domain/services/call_manager_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/domain/services/call_manager_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/domain/services/firebase_api.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/domain/services/firebase_api.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/domain/services/socket_connection.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/domain/services/socket_connection.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/domain/usecases/call_usecases.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/domain/usecases/call_usecases.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/domain/usecases/chat_usecases.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/domain/usecases/chat_usecases.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

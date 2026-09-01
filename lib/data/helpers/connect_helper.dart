@@ -1831,7 +1831,7 @@ class ConnectHelper {
   // post call initiate api
   Future<ResponseModel> postCallInitaite({
     bool isLoading = false,
-    required String receiverId,
+    required dynamic receiverId,
     required bool isVideoCall,
     required bool isAudioCall,
     required bool isGroupCall,
@@ -1957,6 +1957,24 @@ class ConnectHelper {
     };
     var response = await apiWrapper.makeRequest(
       EndPoints.postHistoryByGroup,
+      Request.post,
+      data,
+      isLoading,
+      Utility.commonHeader(),
+    );
+    return response;
+  }
+
+  // postHistoryByCall
+  Future<ResponseModel> postHistoryByCall({
+    bool isLoading = false,
+    required String callid,
+  }) async {
+    var data = {
+      "callid": callid,
+    };
+    var response = await apiWrapper.makeRequest(
+      EndPoints.postHistoryByCall,
       Request.post,
       data,
       isLoading,

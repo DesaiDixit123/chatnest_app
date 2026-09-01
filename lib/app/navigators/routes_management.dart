@@ -47,8 +47,16 @@ abstract class RouteManagement {
           arguments: [url, type]);
   static void goToPdfViewWidget(String url, String type) =>
       Get.toNamed<void>(Routes.pdfViewWidgets, arguments: [url, type]);
-  static void goToCallInfoScreen(String userId, bool isGroup) =>
-      Get.toNamed<void>(Routes.callInfoScreen, arguments: [userId, isGroup]);
+  static void goToCallInfoScreen(
+    String targetId, {
+    bool isGroup = false,
+    bool isConference = false,
+    String callId = "",
+  }) =>
+      Get.toNamed<void>(
+        Routes.callInfoScreen,
+        arguments: [targetId, isGroup, isConference, callId],
+      );
   static void goToContactListScreen() =>
       Get.toNamed<void>(Routes.contactListScreen);
   static void goToBookmarkScreen() => Get.toNamed<void>(Routes.bookmarkScreen);

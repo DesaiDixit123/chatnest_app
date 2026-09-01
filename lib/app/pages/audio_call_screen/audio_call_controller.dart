@@ -10,6 +10,7 @@ import 'package:chatnest/app/app.dart';
 import 'package:chatnest/app/navigators/app_pages.dart';
 import 'package:chatnest/data/helpers/api_wrapper.dart';
 import 'package:chatnest/domain/domain.dart';
+import 'package:chatnest/domain/services/call_ringtone_manager.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ class AudioCallController extends GetxController {
   AudioCallController(this.audioCallPresenter, {required this.api});
 
   final AudioCallPresenter audioCallPresenter;
+  final ApiWrapper api;
   /// backend userId -> user info waiting for Agora uid assignment
   final Map<String, AgoraUser> queuedRemoteMembersById = {};
   final List<String> queuedRemoteMemberOrder = [];
@@ -28,6 +30,7 @@ class AudioCallController extends GetxController {
   final Map<String, Map<String, String>> callMembersMap = {};
   
   bool? isSelfCall;
+  bool isCallEnded = false;
 
   @override
   void onInit() {
@@ -135,32 +138,53 @@ class AudioCallController extends GetxController {
     SocketConnection.socket?.off("call-accepted", _onCallAccepted);
   }
 
+  bool get isMultiPartyConference {
+    final totalRemoteCount = remoteParticipantsCount + pendingInvitees.length;
+    return totalRemoteCount > 1 || users.length > 2 || callMembersMap.length > 2;
+  }
+
   void _onCallRejected(dynamic data) {
-    final id = (data is Map ? (data['callId'] ?? data['callid']) : data).toString();
-    if (id.isNotEmpty && id != callId) return;
-    print("[ANTIGRAVITY_DEBUG] AudioCallController: Remote call rejected received");
+    final id = (data is Map ? (data['callId'] ?? data['callid'] ?? data['data']?['callid'] ?? data['data']?['callId']) : data).toString();
+    print("\n[CALL][REMOTE_DECLINE_RECEIVED]");
+    print("callId=$id");
+
+    if (id.isNotEmpty && id != callId) {
+      print("[CALL][STALE_EVENT_IGNORED] callId=$id (mismatched active callId=$callId)\n");
+      return;
+    }
+
+    print("[CALL][REMOTE_DECLINE_MATCHED]");
+    print("callId=$callId\n");
+
     final fromUserId = (data is Map ? (data['fromUserId'] ?? data['fromid'] ?? data['leftUserId']) : "").toString();
     final currentUserId = Get.find<Repository>().getStringValue(LocalKeys.userIds);
 
-    if (users.length > 2 || remoteParticipantsCount > 1 || callMembersMap.length > 1) {
-      print("[ANTIGRAVITY_DEBUG] Multi-party conference active: ignoring call-rejected and handling participant left: $fromUserId");
+    if (isMultiPartyConference) {
+      print("[CALL] Multi-party conference active: ignoring call-rejected and handling participant left: $fromUserId");
       if (fromUserId.isNotEmpty && fromUserId != currentUserId) {
         handleParticipantLeft(fromUserId, callId: id);
       }
       return;
     }
+
     handleRemoteCallTermination(reason: "Call declined");
   }
 
   void _onCallCancelled(dynamic data) {
-    final id = (data is Map ? (data['callId'] ?? data['callid']) : data).toString();
-    if (id.isNotEmpty && id != callId) return;
-    print("[ANTIGRAVITY_DEBUG] AudioCallController: Remote call cancelled received");
+    final id = (data is Map ? (data['callId'] ?? data['callid'] ?? data['data']?['callid'] ?? data['data']?['callId']) : data).toString();
+    print("\n[CALL][REMOTE_CANCEL_RECEIVED]");
+    print("callId=$id");
+
+    if (id.isNotEmpty && id != callId) {
+      print("[CALL][STALE_EVENT_IGNORED] callId=$id\n");
+      return;
+    }
+
     final fromUserId = (data is Map ? (data['fromUserId'] ?? data['fromid'] ?? data['leftUserId']) : "").toString();
     final currentUserId = Get.find<Repository>().getStringValue(LocalKeys.userIds);
 
-    if (users.length > 2 || remoteParticipantsCount > 1 || callMembersMap.length > 1) {
-      print("[ANTIGRAVITY_DEBUG] Multi-party conference active: ignoring call-cancelled and handling participant left: $fromUserId");
+    if (isMultiPartyConference) {
+      print("[CALL] Multi-party conference active: ignoring call-cancelled and handling participant left: $fromUserId");
       if (fromUserId.isNotEmpty && fromUserId != currentUserId) {
         handleParticipantLeft(fromUserId, callId: id);
       }
@@ -170,14 +194,20 @@ class AudioCallController extends GetxController {
   }
 
   void _onCallEnded(dynamic data) {
-    final id = (data is Map ? (data['callId'] ?? data['callid']) : data).toString();
-    if (id.isNotEmpty && id != callId) return;
-    print("[ANTIGRAVITY_DEBUG] AudioCallController: Remote call ended received");
+    final id = (data is Map ? (data['callId'] ?? data['callid'] ?? data['data']?['callid'] ?? data['data']?['callId']) : data).toString();
+    print("\n[CALL][REMOTE_END_RECEIVED]");
+    print("callId=$id");
+
+    if (id.isNotEmpty && id != callId) {
+      print("[CALL][STALE_EVENT_IGNORED] callId=$id\n");
+      return;
+    }
+
     final fromUserId = (data is Map ? (data['fromUserId'] ?? data['fromid'] ?? data['leftUserId']) : "").toString();
     final currentUserId = Get.find<Repository>().getStringValue(LocalKeys.userIds);
 
-    if (users.length > 2 || remoteParticipantsCount > 1 || callMembersMap.length > 1) {
-      print("[ANTIGRAVITY_DEBUG] Multi-party conference active: treating call-ended as participant left: $fromUserId");
+    if (isMultiPartyConference) {
+      print("[CALL] Multi-party conference active: treating call-ended as participant left: $fromUserId");
       if (fromUserId.isNotEmpty && fromUserId != currentUserId) {
         handleParticipantLeft(fromUserId, callId: id);
       }
@@ -187,7 +217,7 @@ class AudioCallController extends GetxController {
   }
 
   void _onStopRingtone(dynamic data) {
-    Utility.audioPlayer.stop();
+    CallRingtoneManager.stopRingtone(callId: callId, reason: "stop_ringtone");
   }
 
   void _onCallAccepted(dynamic data) {
@@ -198,7 +228,7 @@ class AudioCallController extends GetxController {
 
   void handleRemoteUserJoined() {
     print("[ANTIGRAVITY_DEBUG] AudioCallController: handleRemoteUserJoined");
-    Utility.audioPlayer.stop();
+    CallRingtoneManager.stopRingtone(callId: callId, reason: "user_joined");
     timer?.cancel();
     if (!isCallConnected) {
       _startCallDurationTimer();
@@ -208,21 +238,25 @@ class AudioCallController extends GetxController {
   Future<void> handleRemoteCallTermination({required String reason}) async {
     if (_isEnding) return;
     _isEnding = true;
+    isCallEnded = true;
 
-    print("[ANTIGRAVITY_DEBUG] AudioCallController: handleRemoteCallTermination reason=$reason");
+    print("\n[CALL][CALLER_TERMINATE]");
+    print("callId=$callId reason=$reason\n");
 
-    Utility.audioPlayer.stop();
+    await CallRingtoneManager.stopRingtone(callId: callId, reason: reason);
     timer?.cancel();
     _stopCallDurationTimer();
 
     endReasonText = reason;
     update();
 
-    await CallingKitService.endAllCalls();
     await disposeAgora();
     await Get.find<CallManagerService>().endCall();
 
-    Future.delayed(const Duration(milliseconds: 600), () {
+    print("[CALL][CLEANUP]");
+    print("callId=$callId\n");
+
+    Future.delayed(const Duration(milliseconds: 300), () {
       _safeNavigateBack();
     });
   }
@@ -238,25 +272,43 @@ class AudioCallController extends GetxController {
     if (callMembersMap.containsKey(leftUserId)) {
       final uidStr = callMembersMap[leftUserId]?['uid'] ?? "";
       targetUid = int.tryParse(uidStr);
-      callMembersMap.remove(leftUserId);
+      callMembersMap[leftUserId]?['status'] = 'disconnected';
     }
     final numericUid = _generateNumericUid(leftUserId);
 
     users.removeWhere((u) => (targetUid != null && u.uid == targetUid) || u.uid == numericUid);
+    pendingInvitees.removeWhere((p) => p.userId == leftUserId);
     _updateCallManagerParticipantNames();
     update();
 
-    if (remoteParticipantsCount == 0 && isCallConnected) {
-      _stopCallDurationTimer();
-      _autoLeaveIfAlone();
+    final remainingRemote = remoteParticipantsCount + pendingInvitees.length;
+    if (remainingRemote == 0) {
+      handleRemoteCallTermination(reason: isCallConnected ? "Call ended" : "Call declined");
     }
   }
 
   void _safeNavigateBack() {
-    print("[ANTIGRAVITY_DEBUG] AudioCallController: _safeNavigateBack popping route");
+    print("[CALL] _safeNavigateBack executing for route: ${Get.currentRoute}");
+
     try {
-      if (Get.isDialogOpen ?? false) {
+      while (Get.isDialogOpen ?? false) {
         Get.back();
+      }
+    } catch (_) {}
+
+    try {
+      if (Get.currentRoute == Routes.audioCallScreen ||
+          Get.currentRoute == Routes.videoCallScreen ||
+          Get.currentRoute == '/audioCallScreen' ||
+          Get.currentRoute == '/videoCallScreen') {
+        final nav = Navigator.of(Get.context ?? Get.key.currentContext!);
+        if (nav.canPop()) {
+          nav.pop();
+          return;
+        } else {
+          Get.back();
+          return;
+        }
       }
     } catch (_) {}
 
@@ -264,13 +316,6 @@ class AudioCallController extends GetxController {
       final nav = Get.key.currentState;
       if (nav != null && nav.canPop()) {
         nav.pop();
-        return;
-      }
-    } catch (_) {}
-
-    try {
-      if (Get.context != null && Navigator.canPop(Get.context!)) {
-        Navigator.pop(Get.context!);
         return;
       }
     } catch (_) {}
@@ -307,6 +352,17 @@ class AudioCallController extends GetxController {
   int get remoteParticipantsCount =>
       users.where((u) => u.uid != currentUid).length;
 
+  String formatCallDuration(Duration duration) {
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+    if (hours > 0) {
+      final hoursStr = hours.toString().padLeft(2, '0');
+      return "$hoursStr:$minutes:$seconds";
+    }
+    return "$minutes:$seconds";
+  }
+
   String get callStatusText {
     if (endReasonText != null && endReasonText!.isNotEmpty) {
       return endReasonText!;
@@ -314,32 +370,85 @@ class AudioCallController extends GetxController {
     if (!isCallConnected) {
       return "Ringing...";
     }
-    final minutes =
-        callDuration.inMinutes.remainder(60).toString().padLeft(2, '0');
-    final seconds =
-        callDuration.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return "$minutes:$seconds";
+    return formatCallDuration(callDuration);
+  }
+
+  void logCallTimerDebug() {
+    final callManager = Get.find<CallManagerService>();
+    final startAt = callManager.callStartedAt.value ?? callManager.connectedAt.value ?? DateTime.now();
+    print("[CALL DEBUG]");
+    print("CALL TIMER");
+    print("callId = $callId");
+    print("conferenceId = $channelName");
+    print("callStartedAt = ${startAt.toIso8601String()}");
+    print("elapsedSeconds = ${callDuration.inSeconds}");
+  }
+
+  void _syncCallStartTime(dynamic callData) {
+    if (callData == null || callData is! Map) return;
+    final callManager = Get.find<CallManagerService>();
+    if (callManager.connectedAt.value != null) {
+      return;
+    }
+
+    int? earliestStartMs;
+    if (callData['callStartedAt'] != null) {
+      final s = int.tryParse(callData['callStartedAt'].toString()) ?? 0;
+      if (s > 0) earliestStartMs = s;
+    }
+
+    if (callData['members'] is List) {
+      for (var m in callData['members']) {
+        if (m is Map && m['startedAt'] != null) {
+          final s = int.tryParse(m['startedAt'].toString()) ?? 0;
+          if (s > 0) {
+            if (earliestStartMs == null || s < earliestStartMs) {
+              earliestStartMs = s;
+            }
+          }
+        }
+      }
+    }
+
+    if (earliestStartMs != null && earliestStartMs > 0) {
+      final canonicalDate = DateTime.fromMillisecondsSinceEpoch(earliestStartMs);
+      if (canonicalDate.isBefore(DateTime.now().add(const Duration(seconds: 10)))) {
+        callManager.callStartedAt.value = canonicalDate;
+        callManager.connectedAt.value = canonicalDate;
+      }
+    }
   }
 
   void _startCallDurationTimer() {
-    if (isCallConnected) {
-      return;
-    }
     isCallConnected = true;
-    
+
     final callManager = Get.find<CallManagerService>();
     if (callManager.connectedAt.value == null) {
-      callManager.connectedAt.value = DateTime.now();
+      final now = DateTime.now();
+      callManager.callStartedAt.value = now;
+      callManager.connectedAt.value = now;
       callDuration = Duration.zero;
     } else {
-      callDuration = DateTime.now().difference(callManager.connectedAt.value!);
+      final start = callManager.connectedAt.value!;
+      callDuration = DateTime.now().difference(start);
+      if (callDuration.isNegative) {
+        callDuration = Duration.zero;
+      }
     }
 
     callDurationTimer?.cancel();
     callDurationTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      callDuration += const Duration(seconds: 1);
-      update();
+      final start = callManager.connectedAt.value;
+      if (start != null) {
+        callDuration = DateTime.now().difference(start);
+        if (callDuration.isNegative) {
+          callDuration = Duration.zero;
+        }
+        update();
+      }
     });
+
+    logCallTimerDebug();
     update();
   }
 
@@ -368,6 +477,7 @@ class AudioCallController extends GetxController {
   bool isVideo = true;
 
   Future<void> disposeAgora() async {
+    isCallEnded = true;
     Utility.audioPlayer.stop();
     timer?.cancel();
     _stopCallDurationTimer(reset: true);
@@ -378,6 +488,7 @@ class AudioCallController extends GetxController {
   }
 
   Future<void> _endCallGlobally() async {
+    isCallEnded = true;
     Utility.audioPlayer.stop();
     timer?.cancel();
     _stopCallDurationTimer(reset: true);
@@ -487,11 +598,14 @@ class AudioCallController extends GetxController {
           : (resolved['mobile']?.isNotEmpty == true ? resolved['mobile']! : "User");
       final memberImage = resolved['image'] ?? rawImage;
 
+      final status = (m is Map ? (m["status"] ?? "") : "").toString().toLowerCase();
+      
       callMembersMap[userId] = {
         "name": memberName,
         "image": memberImage,
         "uid": uid.toString(),
         "mobile": resolved['mobile'] ?? rawMobile,
+        "status": status.isNotEmpty ? status : "connected",
       };
 
       if (userId.length >= 12 && (memberName == "User" || memberImage.isEmpty)) {
@@ -512,7 +626,6 @@ class AudioCallController extends GetxController {
         }
       }
 
-      final status = (m is Map ? (m["status"] ?? "") : "").toString().toLowerCase();
       if (status == "ringing") {
         pendingInvitees.removeWhere((element) => element.userId == userId);
         pendingInvitees.add(
@@ -638,6 +751,8 @@ class AudioCallController extends GetxController {
           if (jsonData['Data'] != null) {
             final callData = jsonData['Data'];
             
+            _syncCallStartTime(callData);
+
             // Cache all members for name/image resolution
             if (callData['members'] != null) {
               cacheCallMembers(callData['members']);
@@ -710,6 +825,10 @@ class AudioCallController extends GetxController {
       print("[ANTIGRAVITY_DEBUG] Re-attaching to existing active audio call session");
       _syncUsersWithCallMembers();
       _updateCallManagerParticipantNames();
+      if (callManager.callStartedAt.value != null || callManager.connectedAt.value != null) {
+        _startCallDurationTimer();
+      }
+      logCallTimerDebug();
       update();
       return;
     }
@@ -737,17 +856,24 @@ class AudioCallController extends GetxController {
       isHost: isSelfCall ?? false,
       userName: userName,
       userImage: userImage ?? "",
+      startTime: callManager.callStartedAt.value,
     );
 
-    // If caller, reset connectedAt so Ringing... is shown only on initial dial
+    // If caller, start in Ringing... state until remote user joins or accepts
     if (isSelfCall == true) {
-      callManager.connectedAt.value = null;
-      isCallConnected = false;
-      callDuration = Duration.zero;
-    } else if (callManager.connectedAt.value != null) {
-      _startCallDurationTimer();
+      if (remoteParticipantsCount > 0) {
+        _startCallDurationTimer();
+      } else {
+        isCallConnected = false;
+        callDuration = Duration.zero;
+      }
+    } else {
+      if (remoteParticipantsCount > 0 || callManager.connectedAt.value != null) {
+        _startCallDurationTimer();
+      }
     }
     _updateCallManagerParticipantNames();
+    logCallTimerDebug();
   }
 
   int _generateNumericUid(String str) {
@@ -985,6 +1111,7 @@ class AudioCallController extends GetxController {
       BuildContext context, AudioCallController controller) async {
     if (_isEnding) return;
     _isEnding = true;
+    isCallEnded = true;
 
     final wasConnected = isCallConnected || remoteParticipantsCount > 0 || users.where((u) => u.uid != currentUid).isNotEmpty;
 
@@ -1000,18 +1127,36 @@ class AudioCallController extends GetxController {
         if (isHost) {
           endReasonText = "Call cancelled";
           final payload = {
+            "type": "CALL_CANCELLED",
             "callId": callId,
             "fromUserId": currentUserId,
+            "status": "cancelled",
             "reason": "cancelled",
+            "timestamp": DateTime.now().millisecondsSinceEpoch,
           };
+          print("\n[CALL][CANCEL]");
+          print("callId=$callId");
+          print("[CALL][CANCEL_SEND]");
+          print("callId=$callId");
+          print("[CALL][CANCELLED_SENT]");
+          print("callId=$callId payload=$payload\n");
           SocketConnection.socket?.emit("call-cancelled", payload);
         } else {
           endReasonText = "Call declined";
           final payload = {
+            "type": "CALL_DECLINED",
             "callId": callId,
             "fromUserId": currentUserId,
+            "status": "declined",
             "reason": "rejected",
+            "timestamp": DateTime.now().millisecondsSinceEpoch,
           };
+          print("\n[CALL][DECLINE]");
+          print("callId=$callId");
+          print("[CALL][DECLINE_SEND]");
+          print("callId=$callId");
+          print("[CALL][DECLINED_SENT]");
+          print("callId=$callId payload=$payload\n");
           SocketConnection.socket?.emit("call-rejected", payload);
         }
       } else {
@@ -1115,10 +1260,80 @@ class AudioCallController extends GetxController {
     update();
   }
 
-  final ApiWrapper api;
   bool isAddingParticipant = false;
 
+  Set<String> getActiveAndPendingParticipantUserIds() {
+    final activeIds = <String>{};
+    final currentUserId = Get.isRegistered<Repository>()
+        ? Get.find<Repository>().getStringValue(LocalKeys.userIds)
+        : "";
+    if (currentUserId.isNotEmpty) {
+      activeIds.add(currentUserId);
+    }
+
+    // 1. From connected users in Agora
+    for (final u in users) {
+      if (u.uid == currentUid && currentUserId.isNotEmpty) {
+        activeIds.add(currentUserId);
+        continue;
+      }
+      for (final entry in callMembersMap.entries) {
+        if (entry.value['uid'] == u.uid.toString() || _generateNumericUid(entry.key) == u.uid) {
+          activeIds.add(entry.key);
+          break;
+        }
+      }
+    }
+
+    // 2. From pending invitees (currently ringing)
+    for (final p in pendingInvitees) {
+      if (p.userId.isNotEmpty) {
+        activeIds.add(p.userId);
+      }
+    }
+
+    // 3. From callMembersMap with active or ringing status
+    callMembersMap.forEach((userId, val) {
+      final status = (val['status'] ?? "").toString().toLowerCase();
+      if (status == 'connected' || status == 'started' || status == 'ringing' || status == 'connecting') {
+        activeIds.add(userId);
+      }
+    });
+
+    return activeIds;
+  }
+
+  void logAddParticipantDebug(List<MyFriendDatum> availableFriends, Set<String> activeIds, String currentUserId) {
+    print("[CALL DEBUG]");
+    print("CURRENT USER = $currentUserId\n");
+
+    print("[CALL DEBUG]");
+    print("ACTIVE PARTICIPANTS =\n");
+    for (final activeId in activeIds) {
+      if (activeId != currentUserId) {
+        final isRinging = pendingInvitees.any((p) => p.userId == activeId);
+        print("userId: $activeId");
+        print("status: ${isRinging ? 'RINGING' : 'ACTIVE'}\n");
+      }
+    }
+
+    print("Then:\n");
+    print("[CALL DEBUG]");
+    print("AVAILABLE PARTICIPANTS =\n");
+    for (final friend in availableFriends) {
+      print("userId: ${friend.userid}");
+    }
+  }
+
   Future<void> addParticipant(String userId, String displayName) async {
+    if (userId.isEmpty) return;
+
+    final activeIds = getActiveAndPendingParticipantUserIds();
+    if (activeIds.contains(userId)) {
+      print("[CALL DEBUG] Participant $userId is already active or ringing, skipping duplicate invitation");
+      return;
+    }
+
     if (isAddingParticipant) return;
     isAddingParticipant = true;
 
@@ -1166,7 +1381,7 @@ class AudioCallController extends GetxController {
         initialChildSize: 0.9,
         minChildSize: 0.5,
         maxChildSize: 0.95,
-        builder: (_, controller) => Container(
+        builder: (_, scrollController) => Container(
           decoration: const BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -1181,69 +1396,96 @@ class AudioCallController extends GetxController {
                 ),
               ),
               Expanded(
-                child: GetBuilder<ChatController>(
-                  builder: (chatController) {
-                    if (chatController.allFriends.isEmpty) {
-                      chatController.myFriendsList(1);
-                    }
-                    return ListView.builder(
-                      controller: controller,
-                      itemCount: chatController.allFriends.length,
-                      itemBuilder: (context, index) {
-                        final friend = chatController.allFriends[index];
-                        final resolved = Utility.resolveUserDisplay(
-                          userId: friend.userid,
-                          fullname: friend.fullname,
-                          nickname: friend.nickname,
-                          mobile: friend.mobile,
-                          profileimage: friend.profileimage,
-                        );
-                        final displayName = resolved['name'] ?? "User";
-                        final displayImage = resolved['image'] ?? "";
-                        final subtitleText = (friend.nickname?.trim().isNotEmpty == true && friend.nickname != displayName)
-                            ? friend.nickname!.trim()
-                            : (friend.mobile?.trim().isNotEmpty == true ? friend.mobile!.trim() : "");
+                child: GetBuilder<AudioCallController>(
+                  builder: (audioController) {
+                    return GetBuilder<ChatController>(
+                      builder: (chatController) {
+                        if (chatController.allFriends.isEmpty) {
+                          chatController.myFriendsList(1);
+                        }
 
-                        return ListTile(
-                          leading: SizedBox(
-                            height: 44,
-                            width: 44,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(22),
-                              child: displayImage.isNotEmpty
-                                  ? CachedNetworkImage(
-                                      height: 44,
-                                      width: 44,
-                                      imageUrl: displayImage.startsWith("http")
-                                          ? displayImage
-                                          : ApiWrapper.imageUrl + displayImage,
-                                      fit: BoxFit.cover,
-                                      placeholder: (context, url) => Image.asset(
-                                        AssetConstants.usera,
-                                        fit: BoxFit.cover,
-                                      ),
-                                      errorWidget: (context, url, error) => Image.asset(
-                                        AssetConstants.usera,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    )
-                                  : Image.asset(
-                                      AssetConstants.usera,
-                                      fit: BoxFit.cover,
-                                    ),
+                        final currentUserId = Get.find<Repository>().getStringValue(LocalKeys.userIds);
+                        final activeParticipantIds = audioController.getActiveAndPendingParticipantUserIds();
+
+                        final availableFriends = chatController.allFriends.where((friend) {
+                          final friendId = friend.userid ?? "";
+                          if (friendId.isEmpty) return false;
+                          if (friendId == currentUserId) return false;
+                          if (activeParticipantIds.contains(friendId)) return false;
+                          return true;
+                        }).toList();
+
+                        audioController.logAddParticipantDebug(availableFriends, activeParticipantIds, currentUserId);
+
+                        if (availableFriends.isEmpty) {
+                          return Center(
+                            child: Text(
+                              "No available participants",
+                              style: Styles.greyColor888840012,
                             ),
-                          ),
-                          title: Text(displayName, style: Styles.black70014),
-                          subtitle: subtitleText.isNotEmpty
-                              ? Text(subtitleText, style: Styles.greyColor888840012)
-                              : null,
-                          trailing: IconButton(
-                            icon: const Icon(Icons.person_add),
-                            onPressed: () => addParticipant(
-                              friend.userid ?? "",
-                              displayName,
-                            ),
-                          ),
+                          );
+                        }
+
+                        return ListView.builder(
+                          controller: scrollController,
+                          itemCount: availableFriends.length,
+                          itemBuilder: (context, index) {
+                            final friend = availableFriends[index];
+                            final resolved = Utility.resolveUserDisplay(
+                              userId: friend.userid,
+                              fullname: friend.fullname,
+                              nickname: friend.nickname,
+                              mobile: friend.mobile,
+                              profileimage: friend.profileimage,
+                            );
+                            final displayName = resolved['name'] ?? "User";
+                            final displayImage = resolved['image'] ?? "";
+                            final subtitleText = (friend.nickname?.trim().isNotEmpty == true && friend.nickname != displayName)
+                                ? friend.nickname!.trim()
+                                : (friend.mobile?.trim().isNotEmpty == true ? friend.mobile!.trim() : "");
+
+                            return ListTile(
+                              leading: SizedBox(
+                                height: 44,
+                                width: 44,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(22),
+                                  child: displayImage.isNotEmpty
+                                      ? CachedNetworkImage(
+                                          height: 44,
+                                          width: 44,
+                                          imageUrl: displayImage.startsWith("http")
+                                              ? displayImage
+                                              : ApiWrapper.imageUrl + displayImage,
+                                          fit: BoxFit.cover,
+                                          placeholder: (context, url) => Image.asset(
+                                            AssetConstants.usera,
+                                            fit: BoxFit.cover,
+                                          ),
+                                          errorWidget: (context, url, error) => Image.asset(
+                                            AssetConstants.usera,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        )
+                                      : Image.asset(
+                                          AssetConstants.usera,
+                                          fit: BoxFit.cover,
+                                        ),
+                                ),
+                              ),
+                              title: Text(displayName, style: Styles.black70014),
+                              subtitle: subtitleText.isNotEmpty
+                                  ? Text(subtitleText, style: Styles.greyColor888840012)
+                                  : null,
+                              trailing: IconButton(
+                                icon: const Icon(Icons.person_add),
+                                onPressed: () => addParticipant(
+                                  friend.userid ?? "",
+                                  displayName,
+                                ),
+                              ),
+                            );
+                          },
                         );
                       },
                     );
@@ -1258,6 +1500,15 @@ class AudioCallController extends GetxController {
   }
 
   Future<void> postKickMember(String memberId) async {
+    final currentUserId = Get.isRegistered<Repository>()
+        ? Get.find<Repository>().getStringValue(LocalKeys.userIds)
+        : "";
+    print('\n[CONFERENCE DEBUG]');
+    print('HOST REMOVE PARTICIPANT');
+    print('hostId = $currentUserId');
+    print('participantId = $memberId');
+    print('callId = $callId\n');
+
     var response = await audioCallPresenter.postKickMember(
       callid: callId,
       memberid: memberId,
@@ -1265,6 +1516,14 @@ class AudioCallController extends GetxController {
     );
     if (response != null && response.statusCode == 200) {
       print("Successfully kicked member $memberId");
+      final memberUid = _generateNumericUid(memberId);
+      users.removeWhere((u) => u.uid == memberUid);
+      pendingInvitees.removeWhere((p) => p.userId == memberId);
+      if (callMembersMap.containsKey(memberId)) {
+        callMembersMap[memberId]?['status'] = 'host_removed';
+      }
+      _updateCallManagerParticipantNames();
+      update();
     } else {
       Utility.showMessage("Failed to remove participant", MessageType.error, () => null, '');
     }

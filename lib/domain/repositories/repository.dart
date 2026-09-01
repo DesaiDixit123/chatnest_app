@@ -2229,7 +2229,7 @@ class Repository {
   // post call initiate api
   Future<GetCallInitiatedDataModel?> postCallInitaite({
     bool isLoading = false,
-    required String receiverId,
+    required dynamic receiverId,
     required bool isVideoCall,
     required bool isAudioCall,
     required bool isGroupCall,
@@ -2384,6 +2384,29 @@ class Repository {
     try {
       var response = await _dataRepository.postHistoryByGroup(
         groupid: groupid,
+        isLoading: isLoading,
+      );
+      var callHistoryByUserModel =
+          callHistoryByUserModelFromJson(response.data);
+      if (callHistoryByUserModel.status != 200 &&
+          (callHistoryByUserModel.message ?? "").isNotEmpty) {
+        Utility.errorMessage(callHistoryByUserModel.message ?? "");
+      }
+      return callHistoryByUserModel;
+    } catch (_) {
+      Utility.closeDialog();
+      UnimplementedError();
+      return null;
+    }
+  }
+
+  Future<CallHistoryByUserModel?> postHistoryByCall({
+    bool isLoading = false,
+    required String callid,
+  }) async {
+    try {
+      var response = await _dataRepository.postHistoryByCall(
+        callid: callid,
         isLoading: isLoading,
       );
       var callHistoryByUserModel =

@@ -67,7 +67,9 @@ class CallScreen extends StatelessWidget {
                                 if (callInfoTarget.id.isEmpty) return;
                                 RouteManagement.goToCallInfoScreen(
                                   callInfoTarget.id,
-                                  callInfoTarget.isGroup,
+                                  isGroup: callInfoTarget.isGroup,
+                                  isConference: callInfoTarget.isConference,
+                                  callId: callInfoTarget.callId,
                                 );
                               },
                               child: ListTile(
@@ -87,6 +89,12 @@ class CallScreen extends StatelessWidget {
                                         _isOutgoing(item, currentUserId)
                                             ? AssetConstants.ic_outcoming_call
                                             : AssetConstants.ic_incoming_call,
+                                        colorFilter: ColorFilter.mode(
+                                          _isMissedCall(item, currentUserId)
+                                              ? const Color(0xFFFC5858)
+                                              : const Color(0xFF1DC843),
+                                          BlendMode.srcIn,
+                                        ),
                                       ),
                                       Dimens.boxWidth10,
                                       Text(
@@ -188,6 +196,43 @@ class CallScreen extends StatelessWidget {
       return;
     }
 
+    final bool isConference = (item.isgroupcall ?? false && item.togroup == null) ||
+        (item.members?.length ?? 0) > 2;
+
+    if (isConference) {
+      final List<String> targetUserIds = _otherMemberUsers(item, currentUserId)
+          .map((u) => u.id ?? "")
+          .where((id) => id.isNotEmpty && id != currentUserId)
+          .toSet()
+          .toList();
+
+      if (targetUserIds.isEmpty) return;
+
+      if (isVideoCall) {
+        if (await Utility.cameraPermissionCheack(context) &&
+            await Utility.microphonePermissionCheack(context)) {
+          Get.find<ChatController>().postCallInitaite(
+            isLoading: false,
+            receiverId: targetUserIds.length > 1 ? targetUserIds : targetUserIds.first,
+            isAudioCall: false,
+            isGroupCall: targetUserIds.length > 1,
+            isVideoCall: true,
+          );
+        }
+      } else {
+        if (await Utility.microphonePermissionCheack(context)) {
+          Get.find<ChatController>().postCallInitaite(
+            isLoading: false,
+            receiverId: targetUserIds.length > 1 ? targetUserIds : targetUserIds.first,
+            isAudioCall: true,
+            isGroupCall: targetUserIds.length > 1,
+            isVideoCall: false,
+          );
+        }
+      }
+      return;
+    }
+
     final String peerUserId = _resolvePeerUserId(item, currentUserId);
     if (peerUserId.isEmpty) return;
 
@@ -219,17 +264,32 @@ class CallScreen extends StatelessWidget {
     CallHistoryDoc item,
     String currentUserId,
   ) {
+    final bool isConference = (item.isgroupcall ?? false && item.togroup == null) ||
+        (item.members?.length ?? 0) > 2;
+
+    if (isConference) {
+      final callId = item.id ?? "";
+      return _CallInfoTarget(
+        id: callId,
+        isGroup: false,
+        isConference: true,
+        callId: callId,
+      );
+    }
+
     final String groupId = item.togroup?.id ?? "";
     if (groupId.isNotEmpty) {
       return _CallInfoTarget(
         id: groupId,
         isGroup: true,
+        isConference: false,
       );
     }
 
     return _CallInfoTarget(
       id: _resolvePeerUserId(item, currentUserId),
       isGroup: false,
+      isConference: false,
     );
   }
 
@@ -400,6 +460,19 @@ class CallScreen extends StatelessWidget {
     return (item.from?.id ?? item.initiatedby?.id ?? "") == currentUserId;
   }
 
+  bool _isMissedCall(CallHistoryDoc item, String currentUserId) {
+    if (item.duration != null && item.duration! > 0) return false;
+    final status = (item.status ?? "").toLowerCase().trim();
+    if (status == "ended" || status == "completed") {
+      return false;
+    }
+    final members = item.members ?? [];
+    if (members.any((m) => (m.startedAt ?? 0) > 0 || m.status == "connected")) {
+      return false;
+    }
+    return true;
+  }
+
   List<ChatListsFrom> _otherMemberUsers(
     CallHistoryDoc item,
     String currentUserId,
@@ -413,6 +486,19 @@ class CallScreen extends StatelessWidget {
       if (id.isEmpty || id == currentUserId || seenIds.contains(id)) continue;
       seenIds.add(id);
       result.add(user!);
+    }
+
+    if (item.from != null && (item.from!.id ?? "").isNotEmpty && item.from!.id != currentUserId && !seenIds.contains(item.from!.id)) {
+      seenIds.add(item.from!.id!);
+      result.add(item.from!);
+    }
+    if (item.touser != null && (item.touser!.id ?? "").isNotEmpty && item.touser!.id != currentUserId && !seenIds.contains(item.touser!.id)) {
+      seenIds.add(item.touser!.id!);
+      result.add(item.touser!);
+    }
+    if (item.initiatedby != null && (item.initiatedby!.id ?? "").isNotEmpty && item.initiatedby!.id != currentUserId && !seenIds.contains(item.initiatedby!.id)) {
+      seenIds.add(item.initiatedby!.id!);
+      result.add(item.initiatedby!);
     }
 
     return result;
@@ -448,9 +534,13 @@ class CallScreen extends StatelessWidget {
 class _CallInfoTarget {
   final String id;
   final bool isGroup;
+  final bool isConference;
+  final String callId;
 
   const _CallInfoTarget({
     required this.id,
     required this.isGroup,
+    this.isConference = false,
+    this.callId = "",
   });
 }

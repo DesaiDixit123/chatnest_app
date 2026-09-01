@@ -173,62 +173,94 @@ abstract class Utility {
       if (callManager.isCallIdActive(callid.id)) {
         if (callManager.connectedAt.value != null) {
           final diffSec = DateTime.now().difference(callManager.connectedAt.value!).inSeconds;
-          return "Ongoing (${formatDuration(diffSec)})";
+          return "Ongoing (${formatDuration(diffSec > 0 ? diffSec : 0)})";
         }
         return "Ongoing";
       }
     }
 
-    // 2. Check if call was ANSWERED/CONNECTED
-    int minStartedAt = 0;
-    int maxEndedAt = 0;
-    bool wasConnected = false;
-
-    for (var m in members) {
-      final s = (m.startedAt is num) ? (m.startedAt as num).toInt() : 0;
-      final e = (m.endedAt is num) ? (m.endedAt as num).toInt() : 0;
-      if (s > 0) {
-        wasConnected = true;
-        if (minStartedAt == 0 || s < minStartedAt) {
-          minStartedAt = s;
-        }
-      }
-      if (e > 0) {
-        if (maxEndedAt == 0 || e > maxEndedAt) {
-          maxEndedAt = e;
-        }
-      }
-    }
-
     final callStatus = (callid.status ?? "").toString().toLowerCase().trim();
-    if (callStatus == "connected" || callStatus == "active") {
-      if (wasConnected && minStartedAt > 0) {
-        final diffSec = ((DateTime.now().millisecondsSinceEpoch - minStartedAt) / 1000).floor();
-        return "Ongoing (${formatDuration(diffSec)})";
+
+    // 2. Check if ongoing
+    if (callStatus == "active" || callStatus == "started" || callStatus == "ongoing" || callStatus == "connected") {
+      final startTime = (callid.callStartedAt is num && callid.callStartedAt > 0)
+          ? (callid.callStartedAt as num).toInt()
+          : ((callid.startTime is num && callid.startTime > 0)
+              ? (callid.startTime as num).toInt()
+              : 0);
+      if (startTime > 0) {
+        final diffSec = ((DateTime.now().millisecondsSinceEpoch - startTime) / 1000).floor();
+        return "Ongoing (${formatDuration(diffSec > 0 ? diffSec : 0)})";
       }
       return "Ongoing";
     }
 
-    if (wasConnected && minStartedAt > 0) {
-      if (maxEndedAt > minStartedAt) {
-        final durationSec = ((maxEndedAt - minStartedAt) / 1000).round();
-        return formatDuration(durationSec > 0 ? durationSec : 1);
-      } else if (callid.updatedAt != null && callid.updatedAt is DateTime) {
-        final durationSec = ((callid.updatedAt.millisecondsSinceEpoch - minStartedAt) / 1000).round();
-        if (durationSec > 0) {
-          return formatDuration(durationSec);
-        }
-      }
-      return "00:01";
+    // 3. Check if call was ANSWERED/CONNECTED and COMPLETED
+    int explicitDurationSec = 0;
+    if (callid.duration is num) {
+      explicitDurationSec = (callid.duration as num).toInt();
+    } else if (callid.duration != null) {
+      explicitDurationSec = int.tryParse(callid.duration.toString()) ?? 0;
     }
 
-    // 3. Not answered -> determine exact outcome
+    if (explicitDurationSec > 0) {
+      return formatDuration(explicitDurationSec);
+    }
+
+    int minStartedAt = 0;
+    int maxEndedAt = 0;
+    bool anyMemberConnected = false;
+
+    for (var m in members) {
+      final s = (m.startedAt is num) ? (m.startedAt as num).toInt() : 0;
+      final e = (m.endedAt is num) ? (m.endedAt as num).toInt() : 0;
+      final mStatus = (m.status ?? "").toString().toLowerCase().trim();
+      if (s > 0 || mStatus == "connected") {
+        anyMemberConnected = true;
+        if (s > 0 && (minStartedAt == 0 || s < minStartedAt)) {
+          minStartedAt = s;
+        }
+      }
+      if (e > 0 && (maxEndedAt == 0 || e > maxEndedAt)) {
+        maxEndedAt = e;
+      }
+    }
+
+    final bool isCompleted = callStatus == "ended" || callStatus == "completed";
+
+    if (isCompleted || anyMemberConnected) {
+      if (minStartedAt > 0 && maxEndedAt > minStartedAt) {
+        final durationSec = ((maxEndedAt - minStartedAt) / 1000).round();
+        return formatDuration(durationSec > 0 ? durationSec : 1);
+      }
+      final startTime = (callid.callStartedAt is num && callid.callStartedAt > 0)
+          ? (callid.callStartedAt as num).toInt()
+          : ((callid.startTime is num && callid.startTime > 0)
+              ? (callid.startTime as num).toInt()
+              : 0);
+      final endedTime = (callid.endedAt is num && callid.endedAt > 0)
+          ? (callid.endedAt as num).toInt()
+          : 0;
+      if (startTime > 0 && endedTime > startTime) {
+        final durationSec = ((endedTime - startTime) / 1000).round();
+        return formatDuration(durationSec > 0 ? durationSec : 1);
+      }
+      if (isCompleted) {
+        return "00:01";
+      }
+    }
+
+    // 4. Not answered -> determine exact outcome
     if (callStatus == "rejected" || members.any((m) => m.status == "rejected")) {
       return "Declined";
     }
 
     if (callStatus == "cancelled") {
       return isOutgoing ? "Cancelled" : "Missed call";
+    }
+
+    if (callStatus == "missedcall" || callStatus == "missed") {
+      return isOutgoing ? "No answer" : "Missed call";
     }
 
     if (!isOutgoing) {

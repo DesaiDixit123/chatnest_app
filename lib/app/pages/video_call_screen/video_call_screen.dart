@@ -93,8 +93,12 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
 
   @override
   void dispose() {
-    // We no longer disposeAgora here to keep it active in background
-    Get.find<CallManagerService>().minimizeCall();
+    final controller = Get.isRegistered<VideoCallController>() ? Get.find<VideoCallController>() : null;
+    if (controller == null || !controller.isCallEnded) {
+      if (Get.isRegistered<CallManagerService>()) {
+        Get.find<CallManagerService>().minimizeCall();
+      }
+    }
     super.dispose();
   }
 
@@ -104,7 +108,12 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
       canPop: true,
       onPopInvoked: (didPop) {
         if (didPop) {
-          Get.find<CallManagerService>().minimizeCall();
+          final controller = Get.isRegistered<VideoCallController>() ? Get.find<VideoCallController>() : null;
+          if (controller == null || !controller.isCallEnded) {
+            if (Get.isRegistered<CallManagerService>()) {
+              Get.find<CallManagerService>().minimizeCall();
+            }
+          }
         }
       },
       child: GetBuilder<VideoCallController>(initState: (state) async {

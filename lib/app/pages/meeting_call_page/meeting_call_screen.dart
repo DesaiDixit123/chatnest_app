@@ -20,9 +20,12 @@ class MeetingCallScreen extends StatefulWidget {
 class _MeetingCallScreenState extends State<MeetingCallScreen> {
   @override
   void dispose() {
-    // We no longer end the call here so it persists in the background.
-    // CallManagerService will keep track of the active call.
-    Get.find<CallManagerService>().minimizeCall();
+    final controller = Get.isRegistered<MeetingCallController>() ? Get.find<MeetingCallController>() : null;
+    if (controller == null || !controller.isCallEnded) {
+      if (Get.isRegistered<CallManagerService>()) {
+        Get.find<CallManagerService>().minimizeCall();
+      }
+    }
     super.dispose();
   }
 
@@ -32,7 +35,12 @@ class _MeetingCallScreenState extends State<MeetingCallScreen> {
       canPop: true,
       onPopInvoked: (didPop) {
         if (didPop) {
-          Get.find<CallManagerService>().minimizeCall();
+          final controller = Get.isRegistered<MeetingCallController>() ? Get.find<MeetingCallController>() : null;
+          if (controller == null || !controller.isCallEnded) {
+            if (Get.isRegistered<CallManagerService>()) {
+              Get.find<CallManagerService>().minimizeCall();
+            }
+          }
         }
       },
       child: GetBuilder<MeetingCallController>(initState: (state) async {

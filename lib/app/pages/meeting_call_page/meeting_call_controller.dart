@@ -42,13 +42,16 @@ class MeetingCallController extends GetxController {
   String channelName = "";
   bool isMic = true;
   bool isVideo = true;
+  bool isCallEnded = false;
 
   Future<void> disposeAgora() async {
+    isCallEnded = true;
     users.clear();
     // Engine release moved to CallManagerService.endCall()
   }
 
   Future<void> _endMeetingGlobally() async {
+    isCallEnded = true;
     users.clear();
     
     if (isHost) {

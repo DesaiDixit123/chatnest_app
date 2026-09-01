@@ -115,6 +115,7 @@ class Calldata {
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final int? v;
+  final List<CallHistoryMember>? members;
 
   Calldata({
     this.id,
@@ -132,6 +133,7 @@ class Calldata {
     this.createdAt,
     this.updatedAt,
     this.v,
+    this.members,
   });
 
   factory Calldata.fromJson(Map<String, dynamic> json) => Calldata(
@@ -162,6 +164,11 @@ class Calldata {
             ? DateTime.tryParse(json["updatedAt"].toString())
             : null,
         v: int.tryParse(json["__v"]?.toString() ?? "0") ?? 0,
+        members: json["members"] is List
+            ? List<CallHistoryMember>.from((json["members"] as List)
+                .where((x) => x is Map<String, dynamic>)
+                .map((x) => CallHistoryMember.fromJson(x)))
+            : [],
       );
 
   Map<String, dynamic> toJson() => {
@@ -180,6 +187,9 @@ class Calldata {
         "createdAt": createdAt?.toIso8601String(),
         "updatedAt": updatedAt?.toIso8601String(),
         "__v": v,
+        "members": members == null
+            ? []
+            : List<dynamic>.from(members!.map((x) => x.toJson())),
       };
 }
 

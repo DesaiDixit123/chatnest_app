@@ -1071,7 +1071,7 @@ class DataRepository extends DomainRepository {
   // post call initiate api
   Future<ResponseModel> postCallInitaite({
     bool isLoading = false,
-    required String receiverId,
+    required dynamic receiverId,
     required bool isVideoCall,
     required bool isAudioCall,
     required bool isGroupCall,
@@ -1140,6 +1140,15 @@ class DataRepository extends DomainRepository {
   }) async =>
       connectHelper.postHistoryByGroup(
         groupid: groupid,
+        isLoading: isLoading,
+      );
+
+  Future<ResponseModel> postHistoryByCall({
+    bool isLoading = false,
+    required String callid,
+  }) async =>
+      connectHelper.postHistoryByCall(
+        callid: callid,
         isLoading: isLoading,
       );
 

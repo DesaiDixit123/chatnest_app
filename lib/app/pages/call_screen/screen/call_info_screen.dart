@@ -16,12 +16,16 @@ class CallInfoScreen extends StatelessWidget {
     final String targetId =
         args.isNotEmpty ? (args[0] ?? "").toString() : "";
     final bool isGroupHistory = args.length > 1 && args[1] == true;
+    final bool isConferenceHistory = args.length > 2 && args[2] == true;
+    final String callId = args.length > 3 ? (args[3] ?? "").toString() : "";
 
     return GetBuilder<CallController>(
       initState: (state) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           var controller = Get.find<CallController>();
-          if (isGroupHistory) {
+          if (isConferenceHistory) {
+            controller.postHistoryByCall(callId.isNotEmpty ? callId : targetId);
+          } else if (isGroupHistory) {
             controller.postHistoryByGroup(targetId);
           } else {
             controller.postHistoryByUser(targetId);
@@ -115,7 +119,9 @@ class CallInfoScreen extends StatelessWidget {
                       Dimens.boxHeight10,
                       TextButton(
                         onPressed: () {
-                          if (isGroupHistory) {
+                          if (isConferenceHistory) {
+                            controller.postHistoryByCall(callId.isNotEmpty ? callId : targetId);
+                          } else if (isGroupHistory) {
                             controller.postHistoryByGroup(targetId);
                           } else {
                             controller.postHistoryByUser(targetId);
@@ -201,16 +207,51 @@ class CallInfoScreen extends StatelessWidget {
                     children: [
                       InkWell(
                         onTap: () async {
-                          if (receiverId.isEmpty) return;
-                          if (await Utility.cameraPermissionCheack(context) &&
-                              await Utility.microphonePermissionCheack(context)) {
-                            Get.find<ChatController>().postCallInitaite(
-                              isLoading: false,
-                              receiverId: receiverId,
-                              isAudioCall: false,
-                              isGroupCall: isGroupHistory,
-                              isVideoCall: true,
-                            );
+                          final List<String> otherIds = otherMembers
+                              .map((m) => m.id ?? "")
+                              .where((id) => id.isNotEmpty && id != currentUserId)
+                              .toSet()
+                              .toList();
+
+                          final bool isConference = isConferenceHistory || otherIds.length > 1;
+                          final bool isGroup = isGroupHistory && (headerItem.togroup != null);
+
+                          if (isGroup) {
+                            if (await Utility.cameraPermissionCheack(context) &&
+                                await Utility.microphonePermissionCheack(context)) {
+                              Get.find<ChatController>().postGroupCallInitaite(
+                                isLoading: true,
+                                receiverId: headerItem.togroup?.id ?? "",
+                                isAudioCall: false,
+                                isVideoCall: true,
+                                isGroupCall: true,
+                              );
+                            }
+                          } else if (isConference) {
+                            if (otherIds.isEmpty) return;
+                            if (await Utility.cameraPermissionCheack(context) &&
+                                await Utility.microphonePermissionCheack(context)) {
+                              Get.find<ChatController>().postCallInitaite(
+                                isLoading: false,
+                                receiverId: otherIds.length > 1 ? otherIds : otherIds.first,
+                                isAudioCall: false,
+                                isGroupCall: otherIds.length > 1,
+                                isVideoCall: true,
+                              );
+                            }
+                          } else {
+                            final singleTarget = otherIds.isNotEmpty ? otherIds.first : receiverId;
+                            if (singleTarget.isEmpty) return;
+                            if (await Utility.cameraPermissionCheack(context) &&
+                                await Utility.microphonePermissionCheack(context)) {
+                              Get.find<ChatController>().postCallInitaite(
+                                isLoading: false,
+                                receiverId: singleTarget,
+                                isAudioCall: false,
+                                isGroupCall: false,
+                                isVideoCall: true,
+                              );
+                            }
                           }
                         },
                         child: SvgPicture.asset(
@@ -224,15 +265,48 @@ class CallInfoScreen extends StatelessWidget {
                       Dimens.boxWidth20,
                       InkWell(
                         onTap: () async {
-                          if (receiverId.isEmpty) return;
-                          if (await Utility.microphonePermissionCheack(context)) {
-                            Get.find<ChatController>().postCallInitaite(
-                              isLoading: false,
-                              receiverId: receiverId,
-                              isAudioCall: true,
-                              isGroupCall: isGroupHistory,
-                              isVideoCall: false,
-                            );
+                          final List<String> otherIds = otherMembers
+                              .map((m) => m.id ?? "")
+                              .where((id) => id.isNotEmpty && id != currentUserId)
+                              .toSet()
+                              .toList();
+
+                          final bool isConference = isConferenceHistory || otherIds.length > 1;
+                          final bool isGroup = isGroupHistory && (headerItem.togroup != null);
+
+                          if (isGroup) {
+                            if (await Utility.microphonePermissionCheack(context)) {
+                              Get.find<ChatController>().postGroupCallInitaite(
+                                isLoading: true,
+                                receiverId: headerItem.togroup?.id ?? "",
+                                isAudioCall: true,
+                                isGroupCall: true,
+                                isVideoCall: false,
+                              );
+                            }
+                          } else if (isConference) {
+                            if (otherIds.isEmpty) return;
+                            if (await Utility.microphonePermissionCheack(context)) {
+                              Get.find<ChatController>().postCallInitaite(
+                                isLoading: false,
+                                receiverId: otherIds.length > 1 ? otherIds : otherIds.first,
+                                isAudioCall: true,
+                                isGroupCall: otherIds.length > 1,
+                                isVideoCall: false,
+                              );
+                            }
+                          } else {
+                            final singleTarget = otherIds.isNotEmpty ? otherIds.first : receiverId;
+                            if (singleTarget.isEmpty) return;
+                            if (await Utility.microphonePermissionCheack(context)) {
+                              Get.find<ChatController>().postCallInitaite(
+                                isLoading: false,
+                                receiverId: singleTarget,
+                                isAudioCall: true,
+                                isGroupCall: false,
+                                isVideoCall: false,
+                              );
+                            }
                           }
                         },
                         child: SvgPicture.asset(
@@ -419,8 +493,12 @@ class CallInfoScreen extends StatelessWidget {
 
       final bool isOutgoing = _isOutgoing(item, currentUserId);
       final String callStatus = _checkCallStatus(item, currentUserId);
-      final bool isMissed =
-          callStatus == "Missed call" || callStatus == "No answer";
+      final bool isMissed = callStatus == "Missed call" ||
+          callStatus == "No answer" ||
+          callStatus == "Declined" ||
+          callStatus == "Cancelled" ||
+          callStatus == "missed_call" ||
+          callStatus == "no_answer";
       final Color statusColor = isMissed ? Colors.red : Colors.green;
       final int callTimestamp = _callTimestamp(item);
 
@@ -627,7 +705,7 @@ class CallInfoScreen extends StatelessWidget {
   String _headerSubtitle(CallHistoryByUserData item, String currentUserId) {
     final List<ChatListsFrom> others = _otherMembers(item, currentUserId);
     if (others.length > 1) {
-      return "${others.length} ${'people'.tr}";
+      return "${others.length + 1} ${'people'.tr}";
     }
 
     final ChatListsFrom? otherParty = _otherParty(item, currentUserId);
@@ -671,6 +749,19 @@ class CallInfoScreen extends StatelessWidget {
       result.add(user!);
     }
 
+    if (item.from != null && (item.from!.id ?? "").isNotEmpty && item.from!.id != currentUserId && !seenIds.contains(item.from!.id)) {
+      seenIds.add(item.from!.id!);
+      result.add(item.from!);
+    }
+    if (item.touser != null && (item.touser!.id ?? "").isNotEmpty && item.touser!.id != currentUserId && !seenIds.contains(item.touser!.id)) {
+      seenIds.add(item.touser!.id!);
+      result.add(item.touser!);
+    }
+    if (item.initiatedby != null && (item.initiatedby!.id ?? "").isNotEmpty && item.initiatedby!.id != currentUserId && !seenIds.contains(item.initiatedby!.id)) {
+      seenIds.add(item.initiatedby!.id!);
+      result.add(item.initiatedby!);
+    }
+
     return result;
   }
 
@@ -712,6 +803,12 @@ class CallInfoScreen extends StatelessWidget {
   }
 
   String _checkCallStatus(CallHistoryByUserData item, String currentUserId) {
+    if (item.duration != null && item.duration! > 0) {
+      return _formatDuration(0, item.duration! * 1000);
+    }
+
+    final String callStatus = (item.status ?? "").toLowerCase().trim();
+    final bool isOutgoing = _isOutgoing(item, currentUserId);
     final List<CallHistoryMember> members =
         item.members ?? <CallHistoryMember>[];
 
@@ -723,45 +820,54 @@ class CallInfoScreen extends StatelessWidget {
       }
     }
 
-    if (myMember != null) {
-      if ((myMember.startedAt ?? 0) > 0) {
-        final int startedAt = myMember.startedAt ?? 0;
-        final int endedAt = (myMember.endedAt ?? 0) > 0
-            ? (myMember.endedAt ?? 0)
-            : DateTime.now().millisecondsSinceEpoch;
-        return _formatDuration(startedAt, endedAt);
-      }
+    int minStartedAt = (item.startTime != null && item.startTime! > 0) ? item.startTime! : 0;
+    int maxEndedAt = (item.endedAt != null && item.endedAt! > 0) ? item.endedAt! : 0;
+    bool anyMemberConnected = (myMember != null && (myMember.startedAt ?? 0) > 0);
 
-      if (myMember.status == "ringing" || myMember.status == "disconnected") {
-        return "Missed call";
-      }
-
-      return "No answer";
-    }
-
-    CallHistoryMember? connectedMember;
     for (final member in members) {
-      if ((member.startedAt ?? 0) > 0) {
-        connectedMember = member;
-        break;
+      final s = member.startedAt ?? 0;
+      final e = member.endedAt ?? 0;
+      final mStatus = (member.status ?? "").toLowerCase().trim();
+      if (s > 0 || mStatus == "connected") {
+        anyMemberConnected = true;
+        if (s > 0 && (minStartedAt == 0 || s < minStartedAt)) minStartedAt = s;
+      }
+      if (e > 0 && (maxEndedAt == 0 || e > maxEndedAt)) {
+        maxEndedAt = e;
       }
     }
 
-    if (connectedMember != null) {
-      final int startedAt = connectedMember.startedAt ?? 0;
-      final int endedAt = (connectedMember.endedAt ?? 0) > 0
-          ? (connectedMember.endedAt ?? 0)
-          : DateTime.now().millisecondsSinceEpoch;
-      return _formatDuration(startedAt, endedAt);
+    final bool isCompleted = callStatus == "ended" || callStatus == "completed";
+
+    if (isCompleted || anyMemberConnected) {
+      if (minStartedAt > 0 && maxEndedAt > minStartedAt) {
+        return _formatDuration(minStartedAt, maxEndedAt);
+      }
+      final startTime = (item.callStartedAt != null && item.callStartedAt! > 0)
+          ? item.callStartedAt!
+          : ((item.startTime != null && item.startTime! > 0) ? item.startTime! : 0);
+      final endedTime = (item.endedAt != null && item.endedAt! > 0) ? item.endedAt! : 0;
+      if (startTime > 0 && endedTime > startTime) {
+        return _formatDuration(startTime, endedTime);
+      }
+      if (isCompleted) {
+        return "1s";
+      }
     }
 
-    final bool isMissed = members.any(
-      (member) =>
-          ((member.status == "ringing" || member.status == "disconnected") &&
-              (member.startedAt ?? 0) == 0),
-    );
+    if (callStatus == "rejected" || members.any((m) => m.status == "rejected")) {
+      return "Declined";
+    }
 
-    return isMissed ? "missed_call" : "no_answer";
+    if (callStatus == "cancelled") {
+      return isOutgoing ? "Cancelled" : "Missed call";
+    }
+
+    if (callStatus == "missedcall" || callStatus == "missed") {
+      return isOutgoing ? "No answer" : "Missed call";
+    }
+
+    return isOutgoing ? "No answer" : "Missed call";
   }
 
   String _formatDuration(int startedAt, int endedAt) {

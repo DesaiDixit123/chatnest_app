@@ -1,5 +1,6 @@
 <manifest xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:installLocation="auto">
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -40,7 +41,7 @@
 
     <application
         android:label="ChatNest"
-        android:name="${applicationName}"
+        android:name=".ChatNestApplication"
         android:enableOnBackInvokedCallback="true"
         android:usesCleartextTraffic="true"
         android:icon="@mipmap/ic_launcher">

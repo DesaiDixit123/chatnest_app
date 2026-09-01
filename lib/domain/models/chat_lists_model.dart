@@ -366,6 +366,10 @@ class ChatListsCallid {
   DateTime? createdAt;
   DateTime? updatedAt;
   int? v;
+  int? duration;
+  int? startTime;
+  int? endedAt;
+  int? callStartedAt;
 
   ChatListsCallid({
     this.id,
@@ -384,6 +388,10 @@ class ChatListsCallid {
     this.createdAt,
     this.updatedAt,
     this.v,
+    this.duration,
+    this.startTime,
+    this.endedAt,
+    this.callStartedAt,
   });
 
   factory ChatListsCallid.fromJson(Map<String, dynamic> json) =>
@@ -420,6 +428,18 @@ class ChatListsCallid {
             ? null
             : DateTime.tryParse(json["updatedAt"].toString()),
         v: _parseNum(json["__v"]).toInt(),
+        duration: json["duration"] is num
+            ? (json["duration"] as num).toInt()
+            : int.tryParse(json["duration"]?.toString() ?? ""),
+        startTime: json["startTime"] is num
+            ? (json["startTime"] as num).toInt()
+            : int.tryParse(json["startTime"]?.toString() ?? ""),
+        endedAt: json["endedAt"] is num
+            ? (json["endedAt"] as num).toInt()
+            : int.tryParse(json["endedAt"]?.toString() ?? ""),
+        callStartedAt: json["callStartedAt"] is num
+            ? (json["callStartedAt"] as num).toInt()
+            : int.tryParse(json["callStartedAt"]?.toString() ?? ""),
       );
 
   Map<String, dynamic> toJson() => {
@@ -441,6 +461,10 @@ class ChatListsCallid {
         "createdAt": createdAt?.toIso8601String(),
         "updatedAt": updatedAt?.toIso8601String(),
         "__v": v,
+        "duration": duration,
+        "startTime": startTime,
+        "endedAt": endedAt,
+        "callStartedAt": callStartedAt,
       };
 }
 

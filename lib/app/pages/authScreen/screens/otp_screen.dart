@@ -17,17 +17,19 @@ class OtpScreen extends StatelessWidget {
         controller.otpTextEditingController = TextEditingController();
         controller.counter = 30;
         controller.startTimer();
-        if (Get.arguments != null && Get.arguments is List && (Get.arguments as List).isNotEmpty) {
+        if (Get.arguments is List && (Get.arguments as List).isNotEmpty) {
           final args = Get.arguments as List;
-          if (args.isNotEmpty && args[0] != null && args[0].toString().isNotEmpty) {
-            if (controller.sendOtpData == null) {
-              controller.sendOtpData = SendOtpData(key: args[0].toString());
-            } else {
-              controller.sendOtpData!.key = args[0].toString();
-            }
+          final passedKey = (args[0] ?? "").toString();
+          final passedMobile = args.length > 2 ? (args[2] ?? "").toString() : "";
+          if (passedMobile.isNotEmpty && controller.phonenumbercontroller.text.isEmpty) {
+            controller.phonenumbercontroller.text = passedMobile;
           }
-          if (args.length > 2 && args[2] != null && args[2].toString().isNotEmpty) {
-            controller.phonenumbercontroller.text = args[2].toString();
+          if (passedKey.isNotEmpty) {
+            if (controller.sendOtpData == null) {
+              controller.sendOtpData = SendOtpData(key: passedKey, userid: "");
+            } else {
+              controller.sendOtpData?.key = passedKey;
+            }
           }
         }
       },
@@ -59,8 +61,7 @@ class OtpScreen extends StatelessWidget {
                 ),
                 Dimens.boxHeight10,
                 Text(
-                  "${"enter_otp_you_received".tr}\n${controller.dailcode} ${controller.phonenumbercontroller.text.isNotEmpty ? controller.phonenumbercontroller.text : (Get.arguments != null && Get.arguments is List && (Get.arguments as List).length > 2 ? (Get.arguments as List)[2] : '')}"
-                      .tr,
+                  "${"enter_otp_you_received".tr}\n${controller.dailcode} ${controller.phonenumbercontroller.text.isNotEmpty ? controller.phonenumbercontroller.text : (Get.arguments is List && (Get.arguments as List).length > 2 ? Get.arguments[2] : '')}",
                   style: Styles.hinttext40014,
                   textAlign: TextAlign.center,
                 ),
@@ -153,11 +154,10 @@ class OtpScreen extends StatelessWidget {
                       : ColorsValue.maincolor1.withOpacity(0.4),
                   onTap: controller.isbuttonactivate
                       ? () {
-                          final isChangeNumber = Get.arguments != null &&
-                              Get.arguments is List &&
+                          final isChange = Get.arguments is List &&
                               (Get.arguments as List).length > 1 &&
-                              ((Get.arguments as List)[1] == true);
-                          if (isChangeNumber) {
+                              (Get.arguments[1] == true);
+                          if (isChange) {
                             controller.postChangeNumberVerify();
                           } else {
                             controller.verifyOtpApi();

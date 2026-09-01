@@ -1,6 +1,7 @@
 import 'package:chatnest/app/navigators/routes_management.dart';
 import 'package:chatnest/app/pages/audio_call_screen/audio_call_controller.dart';
 import 'package:chatnest/app/pages/video_call_screen/video_call_controller.dart';
+import 'package:chatnest/app/pages/meeting_call_page/meeting_call_controller.dart';
 import 'package:get/get.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 
@@ -17,6 +18,7 @@ class CallManagerService extends GetxService {
   final RxString activeUserImage = "".obs;
   final RxList<String> activeParticipantNames = <String>[].obs;
   final Rx<DateTime?> connectedAt = Rx<DateTime?>(null);
+  final Rx<DateTime?> callStartedAt = Rx<DateTime?>(null);
 
   RtcEngine? agoraEngine;
 
@@ -36,7 +38,19 @@ class CallManagerService extends GetxService {
     String userName = "",
     String userImage = "",
     List<String>? participantNames,
+    DateTime? startTime,
   }) {
+    final isNewCallSession = activeCallId.value.isEmpty || activeCallId.value != callId;
+    if (isNewCallSession) {
+      connectedAt.value = null;
+      callStartedAt.value = null;
+    }
+
+    if (startTime != null) {
+      callStartedAt.value = startTime;
+      connectedAt.value = startTime;
+    }
+
     activeCallType.value = type;
     activeChannelName.value = channelName;
     activeCallId.value = callId;
@@ -76,12 +90,16 @@ class CallManagerService extends GetxService {
     activeUserImage.value = "";
     activeParticipantNames.clear();
     connectedAt.value = null;
+    callStartedAt.value = null;
 
     if (Get.isRegistered<AudioCallController>()) {
       Get.delete<AudioCallController>(force: true);
     }
     if (Get.isRegistered<VideoCallController>()) {
       Get.delete<VideoCallController>(force: true);
+    }
+    if (Get.isRegistered<MeetingCallController>()) {
+      Get.delete<MeetingCallController>(force: true);
     }
   }
 

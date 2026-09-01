@@ -358,7 +358,7 @@ class ChatUsecases {
   // post call initiate api
   Future<GetCallInitiatedDataModel?> postCallInitaite({
     bool isLoading = false,
-    required String receiverId,
+    required dynamic receiverId,
     required bool isVideoCall,
     required bool isAudioCall,
     required bool isGroupCall,

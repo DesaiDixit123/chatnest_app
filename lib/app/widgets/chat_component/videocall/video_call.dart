@@ -1,4 +1,5 @@
 import 'package:chatnest/app/app.dart';
+import 'package:chatnest/app/navigators/navigators.dart';
 import 'package:chatnest/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -36,6 +37,36 @@ class VideoCall extends StatelessWidget {
                 final callManager = Get.find<CallManagerService>();
                 if (callManager.isCallIdActive(chatListsDocData.callid?.id)) {
                   callManager.returnToCall();
+                  return;
+                }
+              }
+              final call = chatListsDocData.callid;
+              if (call != null && (call.id ?? "").isNotEmpty) {
+                final List members = (call.members is List) ? (call.members as List) : [];
+                final isConference = (call.isgroupcall ?? false && call.togroup == null) ||
+                    (members.length > 2);
+                if (isConference) {
+                  RouteManagement.goToCallInfoScreen(
+                    call.id ?? "",
+                    isGroup: false,
+                    isConference: true,
+                    callId: call.id ?? "",
+                  );
+                } else if (call.togroup != null) {
+                  RouteManagement.goToCallInfoScreen(
+                    call.togroup?.id ?? "",
+                    isGroup: true,
+                  );
+                } else {
+                  final otherUserId = isSend
+                      ? (chatListsDocData.to?.id ?? "")
+                      : (chatListsDocData.from?.id ?? "");
+                  if (otherUserId.isNotEmpty) {
+                    RouteManagement.goToCallInfoScreen(
+                      otherUserId,
+                      isGroup: false,
+                    );
+                  }
                 }
               }
             },

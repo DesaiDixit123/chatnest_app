@@ -302,8 +302,12 @@ class _AudioCallScreenState extends State<AudioCallScreen> {
 
   @override
   void dispose() {
-    // We no longer disposeAgora here to keep it active in background
-    Get.find<CallManagerService>().minimizeCall();
+    final controller = Get.isRegistered<AudioCallController>() ? Get.find<AudioCallController>() : null;
+    if (controller == null || !controller.isCallEnded) {
+      if (Get.isRegistered<CallManagerService>()) {
+        Get.find<CallManagerService>().minimizeCall();
+      }
+    }
     super.dispose();
   }
 
@@ -313,7 +317,12 @@ class _AudioCallScreenState extends State<AudioCallScreen> {
       canPop: true,
       onPopInvoked: (didPop) {
         if (didPop) {
-          Get.find<CallManagerService>().minimizeCall();
+          final controller = Get.isRegistered<AudioCallController>() ? Get.find<AudioCallController>() : null;
+          if (controller == null || !controller.isCallEnded) {
+            if (Get.isRegistered<CallManagerService>()) {
+              Get.find<CallManagerService>().minimizeCall();
+            }
+          }
         }
       },
       child: GetBuilder<AudioCallController>(initState: (state) async {
@@ -341,20 +350,31 @@ class _AudioCallScreenState extends State<AudioCallScreen> {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.only(left: 8.0, top: 4.0, bottom: 2.0),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      color: Colors.black87,
-                      size: 22,
+                padding: const EdgeInsets.only(left: 8.0, top: 4.0, right: 8.0, bottom: 2.0),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          color: Colors.black87,
+                          size: 22,
+                        ),
+                        onPressed: () {
+                          Get.find<CallManagerService>().minimizeCall();
+                          Get.back();
+                        },
+                      ),
                     ),
-                    onPressed: () {
-                      Get.find<CallManagerService>().minimizeCall();
-                      Get.back();
-                    },
-                  ),
+                    Center(
+                      child: Text(
+                        controller.callStatusText,
+                        style: Styles.black70018.copyWith(fontSize: 16),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               if (controller.pendingInvitees.isNotEmpty)

@@ -16,14 +16,39 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
+import android.app.KeyguardManager
+import android.view.WindowManager
+
 class MainActivity : FlutterActivity() {
     private var initialCallData: HashMap<String, Any?>? = null
     private var helloWorldChannel: MethodChannel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(true)
+            setTurnScreenOn(true)
+            val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
+            keyguardManager?.requestDismissKeyguard(this, null)
+        } else {
+            @Suppress("DEPRECATION")
+            window.addFlags(
+                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
+                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+            )
+        }
         createCallNotificationChannel()
         handleIntent(intent)
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(true)
+            setTurnScreenOn(true)
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -37,12 +62,18 @@ class MainActivity : FlutterActivity() {
             val notificationManager =
                 getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager ?: return
 
-            val soundUri =
-                Uri.parse("android.resource://" + packageName + "/" + R.raw.ringtone_default)
-            val audioAttributes = AudioAttributes.Builder()
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
-                .build()
+            // Unconditionally delete legacy channels that had sounds attached to eliminate double ringing
+            val legacyChannelIds = listOf(
+                "callkit_incoming_channel_id",
+                "incoming_call_channel_id",
+                "ChatNest Incoming Calls",
+                "callkit_incoming_channel_id_v2"
+            )
+            for (legacyId in legacyChannelIds) {
+                try {
+                    notificationManager.deleteNotificationChannel(legacyId)
+                } catch (_: Exception) {}
+            }
 
             val channelIds = listOf(
                 "callkit_incoming_channel_id",
@@ -51,17 +82,13 @@ class MainActivity : FlutterActivity() {
             )
 
             for (channelId in channelIds) {
-                try {
-                    notificationManager.deleteNotificationChannel(channelId)
-                } catch (_: Exception) {}
-
                 val channel = NotificationChannel(
                     channelId,
                     "Incoming Calls",
                     NotificationManager.IMPORTANCE_HIGH
                 ).apply {
                     description = "Incoming call notifications"
-                    setSound(null, null)
+                    setSound(null, null) // FlutterCallkitIncoming plays ringtone directly via MediaPlayer; channel sound must be null to prevent double ringing
                     enableVibration(true)
                     vibrationPattern = longArrayOf(0, 1000, 500, 1000, 500, 1000)
                     lockscreenVisibility = Notification.VISIBILITY_PUBLIC
@@ -73,12 +100,17 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun handleIntent(intent: Intent?) {
-        if (intent != null && intent.action == "com.hiennv.flutter_callkit_incoming.ACTION_CALL_ACCEPT") {
+        if (intent != null) {
             val extras = intent.extras
             if (extras != null) {
                 val callData = fromBundle(extras)
-                initialCallData = callData
-                helloWorldChannel?.invokeMethod("CALL_ACCEPTED_INTENT", callData)
+                if (intent.action == "com.hiennv.flutter_callkit_incoming.ACTION_CALL_ACCEPT") {
+                    initialCallData = callData
+                    helloWorldChannel?.invokeMethod("CALL_ACCEPTED_INTENT", callData)
+                } else if (intent.action == "com.hiennv.flutter_callkit_incoming.ACTION_CALL_DECLINE" ||
+                           intent.action == "com.hiennv.flutter_callkit_incoming.ACTION_CALL_ENDED") {
+                    helloWorldChannel?.invokeMethod("CALL_DECLINED_INTENT", callData)
+                }
             }
         }
     }

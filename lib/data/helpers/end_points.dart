@@ -97,6 +97,7 @@ class EndPoints {
   static String postChatJoinCall = "call/joincall";
   static String postHistoryByUser = "call/historybyuser";
   static String postHistoryByGroup = "call/historybygroup";
+  static String postHistoryByCall = "call/historybycall";
   static String postKickMember = "call/kickmember";
 
   static String postListBroadcast = "broadcast";

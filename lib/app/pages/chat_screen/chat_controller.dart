@@ -1920,7 +1920,7 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
   // post call initiate api
   Future<void> postCallInitaite({
     bool isLoading = false,
-    required String receiverId,
+    required dynamic receiverId,
     required bool isVideoCall,
     required bool isAudioCall,
     required bool isGroupCall,
@@ -1939,19 +1939,52 @@ class ChatController extends GetxController with GetTickerProviderStateMixin {
             MessageType.error, () => Get.back(), 'Okay');
         return;
       }
-      final resolvedUser = Utility.resolveUserDisplay(
-        userId: receiverId.toString(),
-        fullname: response.data.calldata.touser?.fullname,
-        nickname: response.data.calldata.touser?.nickname,
-        mobile: response.data.calldata.touser?.mobile,
-        profileimage: response.data.calldata.touser?.profileimage,
-      );
-      final finalUserName = (resolvedUser['name']?.isNotEmpty == true && resolvedUser['name'] != "User")
-          ? resolvedUser['name']!
-          : (response.data.calldata.touser?.mobile ?? "User");
-      final finalUserImage = (resolvedUser['image']?.isNotEmpty == true)
-          ? resolvedUser['image']!
-          : (response.data.calldata.touser?.profileimage ?? "");
+
+      final bool isMulti = (receiverId is List && (receiverId as List).length > 1) ||
+          (response.data.calldata.members != null && response.data.calldata.members!.length > 2);
+
+      String finalUserName = "Conference Call";
+      String finalUserImage = "";
+
+      if (!isMulti && response.data.calldata.touser != null) {
+        final resolvedUser = Utility.resolveUserDisplay(
+          userId: receiverId.toString(),
+          fullname: response.data.calldata.touser?.fullname,
+          nickname: response.data.calldata.touser?.nickname,
+          mobile: response.data.calldata.touser?.mobile,
+          profileimage: response.data.calldata.touser?.profileimage,
+        );
+        finalUserName = (resolvedUser['name']?.isNotEmpty == true && resolvedUser['name'] != "User")
+            ? resolvedUser['name']!
+            : (response.data.calldata.touser?.mobile ?? "User");
+        finalUserImage = (resolvedUser['image']?.isNotEmpty == true)
+            ? resolvedUser['image']!
+            : (response.data.calldata.touser?.profileimage ?? "");
+      } else if (isMulti) {
+        final members = response.data.calldata.members ?? [];
+        final currentUserId = Get.find<Repository>().getStringValue(LocalKeys.userIds);
+        final names = <String>[];
+        for (var m in members) {
+          final u = m.memberid;
+          if (u == null || u.id == currentUserId) continue;
+          final r = Utility.resolveUserDisplay(
+            userId: u.id,
+            fullname: u.fullname,
+            nickname: u.nickname,
+            mobile: u.mobile,
+          );
+          final n = r['name'] ?? "";
+          if (n.isNotEmpty && n != "User" && !names.contains(n)) {
+            names.add(n);
+          }
+        }
+        if (names.isNotEmpty) {
+          finalUserName = names.take(3).join(", ");
+        }
+      }
+
+      print("\n[CALL][OUTGOING]");
+      print("callId=${response.data.calldata.id}\n");
 
       if (isAudioCall) {
         RouteManagement.goToAudioCallScreen(

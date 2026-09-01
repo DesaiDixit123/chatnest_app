@@ -37,6 +37,15 @@ class CallPresenter {
         groupid: groupid,
       );
 
+  Future<CallHistoryByUserModel?> postHistoryByCall({
+    required String callid,
+    bool isLoading = false,
+  }) async =>
+      await callUsecases.postHistoryByCall(
+        isLoading: isLoading,
+        callid: callid,
+      );
+
   Future<ContactListModel?> postSyncContacts({
     required List<Map<String, dynamic>> contactLists,
     bool isLoading = false,
