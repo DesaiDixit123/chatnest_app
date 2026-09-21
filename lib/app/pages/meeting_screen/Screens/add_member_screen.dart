@@ -65,8 +65,6 @@ class AddMembersScreen extends StatelessWidget {
           onPressed: () {
             if (controller.selectedMemberList.isEmpty) {
               Utility.errorMessage("please_select_member".tr);
-            } else if (controller.selectedMemberList.length < 2) {
-              Utility.errorMessage("At least 2 Members must be selected");
             } else {
               controller.postSaveMetting();
             }
@@ -91,11 +89,7 @@ class AddMembersScreen extends StatelessWidget {
                 ),
                 onChanged: (value) {
                   _debouncer.run(() {
-                    Future.sync(
-                      () {
-                        return controller.myFriendsWithoutPaginationList();
-                      },
-                    );
+                    controller.filterMembers(value);
                   });
                 },
               ),
@@ -195,8 +189,7 @@ class AddMembersScreen extends StatelessWidget {
                                   Dimens.boxHeight5,
                                   Text(
                                     controller.selectedMemberList[index]
-                                            .fullname ??
-                                        "",
+                                        .displayName,
                                     overflow: TextOverflow.ellipsis,
                                     maxLines: 1,
                                     style: Styles.greyColor888840010,
@@ -211,113 +204,119 @@ class AddMembersScreen extends StatelessWidget {
               ),
               Dimens.boxHeight10,
               Expanded(
-                  child: ListView.builder(
-                itemCount: controller.memberLists.length,
-                itemBuilder: (context, index) {
-                  return InkWell(
-                    onTap: () {
-                      var i = controller.selectedMemberList.indexWhere(
-                          (element) =>
-                              element.userid ==
-                              controller.memberLists[index].userid);
-                      if (i.isNegative) {
-                        controller.selectedMemberList
-                            .add(controller.memberLists[index]);
-                      } else {
-                        controller.selectedMemberList.removeAt(i);
-                      }
+                child: controller.isLoadingMembers
+                    ? const Center(child: CircularProgressIndicator())
+                    : controller.memberLists.isEmpty
+                        ? Center(
+                            child: Text(
+                              'no_data_found'.tr,
+                              style: Styles.greyColor888840014,
+                            ),
+                          )
+                        : ListView.builder(
+                            itemCount: controller.memberLists.length,
+                            itemBuilder: (context, index) {
+                              final member = controller.memberLists[index];
+                              final isSelected = controller.selectedMemberList
+                                  .any((element) =>
+                                      element.userid == member.userid);
+                              final displayName = member.displayName;
+                              final mobile = (member.mobile ?? "").trim();
 
-                      controller.update();
-                    },
-                    child: ListTile(
-                      contentPadding: Dimens.edgeInsets0,
-                      leading: Stack(
-                        children: [
-                          Container(
-                            height: Dimens.fifty,
-                            width: Dimens.fifty,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(
-                                Dimens.hundred,
-                              ),
-                              color: ColorsValue.blackColor,
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(
-                                Dimens.hundred,
-                              ),
-                              child: CachedNetworkImage(
-                                imageUrl: ApiWrapper.imageUrl +
-                                    (controller
-                                            .memberLists[index].profileimage ??
-                                        ""),
-                                fit: BoxFit.cover,
-                                maxHeightDiskCache: 300,
-                                maxWidthDiskCache: 300,
-                                width: Dimens.fifty,
-                                height: Dimens.fifty,
-                                placeholder: (context, url) => Center(
-                                  child: Image.asset(
-                                    AssetConstants.usera,
-                                    height: Dimens.fifty,
+                              return InkWell(
+                                onTap: () {
+                                  var i = controller.selectedMemberList
+                                      .indexWhere((element) =>
+                                          element.userid == member.userid);
+                                  if (i.isNegative) {
+                                    controller.selectedMemberList.add(member);
+                                  } else {
+                                    controller.selectedMemberList.removeAt(i);
+                                  }
+                                  controller.update();
+                                },
+                                child: ListTile(
+                                  contentPadding: Dimens.edgeInsets0,
+                                  leading: Stack(
+                                    children: [
+                                      CircleAvatar(
+                                        radius: Dimens.twentyFive,
+                                        backgroundColor: ColorsValue.maincolor1
+                                            .withOpacity(0.15),
+                                        backgroundImage: (member.profileimage !=
+                                                    null &&
+                                                member.profileimage!
+                                                    .trim()
+                                                    .isNotEmpty)
+                                            ? NetworkImage(ApiWrapper.imageUrl +
+                                                member.profileimage!)
+                                            : null,
+                                        child: (member.profileimage == null ||
+                                                member.profileimage!
+                                                    .trim()
+                                                    .isEmpty)
+                                            ? Text(
+                                                displayName.isNotEmpty
+                                                    ? displayName[0]
+                                                        .toUpperCase()
+                                                    : "U",
+                                                style: TextStyle(
+                                                  color:
+                                                      ColorsValue.maincolor1,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: Dimens.eighteen,
+                                                ),
+                                              )
+                                            : null,
+                                      ),
+                                      if (isSelected)
+                                        Positioned(
+                                          right: 0,
+                                          bottom: 0,
+                                          child: Container(
+                                            height: Dimens.eighteen,
+                                            width: Dimens.eighteen,
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                Dimens.hundred,
+                                              ),
+                                              color: ColorsValue.maincolor1,
+                                              border: Border.all(
+                                                color: ColorsValue.white,
+                                                width: Dimens.one,
+                                              ),
+                                            ),
+                                            child: Center(
+                                              child: Icon(
+                                                Icons.done,
+                                                size: Dimens.twelve,
+                                                color: ColorsValue.white,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                  title: Text(
+                                    displayName,
+                                    style: Styles.black50016,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  subtitle: Text(
+                                    mobile.isNotEmpty
+                                        ? mobile
+                                        : (member.aboutme ?? ""),
+                                    style: Styles.greyColor888840012,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                                errorWidget: (context, url, error) =>
-                                    Image.asset(AssetConstants.usera),
-                              ),
-                            ),
+                              );
+                            },
                           ),
-                          Visibility(
-                            visible: controller.selectedMemberList.any(
-                              (element) =>
-                                  element.userid ==
-                                  controller.memberLists[index].userid,
-                            )
-                                ? true
-                                : false,
-                            child: Positioned(
-                              right: 0,
-                              bottom: 0,
-                              child: Container(
-                                height: Dimens.eighteen,
-                                width: Dimens.eighteen,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(
-                                    Dimens.hundred,
-                                  ),
-                                  color: ColorsValue.maincolor1,
-                                  border: Border.all(
-                                    color: ColorsValue.white,
-                                    width: Dimens.one,
-                                  ),
-                                ),
-                                child: Center(
-                                  child: Icon(
-                                    Icons.done,
-                                    size: Dimens.twelve,
-                                    color: ColorsValue.white,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      title: Text(
-                        controller.memberLists[index].fullname?.isEmpty ?? false
-                            ? (controller.memberLists[index].nickname ?? "")
-                            : controller.memberLists[index].nickname ?? "",
-                        style: Styles.black50016,
-                      ),
-                      subtitle: Text(
-                          controller.memberLists[index].aboutme ?? "",
-                          style: Styles.greyColor888840012,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis),
-                    ),
-                  );
-                },
-              ))
+              )
             ],
           ),
         ),

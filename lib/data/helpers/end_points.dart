@@ -248,4 +248,13 @@ class EndPoints {
   static String postMeetingCancle = "meeting/cancel";
   static String postGroupListWithoutPaging = "groups/list";
   static String getUserStatus = 'status/getuserstatus';
+
+  // Plans & Membership
+  static String getPlansList = 'plans/list-all';
+  static String createOrder = 'plans/create-order';
+  static String verifyPayment = 'plans/verify-payment';
+  static String subscribePlan = 'plans/subscribe';
+  static String getMySubscription = 'plans/my-subscription';
+  static String getGst = 'plans/gst';
+  static String getMyInvoices = 'plans/my-invoices';
 }

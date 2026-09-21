@@ -2381,4 +2381,89 @@ class DataRepository extends DomainRepository {
         fcmToken: fcmToken,
         isLoading: isLoading,
       );
+
+  Future<ResponseModel> getPlansList({
+    bool isLoading = false,
+  }) async =>
+      connectHelper.getPlansList(
+        isLoading: isLoading,
+      );
+
+  Future<ResponseModel> subscribePlan({
+    bool isLoading = true,
+    required String planId,
+    required int durationDays,
+    required String durationLabel,
+    required double price,
+    String? paymentId,
+    String? orderId,
+    String? paymentMethod,
+  }) async =>
+      connectHelper.subscribePlan(
+        isLoading: isLoading,
+        planId: planId,
+        durationDays: durationDays,
+        durationLabel: durationLabel,
+        price: price,
+        paymentId: paymentId,
+        orderId: orderId,
+        paymentMethod: paymentMethod,
+      );
+
+  Future<ResponseModel> createPaymentOrder({
+    bool isLoading = true,
+    required String planId,
+    required int durationDays,
+    required String durationLabel,
+    required double price,
+  }) async =>
+      connectHelper.createPaymentOrder(
+        isLoading: isLoading,
+        planId: planId,
+        durationDays: durationDays,
+        durationLabel: durationLabel,
+        price: price,
+      );
+
+  Future<ResponseModel> verifyPlanPayment({
+    bool isLoading = true,
+    required String planId,
+    required int durationDays,
+    required String durationLabel,
+    required double price,
+    required String paymentId,
+    String? orderId,
+    String? signature,
+  }) async =>
+      connectHelper.verifyPlanPayment(
+        isLoading: isLoading,
+        planId: planId,
+        durationDays: durationDays,
+        durationLabel: durationLabel,
+        price: price,
+        paymentId: paymentId,
+        orderId: orderId,
+        signature: signature,
+      );
+
+  Future<ResponseModel> getMySubscription({
+    bool isLoading = false,
+  }) async =>
+      connectHelper.getMySubscription(
+        isLoading: isLoading,
+      );
+
+  Future<ResponseModel> getGst({
+    bool isLoading = false,
+  }) async =>
+      connectHelper.getGst(
+        isLoading: isLoading,
+      );
+
+  Future<ResponseModel> getMyInvoices({
+    bool isLoading = false,
+  }) async =>
+      connectHelper.getMyInvoices(
+        isLoading: isLoading,
+      );
 }

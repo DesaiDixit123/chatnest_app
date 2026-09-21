@@ -116,42 +116,50 @@ class JoinMeetingScreen extends StatelessWidget {
                               ],
                             ),
                             trailing: item.status != "cancel"
-                                ? Visibility(
-                                    visible:
-                                        item.agorameta?.token?.isNotEmpty ??
-                                                false
-                                            ? true
-                                            : false,
-                                    child: InkWell(
-                                      onTap: () async {
-                                        if (await Utility
-                                                .cameraPermissionCheack(
-                                                    context) &&
-                                            await Utility
-                                                .microphonePermissionCheack(
-                                                    context)) {
-                                          controller.postMeetingJoin(item.id);
-                                        }
+                                ? InkWell(
+                                    onTap: () async {
+                                      if (await Utility
+                                              .cameraPermissionCheack(
+                                                  context) &&
+                                          await Utility
+                                              .microphonePermissionCheack(
+                                                  context)) {
+                                        controller.postMeetingJoin(item.id);
+                                      }
+                                    },
+                                    child: Builder(
+                                      builder: (context) {
+                                        final bool isLiveOrRejoin =
+                                            (item.agorameta?.token?.isNotEmpty == true) ||
+                                            (item.attendees?.any((a) =>
+                                                    a.userid ==
+                                                    Utility.profileData?.id) ==
+                                                true);
+                                        return Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              Dimens.four,
+                                            ),
+                                            color: isLiveOrRejoin
+                                                ? Colors.teal
+                                                : ColorsValue.maincolor1,
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8, vertical: 4),
+                                            child: Text(
+                                              isLiveOrRejoin
+                                                  ? 'REJOIN'
+                                                  : 'join_meeting'.tr.toUpperCase(),
+                                              style: Styles.white50012,
+                                            ),
+                                          ),
+                                        );
                                       },
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                            Dimens.four,
-                                          ),
-                                          color: ColorsValue.maincolor1,
-                                        ),
-                                        child: Padding(
-                                          padding: Dimens.edgeInsets4,
-                                          child: Text(
-                                            'join_meeting'.tr.toUpperCase(),
-                                            style: Styles.white50012,
-                                          ),
-                                        ),
-                                      ),
                                     ),
                                   )
                                 : Text(
-                                    'Cancel Session',
+                                    'Cancelled',
                                     style: Styles.redColor50014,
                                   ),
                             contentPadding: Dimens.edgeInsets0,

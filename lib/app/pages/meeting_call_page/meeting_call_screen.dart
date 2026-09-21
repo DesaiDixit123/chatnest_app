@@ -1,9 +1,6 @@
-import 'dart:math';
-
 import 'package:chatnest/app/app.dart';
 import 'package:chatnest/data/data.dart';
 import 'package:chatnest/domain/domain.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -20,7 +17,9 @@ class MeetingCallScreen extends StatefulWidget {
 class _MeetingCallScreenState extends State<MeetingCallScreen> {
   @override
   void dispose() {
-    final controller = Get.isRegistered<MeetingCallController>() ? Get.find<MeetingCallController>() : null;
+    final controller = Get.isRegistered<MeetingCallController>()
+        ? Get.find<MeetingCallController>()
+        : null;
     if (controller == null || !controller.isCallEnded) {
       if (Get.isRegistered<CallManagerService>()) {
         Get.find<CallManagerService>().minimizeCall();
@@ -35,7 +34,9 @@ class _MeetingCallScreenState extends State<MeetingCallScreen> {
       canPop: true,
       onPopInvoked: (didPop) {
         if (didPop) {
-          final controller = Get.isRegistered<MeetingCallController>() ? Get.find<MeetingCallController>() : null;
+          final controller = Get.isRegistered<MeetingCallController>()
+              ? Get.find<MeetingCallController>()
+              : null;
           if (controller == null || !controller.isCallEnded) {
             if (Get.isRegistered<CallManagerService>()) {
               Get.find<CallManagerService>().minimizeCall();
@@ -43,494 +44,708 @@ class _MeetingCallScreenState extends State<MeetingCallScreen> {
           }
         }
       },
-      child: GetBuilder<MeetingCallController>(initState: (state) async {
-      var controller = Get.find<MeetingCallController>();
-      Future.delayed(Duration.zero, () async {
-        if (await Utility.cameraPermissionCheack(context) &&
-            // ignore: use_build_context_synchronously
-            await Utility.microphonePermissionCheack(context)) {
-          controller.token = Get.arguments[1];
-          controller.channelName = Get.arguments[0];
-          controller.meetingId = Get.arguments[2];
-          controller.isHost = Get.arguments[4];
-          controller.isMicEnabled = true;
-          controller.isVideoEnabled = true;
-          controller.initialize();
-        }
-      });
-    }, builder: (controller) {
-      return Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          automaticallyImplyLeading: false,
-        ),
-        body: Stack(
-          children: [
-            // Main meeting view
-            SafeArea(
-              child: Column(
+      child: GetBuilder<MeetingCallController>(
+        initState: (state) async {
+          var controller = Get.find<MeetingCallController>();
+          Future.delayed(Duration.zero, () async {
+            if (await Utility.cameraPermissionCheack(context) &&
+                // ignore: use_build_context_synchronously
+                await Utility.microphonePermissionCheack(context)) {
+              controller.token = Get.arguments[1];
+              controller.channelName = Get.arguments[0];
+              controller.meetingId = Get.arguments[2];
+              controller.isHost = Get.arguments[4];
+              controller.isMicEnabled = true;
+              controller.isVideoEnabled = true;
+              controller.initialize();
+            }
+          });
+        },
+        builder: (controller) {
+          return Scaffold(
+            backgroundColor: const Color(0xFF121212),
+            body: SafeArea(
+              child: Stack(
                 children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: OrientationBuilder(
-                        builder: (context, orientation) {
-                          final isPortrait =
-                              orientation == Orientation.portrait;
-                          if (controller.users.isEmpty) {
-                            return const SizedBox();
-                          }
-                          WidgetsBinding.instance.addPostFrameCallback(
-                            (_) {
-                              controller.viewAspectRatio =
-                                  isPortrait ? 3 / 3 : 3 / 2;
-                              controller.update();
-                            },
-                          );
-                          final layoutViews =
-                              controller.createLayout(controller.users.length);
-                          return AgoraMeetingLayout(
-                            users: controller.users,
-                            views: layoutViews,
-                            viewAspectRatio: controller.viewAspectRatio,
-                            controller: controller,
-                          );
-                        },
+                  Column(
+                    children: [
+                      // Top Bar
+                      _buildTopBar(context, controller),
+
+                      // Video View Layout
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12.0, vertical: 8.0),
+                          child: _buildVideoGrid(controller),
+                        ),
                       ),
-                    ),
+
+                      // Bottom Control Bar
+                      if (!controller.isFullScreen)
+                        _buildBottomControlBar(context, controller),
+                    ],
                   ),
-                  // Control buttons - hide when in full screen
-                  if (!controller.isFullScreen)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: <Widget>[
-                          // End call button
-                          InkWell(
-                            onTap: () {
-                              controller.onCallEnd(context, controller);
-                            },
-                            child: Container(
-                                height: Dimens.fifty,
-                                width: Dimens.fifty,
-                                decoration: BoxDecoration(
-                                  color: ColorsValue.redColor,
-                                  borderRadius: BorderRadius.circular(
-                                    Dimens.five,
-                                  ),
-                                ),
-                                child: Padding(
-                                  padding: Dimens.edgeInsets10,
-                                  child: SvgPicture.asset(
-                                    AssetConstants.ic_end_call,
-                                  ),
-                                )),
-                          ),
-                          // Microphone toggle
-                          InkWell(
-                            onTap: () {
-                              controller.onToggleAudio();
-                            },
-                            child: Container(
-                              height: Dimens.fifty,
-                              width: Dimens.fifty,
-                              decoration: BoxDecoration(
-                                color: ColorsValue.textfildbackcolor,
-                                borderRadius: BorderRadius.circular(
-                                  Dimens.five,
-                                ),
-                              ),
-                              child: Padding(
-                                padding: Dimens.edgeInsets12,
-                                child: SvgPicture.asset(
-                                  controller.isMicEnabled
-                                      ? AssetConstants.ic_mic_on
-                                      : AssetConstants.ic_mic_off,
-                                ),
-                              ),
-                            ),
-                          ),
-                          // Camera toggle
-                          InkWell(
-                            onTap: () {
-                              controller.onToggleCamera();
-                            },
-                            child: Container(
-                              height: Dimens.fifty,
-                              width: Dimens.fifty,
-                              decoration: BoxDecoration(
-                                color: ColorsValue.textfildbackcolor,
-                                borderRadius: BorderRadius.circular(
-                                  Dimens.five,
-                                ),
-                              ),
-                              child: Padding(
-                                padding: Dimens.edgeInsets12,
-                                child: SvgPicture.asset(
-                                  controller.isVideoEnabled
-                                      ? AssetConstants.ic_video_on
-                                      : AssetConstants.ic_video_off,
-                                ),
-                              ),
-                            ),
-                          ),
-                          // Switch camera
-                          InkWell(
-                            onTap: () {
-                              controller.onSwitchCamera();
-                            },
-                            child: Container(
-                              height: Dimens.fifty,
-                              width: Dimens.fifty,
-                              decoration: BoxDecoration(
-                                color: ColorsValue.textfildbackcolor,
-                                borderRadius: BorderRadius.circular(
-                                  Dimens.five,
-                                ),
-                              ),
-                              child: Padding(
-                                padding: Dimens.edgeInsets12,
-                                child: Image.asset(
-                                  AssetConstants.ic_camera_switch,
-                                ),
-                              ),
-                            ),
-                          ),
-                          // Screen share toggle
-                          InkWell(
-                            onTap: () {
-                              controller.onToggleScreenShare();
-                            },
-                            child: Container(
-                              height: Dimens.fifty,
-                              width: Dimens.fifty,
-                              decoration: BoxDecoration(
-                                color: controller.isScreenSharing
-                                    ? ColorsValue.appColor
-                                    : ColorsValue.textfildbackcolor,
-                                borderRadius: BorderRadius.circular(
-                                  Dimens.five,
-                                ),
-                              ),
-                              child: Icon(
-                                controller.isScreenSharing
-                                    ? Icons.stop_screen_share
-                                    : Icons.screen_share,
-                                color: controller.isScreenSharing
-                                    ? Colors.white
-                                    : Colors.black,
-                                size: 24,
-                              ),
-                            ),
-                          ),
-                          // Participants list button
-                          InkWell(
-                            onTap: () {
-                              _showParticipantsSheet(context, controller);
-                            },
-                            child: Container(
-                              height: Dimens.fifty,
-                              width: Dimens.fifty,
-                              decoration: BoxDecoration(
-                                color: ColorsValue.textfildbackcolor,
-                                borderRadius: BorderRadius.circular(
-                                  Dimens.five,
-                                ),
-                              ),
-                              child: const Icon(
-                                Icons.people_outline,
-                                color: Colors.black,
-                                size: 24,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+
+                  // Full screen view overlay
+                  if (controller.isFullScreen &&
+                      controller.fullScreenUser != null)
+                    _buildFullScreenOverlay(controller),
                 ],
               ),
             ),
-            // Full screen overlay
-            if (controller.isFullScreen && controller.fullScreenUser != null)
-              Positioned.fill(
-                child: GestureDetector(
-                  onTap: () {
-                    controller.exitFullScreen();
-                  },
-                  child: Container(
-                    color: Colors.black,
-                    child: Stack(
-                      children: [
-                        // Full screen video
-                        Center(
-                          child:
-                              controller.fullScreenUser!.isVideoEnabled ?? false
-                                  ? controller.fullScreenUser!.view
-                                  : CircleAvatar(
-                                      backgroundColor: Colors.grey.shade800,
-                                      maxRadius: 80,
-                                      child: Image.asset(
-                                        AssetConstants.usera,
-                                      ),
-                                    ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildTopBar(BuildContext context, MeetingCallController controller) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Minimize button
+          GestureDetector(
+            onTap: () {
+              Get.find<CallManagerService>().minimizeCall();
+              Get.back();
+            },
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.12),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+          ),
+
+          // Title & Duration
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  controller.meetingTitle,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: Colors.greenAccent,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      controller.formattedDuration,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.white12,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        "${controller.users.length} in session",
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 11,
                         ),
-                        // Exit full screen hint
-                        Positioned(
-                          top: 40,
-                          right: 16,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // Mirror toggle & Quick camera switch
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              GestureDetector(
+                onTap: () => controller.toggleMirror(),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: controller.isMirrored
+                        ? Colors.blueAccent.withOpacity(0.3)
+                        : Colors.white.withOpacity(0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.flip_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () => controller.onSwitchCamera(),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.cameraswitch_outlined,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVideoGrid(MeetingCallController controller) {
+    if (controller.users.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.greenAccent),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              "Joining ${controller.meetingTitle}...",
+              style: const TextStyle(color: Colors.white70, fontSize: 14),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final userList = controller.users.toList();
+    final count = userList.length;
+
+    if (count == 1) {
+      // Single participant fills the area
+      return _buildVideoTile(userList[0], controller);
+    } else if (count == 2) {
+      // 2 participants: Split vertically
+      return Column(
+        children: [
+          Expanded(child: _buildVideoTile(userList[0], controller)),
+          const SizedBox(height: 8),
+          Expanded(child: _buildVideoTile(userList[1], controller)),
+        ],
+      );
+    } else if (count == 3 || count == 4) {
+      // 2x2 grid
+      return Column(
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(child: _buildVideoTile(userList[0], controller)),
+                const SizedBox(width: 8),
+                Expanded(child: _buildVideoTile(userList[1], controller)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(child: _buildVideoTile(userList[2], controller)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: count > 3
+                      ? _buildVideoTile(userList[3], controller)
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    } else {
+      // 5+ participants: scrollable 2-column grid
+      return GridView.builder(
+        itemCount: count,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
+          childAspectRatio: 0.85,
+        ),
+        itemBuilder: (context, index) {
+          return _buildVideoTile(userList[index], controller);
+        },
+      );
+    }
+  }
+
+  Widget _buildVideoTile(AgoraUser user, MeetingCallController controller) {
+    final bool isMe =
+        user.uid == controller.currentUid || user.uid == 0;
+    final bool isVideoOn = user.isVideoEnabled ?? false;
+    final bool isAudioOn = user.isAudioEnabled ?? false;
+
+    String displayName = isMe ? "You" : (user.name ?? "Participant");
+    if (!isMe && (displayName == "Participant" || displayName.isEmpty)) {
+      controller.callMembersMap.forEach((k, v) {
+        if (v['uid'] == user.uid.toString()) {
+          final n = v['name'];
+          if (n != null && n.isNotEmpty) displayName = n;
+        }
+      });
+    }
+
+    return GestureDetector(
+      onTap: () => controller.toggleFullScreen(user),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E1E1E),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isAudioOn ? Colors.greenAccent.withOpacity(0.5) : Colors.white12,
+            width: isAudioOn ? 2.0 : 1.0,
+          ),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Video surface, Screen Sharing Card, or Avatar
+            if (isMe && controller.isScreenSharing)
+              _buildLocalScreenSharingView(controller)
+            else if (isVideoOn && user.view != null)
+              user.view!
+            else
+              _buildCameraOffAvatar(user, displayName),
+
+            // Top-left Screen Sharing Badge
+            if (controller.isScreenSharing && isMe)
+              Positioned(
+                top: 10,
+                left: 10,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.blueAccent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.screen_share, color: Colors.white, size: 12),
+                      SizedBox(width: 4),
+                      Text(
+                        'Sharing Screen',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+            // Top-right Individual Mirror Flip Button
+            if (isVideoOn && !(isMe && controller.isScreenSharing))
+              Positioned(
+                top: 8,
+                right: 8,
+                child: GestureDetector(
+                  onTap: () => controller.toggleUserMirror(user.uid),
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.6),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.flip_rounded,
+                      color: controller.isUserMirrored(user.uid)
+                          ? Colors.blueAccent
+                          : Colors.white70,
+                      size: 16,
+                    ),
+                  ),
+                ),
+              ),
+
+            // Bottom-left Participant Info Pill
+            Positioned(
+              bottom: 8,
+              left: 8,
+              right: 8,
+              child: Row(
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.65),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isAudioOn ? Icons.mic : Icons.mic_off,
+                          color: isAudioOn ? Colors.white : Colors.redAccent,
+                          size: 14,
+                        ),
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            displayName,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
                             ),
-                            decoration: BoxDecoration(
-                              color: Colors.black54,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.fullscreen_exit,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                                SizedBox(width: 4),
-                                Text(
-                                  'Tap to exit',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
                     ),
                   ),
-                ),
+                ],
               ),
+            ),
           ],
         ),
-      );
-    }),
-  );
-}
-
-  void _showParticipantsSheet(
-      BuildContext context, MeetingCallController controller) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) {
-        return Container(
-          padding: const EdgeInsets.all(20),
+    );
+  }
+
+  Widget _buildCameraOffAvatar(AgoraUser user, String displayName) {
+    final String image = (user.bannerImg ?? "").toString();
+    final bool hasImage = image.isNotEmpty;
+
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircleAvatar(
+            radius: 36,
+            backgroundColor: Colors.white12,
+            backgroundImage: hasImage
+                ? NetworkImage("${ApiWrapper.imageUrl}$image")
+                : null,
+            child: !hasImage
+                ? const Icon(Icons.person, color: Colors.white70, size: 36)
+                : null,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            displayName,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 2),
+          const Text(
+            "Camera is off",
+            style: TextStyle(
+              color: Colors.white38,
+              fontSize: 11,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomControlBar(
+      BuildContext context, MeetingCallController controller) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E1E),
+        borderRadius: BorderRadius.circular(32),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.4),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          // 1. End Call
+          _buildControlButton(
+            onTap: () => controller.onCallEnd(context, controller),
+            backgroundColor: ColorsValue.redColor,
+            icon: SvgPicture.asset(
+              AssetConstants.ic_end_call,
+              width: 22,
+              height: 22,
+            ),
+          ),
+
+          // 2. Microphone Toggle
+          _buildControlButton(
+            onTap: () => controller.onToggleAudio(),
+            backgroundColor: controller.isMicEnabled
+                ? Colors.white.withOpacity(0.12)
+                : ColorsValue.redColor,
+            icon: Icon(
+              controller.isMicEnabled ? Icons.mic : Icons.mic_off,
+              color: Colors.white,
+              size: 22,
+            ),
+          ),
+
+          // 3. Camera Toggle
+          _buildControlButton(
+            onTap: () => controller.onToggleCamera(),
+            backgroundColor: controller.isVideoEnabled
+                ? Colors.white.withOpacity(0.12)
+                : ColorsValue.redColor,
+            icon: Icon(
+              controller.isVideoEnabled
+                  ? Icons.videocam
+                  : Icons.videocam_off,
+              color: Colors.white,
+              size: 22,
+            ),
+          ),
+
+          // 4. Switch Camera
+          _buildControlButton(
+            onTap: () => controller.onSwitchCamera(),
+            backgroundColor: Colors.white.withOpacity(0.12),
+            icon: const Icon(
+              Icons.cameraswitch,
+              color: Colors.white,
+              size: 22,
+            ),
+          ),
+
+          // 5. Screen Share
+          _buildControlButton(
+            onTap: () => controller.onToggleScreenShare(),
+            backgroundColor: controller.isScreenSharing
+                ? Colors.blueAccent
+                : Colors.white.withOpacity(0.12),
+            icon: Icon(
+              controller.isScreenSharing
+                  ? Icons.stop_screen_share
+                  : Icons.screen_share,
+              color: Colors.white,
+              size: 22,
+            ),
+          ),
+
+          // 6. Participants Sheet
+          _buildControlButton(
+            onTap: () => controller.showParticipantsSheet(context),
+            backgroundColor: Colors.white.withOpacity(0.12),
+            icon: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Icon(
+                  Icons.people_alt_outlined,
+                  color: Colors.white,
+                  size: 22,
+                ),
+                Positioned(
+                  right: -4,
+                  top: -4,
+                  child: Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: const BoxDecoration(
+                      color: Colors.greenAccent,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      "${controller.users.length}",
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildControlButton({
+    required VoidCallback onTap,
+    required Color backgroundColor,
+    required Widget icon,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(25),
+      child: Container(
+        height: 48,
+        width: 48,
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          shape: BoxShape.circle,
+        ),
+        alignment: Alignment.center,
+        child: icon,
+      ),
+    );
+  }
+
+  Widget _buildLocalScreenSharingView(MeetingCallController controller) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Center(
+        child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                "Participants (${controller.callMembersMap.length})",
-                style: Styles.black70018,
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.blueAccent.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.screen_share_rounded,
+                  color: Colors.blueAccent,
+                  size: 36,
+                ),
               ),
-              const SizedBox(height: 20),
-              Flexible(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: controller.callMembersMap.length,
-                  itemBuilder: (context, index) {
-                    final userId = controller.callMembersMap.keys.elementAt(index);
-                    final userInfo = controller.callMembersMap[userId]!;
-                    final bool isMe = userId == (Utility.profileData?.id ?? "");
-                    final bool canKick = controller.isHost && !isMe;
-
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundImage: NetworkImage(
-                          "${ApiWrapper.imageUrl}${userInfo['image'] ?? ""}",
-                        ),
-                      ),
-                      title: Text(
-                        "${userInfo['name']}${isMe ? ' (You)' : ''}",
-                        style: Styles.black50014,
-                      ),
-                      trailing: canKick
-                          ? IconButton(
-                              icon: const Icon(Icons.person_remove, color: Colors.red),
-                              onPressed: () {
-                                Get.back();
-                                controller.postKickMember(userId);
-                              },
-                            )
-                          : null,
-                    );
-                  },
+              const SizedBox(height: 10),
+              const Text(
+                "You are sharing your screen",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                "Participants can see your screen live",
+                style: TextStyle(
+                  color: Colors.white60,
+                  fontSize: 11,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.redAccent,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  minimumSize: const Size(0, 32),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                onPressed: () => controller.stopScreenSharing(),
+                icon: const Icon(Icons.stop_screen_share, size: 14, color: Colors.white),
+                label: const Text(
+                  "Stop Sharing",
+                  style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
           ),
-        );
-      },
-    );
-  }
-}
-
-class AgoraMeetingLayout extends StatelessWidget {
-  const AgoraMeetingLayout({
-    super.key,
-    required Set<AgoraUser> users,
-    required List<int> views,
-    required double viewAspectRatio,
-    required MeetingCallController controller,
-  })  : _users = users,
-        _views = views,
-        _viewAspectRatio = viewAspectRatio,
-        _controller = controller;
-
-  final Set<AgoraUser> _users;
-  final List<int> _views;
-  final double _viewAspectRatio;
-  final MeetingCallController _controller;
-
-  @override
-  Widget build(BuildContext context) {
-    int totalCount = _views.reduce((value, element) => value + element);
-    int rows = _views.length;
-    int columns = _views.reduce(max);
-
-    List<Widget> rowsList = [];
-    for (int i = 0; i < rows; i++) {
-      List<Widget> rowChildren = [];
-      for (int j = 0; j < columns; j++) {
-        int index = i * columns + j;
-        if (index < totalCount) {
-          rowChildren.add(
-            AgoraMeetingView(
-              user: _users.elementAt(index),
-              viewAspectRatio: _viewAspectRatio,
-              controller: _controller,
-            ),
-          );
-        } else {
-          rowChildren.add(
-            const SizedBox.shrink(),
-          );
-        }
-      }
-      rowsList.add(
-        Flexible(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: rowChildren,
-          ),
         ),
-      );
-    }
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: rowsList,
+      ),
     );
   }
-}
 
-class AgoraMeetingView extends StatelessWidget {
-  const AgoraMeetingView({
-    super.key,
-    required double viewAspectRatio,
-    required AgoraUser user,
-    required MeetingCallController controller,
-  })  : _viewAspectRatio = viewAspectRatio,
-        _user = user,
-        _controller = controller;
+  Widget _buildFullScreenOverlay(MeetingCallController controller) {
+    final user = controller.fullScreenUser!;
+    final isMe = user.uid == controller.currentUid || user.uid == 0;
+    final isVideoOn = user.isVideoEnabled ?? false;
 
-  final double _viewAspectRatio;
-  final AgoraUser _user;
-  final MeetingCallController _controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return Flexible(
+    return Positioned.fill(
       child: GestureDetector(
-        onTap: () {
-          _controller.toggleFullScreen(_user);
-        },
-        child: Padding(
-          padding: Dimens.edgeInsets2,
-          child: AspectRatio(
-            aspectRatio: _viewAspectRatio,
-            child: Container(
-              decoration: BoxDecoration(
-                color: ColorsValue.textfildbackcolor,
-                borderRadius: BorderRadius.circular(
-                  Dimens.ten,
-                ),
-                border: Border.all(
-                  color: _user.isAudioEnabled ?? false
-                      ? ColorsValue.appColor
-                      : ColorsValue.redColor,
-                  width: 2.0,
-                ),
-              ),
-              child: Stack(
-                children: [
-                  Center(
-                    child: CircleAvatar(
-                      backgroundColor: Colors.grey.shade800,
-                      maxRadius: Dimens.fifty,
-                      child: Image.asset(
-                        AssetConstants.usera,
-                      ),
-                    ),
+        onTap: () => controller.exitFullScreen(),
+        child: Container(
+          color: Colors.black,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              if (isMe && controller.isScreenSharing)
+                _buildLocalScreenSharingView(controller)
+              else if (isVideoOn && user.view != null)
+                user.view!
+              else
+                _buildCameraOffAvatar(user, user.name ?? "Participant"),
+
+              Positioned(
+                top: 40,
+                right: 16,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  if (_user.isVideoEnabled ?? false)
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8 - 2),
-                      child: _user.view,
-                    ),
-                  // Screen sharing indicator
-                  if (_controller.isScreenSharing &&
-                      _user.uid == _controller.currentUid)
-                    Positioned(
-                      top: 8,
-                      left: 8,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: ColorsValue.appColor,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.screen_share,
-                              color: Colors.white,
-                              size: 12,
-                            ),
-                            SizedBox(width: 4),
-                            Text(
-                              'Sharing',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.fullscreen_exit, color: Colors.white, size: 20),
+                      SizedBox(width: 4),
+                      Text(
+                        'Tap to exit',
+                        style: TextStyle(color: Colors.white, fontSize: 12),
                       ),
-                    ),
-                ],
+                    ],
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),

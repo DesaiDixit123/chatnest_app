@@ -1,6 +1,7 @@
 import 'package:chatnest/app/pages/pages.dart';
 import 'package:chatnest/app/utils/asset_constants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../theme/theme.dart';
 
@@ -80,10 +81,16 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<SplashController>(
-      builder: (controller) {
-        return Scaffold(
-          body: Container(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+      child: GetBuilder<SplashController>(
+        builder: (controller) {
+          return Scaffold(
+            body: Container(
             width: double.infinity,
             height: double.infinity,
             decoration: const BoxDecoration(
@@ -228,8 +235,9 @@ class _SplashScreenState extends State<SplashScreen>
           ),
         );
       },
-    );
-  }
+    ),
+  );
+}
 }
 
 /// Soft glowing circular blob used as background decoration

@@ -109,7 +109,7 @@ class JoinMeetingDetailScreen extends StatelessWidget {
                                   ),
                                 ),
                                 child: Text(
-                                  'Cancel Session',
+                                  'Cancelled',
                                   style: Styles.redColor50014,
                                 ),
                               )
@@ -238,28 +238,32 @@ class JoinMeetingDetailScreen extends StatelessWidget {
                     if (controller.hostMeetingDoc?.status != "cancel") ...[
                       Padding(
                         padding: Dimens.edgeInsets20,
-                        child: CustomButton(
-                          text: 'join_meeting'.tr.toUpperCase(),
-                          onTap: controller.hostMeetingDoc?.agorameta?.token
-                                      ?.isNotEmpty ??
-                                  false
-                              ? () async {
-                                  if (await Utility.cameraPermissionCheack(
-                                          context) &&
-                                      await Utility.microphonePermissionCheack(
-                                          context)) {
-                                    controller.postMeetingJoin(
-                                        controller.hostMeetingDoc?.id);
-                                  }
+                        child: Builder(
+                          builder: (context) {
+                            final bool isLiveOrRejoin =
+                                (controller.hostMeetingDoc?.agorameta?.token?.isNotEmpty == true) ||
+                                (controller.hostMeetingDoc?.attendees?.any((a) =>
+                                        a.userid == Utility.profileData?.id) ==
+                                    true);
+                            return CustomButton(
+                              text: isLiveOrRejoin
+                                  ? 'REJOIN SESSION'
+                                  : 'join_meeting'.tr.toUpperCase(),
+                              backgroundColor: isLiveOrRejoin
+                                  ? Colors.teal
+                                  : ColorsValue.maincolor1,
+                              onTap: () async {
+                                if (await Utility.cameraPermissionCheack(
+                                        context) &&
+                                    await Utility.microphonePermissionCheack(
+                                        context)) {
+                                  controller.postMeetingJoin(
+                                      controller.hostMeetingDoc?.id);
                                 }
-                              : null,
-                          // : null,
-                          height: Dimens.fifty,
-                          backgroundColor: controller.hostMeetingDoc?.agorameta
-                                      ?.token?.isNotEmpty ??
-                                  false
-                              ? ColorsValue.maincolor1
-                              : ColorsValue.maincolor1.withOpacity(0.6),
+                              },
+                              height: Dimens.fifty,
+                            );
+                          },
                         ),
                       )
                     ],

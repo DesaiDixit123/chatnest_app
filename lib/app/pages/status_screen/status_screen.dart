@@ -73,17 +73,15 @@ class StatusScreen extends StatelessWidget {
                           child: CircleAvatar(
                             radius: 24,
                             backgroundColor: ColorsValue.greyColorEEEE,
-                            backgroundImage:
-                                Utility.profileData?.profileimage != null &&
-                                        Utility.profileData!.profileimage!
-                                            .isNotEmpty
-                                    ? NetworkImage(
-                                        ApiWrapper.imageUrl +
-                                            Utility.profileData!.profileimage!,
-                                      )
-                                    : null,
-                            child: Utility.profileData?.profileimage == null ||
-                                    Utility.profileData!.profileimage!.isEmpty
+                            backgroundImage: ApiWrapper.isValidImageUrl(
+                                    Utility.profileData?.profileimage)
+                                ? NetworkImage(
+                                    ApiWrapper.getFullImageUrl(
+                                        Utility.profileData?.profileimage),
+                                  )
+                                : null,
+                            child: !ApiWrapper.isValidImageUrl(
+                                    Utility.profileData?.profileimage)
                                 ? Icon(
                                     Icons.person,
                                     color: ColorsValue.greyColor8888,

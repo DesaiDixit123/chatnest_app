@@ -1,0 +1,45 @@
+workflows:
+  ios-release:
+    name: iOS App Store Release
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+
+    environment:
+      flutter: 3.19.3
+      xcode: latest
+      cocoapods: default
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.siddhi.chauhan.cochat
+
+    scripts:
+      - name: Get Flutter packages
+        script: |
+          flutter pub get
+
+      - name: Install CocoaPods
+        script: |
+          find . -name "Podfile" -execdir pod install \;
+
+      - name: Flutter build iOS
+        script: |
+          flutter build ios --release \
+            --build-name=1.0.3 \
+            --build-number=$PROJECT_BUILD_NUMBER \
+            --no-codesign
+
+      - name: Build and export ipa
+        script: |
+          xcode-project build-ipa \
+            --workspace ios/Runner.xcworkspace \
+            --scheme Runner
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        submit_to_app_store: false

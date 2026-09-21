@@ -16,3 +16,5 @@ export 'video_call_screen/video_call_page.dart';
 export 'audio_call_screen/audio_call_page.dart';
 export 'meeting_call_page/meeting_call_page.dart';
 export 'eula_screen.dart';
+export 'membership_screen/membership_plans_page.dart';
+export 'invoices_screen/invoices_page.dart';

@@ -76,7 +76,7 @@ class _HomeScreenScreenState extends State<HomeScreenScreen>
         controller.getProfile();
       },
       builder: (controller) => DefaultTabController(
-        length: controller.tabController.length,
+        length: 4,
         child: Scaffold(
           backgroundColor: ColorsValue.white,
           appBar: GradientAppBar(
@@ -101,7 +101,7 @@ class _HomeScreenScreenState extends State<HomeScreenScreen>
                             overlayColor: WidgetStateProperty.all(
                                 ColorsValue.transparent),
                             onTap: () {
-                              controller.isProfile!
+                              (controller.isProfile ?? false)
                                   ? RouteManagement.goToProfileScreen()
                                   : RouteManagement.goTocreateProfileView();
                             },
@@ -145,7 +145,7 @@ class _HomeScreenScreenState extends State<HomeScreenScreen>
                     )
                   : InkWell(
                       onTap: () {
-                        controller.isProfile!
+                        (controller.isProfile ?? false)
                             ? RouteManagement.goToProfileScreen()
                             : RouteManagement.goTocreateProfileView();
                       },
@@ -323,64 +323,57 @@ class _HomeScreenScreenState extends State<HomeScreenScreen>
                   ),
                 ]
               ]),
-          bottomNavigationBar: Utility.profileData != null
-              ? (Utility.profileData?.isprofilecompleted ?? false)
-                  ? const SizedBox.shrink()
-                  : Container(
-                      width: double.infinity,
-                      color: ColorsValue.appColor,
-                      child: SafeArea(
-                        top: false,
-                        left: false,
-                        right: false,
-                        child: Container(
-                          height: Dimens.sixty,
-                          padding: Dimens.edgeInsets20_0_20_0,
-                          alignment: Alignment.center,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  "complete_your_profile".tr,
-                                  style: Styles.white70018.copyWith(
-                                    fontSize: Dimens.sixteen,
-                                  ),
-                                ),
-                              ),
-                              Dimens.boxWidth10,
-                              InkWell(
-                                onTap: () {
-                                  controller.tabController.animateTo(0);
-                                  RouteManagement.goTocreateProfileView();
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 8,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: ColorsValue.white,
-                                    borderRadius: BorderRadius.circular(
-                                      Dimens.twenty,
-                                    ),
-                                  ),
-                                  child: Text(
-                                    "Create Profile",
-                                    style: Styles.main60014.copyWith(
-                                      color: ColorsValue.appColor,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              )
-                            ],
+          bottomNavigationBar: (Utility.profileData != null &&
+                  !(Utility.profileData?.isprofilecompleted ?? false))
+              ? SafeArea(
+                  top: false,
+                  child: Container(
+                    width: double.infinity,
+                    color: ColorsValue.appColor,
+                    padding: Dimens.edgeInsets20_10_20_10,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            "complete_your_profile".tr,
+                            style: Styles.white70018.copyWith(
+                              fontSize: Dimens.sixteen,
+                            ),
                           ),
                         ),
-                      ),
-                    )
-              : const SizedBox.shrink(),
+                        Dimens.boxWidth10,
+                        InkWell(
+                          onTap: () {
+                            controller.tabController.animateTo(0);
+                            RouteManagement.goTocreateProfileView();
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: ColorsValue.white,
+                              borderRadius: BorderRadius.circular(
+                                Dimens.twenty,
+                              ),
+                            ),
+                            child: Text(
+                              "Create Profile",
+                              style: Styles.main60014.copyWith(
+                                color: ColorsValue.appColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                )
+              : null,
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -399,6 +392,8 @@ class _HomeScreenScreenState extends State<HomeScreenScreen>
                         labelColor: ColorsValue.maincolor1,
                         dividerColor: Colors.transparent,
                         dividerHeight: 0,
+                        indicatorSize: TabBarIndicatorSize.tab,
+                        indicator: const BoxDecoration(),
                         tabAlignment: Get.find<Repository>()
                                 .getBoolValue(LocalKeys.isSubUser)
                             ? TabAlignment.start
@@ -412,17 +407,21 @@ class _HomeScreenScreenState extends State<HomeScreenScreen>
                         automaticIndicatorColorAdjustment: true,
                         onTap: (value) {
                           if (controller.tabController.index == 0) {
-                            Get.find<ChatController>()
-                                .chatPagingController
-                                .refresh();
+                            if (Get.isRegistered<ChatController>()) {
+                              Get.find<ChatController>()
+                                  .chatPagingController
+                                  .refresh();
+                            }
                           } else if (controller.tabController.index == 1) {
                             controller.selectedChateData = null;
                           } else if (controller.tabController.index == 2) {
                             // Status tab
                           } else {
-                            Get.find<CallController>()
-                                .chatHsitoryPagingController
-                                .refresh();
+                            if (Get.isRegistered<CallController>()) {
+                              Get.find<CallController>()
+                                  .chatHsitoryPagingController
+                                  .refresh();
+                            }
                           }
                         },
                         tabs: [
@@ -437,9 +436,10 @@ class _HomeScreenScreenState extends State<HomeScreenScreen>
                                         ? AssetConstants.selectedchaticon
                                         : AssetConstants.unselectedchaticon,
                                   ),
-                                  if (Get.find<ChatController>()
-                                          .totalMarkeReadUser !=
-                                      0) ...[
+                                  if (Get.isRegistered<ChatController>() &&
+                                      Get.find<ChatController>()
+                                              .totalMarkeReadUser !=
+                                          0) ...[
                                     Align(
                                       alignment: Alignment.topRight,
                                       child: Container(
@@ -477,9 +477,10 @@ class _HomeScreenScreenState extends State<HomeScreenScreen>
                                         ? AssetConstants.selectedGroupchaticon
                                         : AssetConstants.unselectedgroupchat,
                                   ),
-                                  if (Get.find<GroupChatController>()
-                                          .totalReadGroups !=
-                                      0) ...[
+                                  if (Get.isRegistered<GroupChatController>() &&
+                                      Get.find<GroupChatController>()
+                                              .totalReadGroups !=
+                                          0) ...[
                                     Align(
                                       alignment: Alignment.topRight,
                                       child: Container(
@@ -515,16 +516,14 @@ class _HomeScreenScreenState extends State<HomeScreenScreen>
                             ),
                             text: "status".tr,
                           ),
-                          if (!Get.find<Repository>()
-                              .getBoolValue(LocalKeys.isSubUser)) ...[
-                            Tab(
-                              icon: SvgPicture.asset(
-                                  controller.tabController.index == 3
-                                      ? AssetConstants.selectedcallicon
-                                      : AssetConstants.unselectedcall),
-                              text: "calls".tr,
+                          Tab(
+                            icon: SvgPicture.asset(
+                              controller.tabController.index == 3
+                                  ? AssetConstants.selectedcallicon
+                                  : AssetConstants.unselectedcall,
                             ),
-                          ],
+                            text: "calls".tr,
+                          ),
                         ],
                       ),
                       AnimatedCollapse(
@@ -534,163 +533,7 @@ class _HomeScreenScreenState extends State<HomeScreenScreen>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Dimens.boxHeight10,
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: InkWell(
-                                    onTap: () {
-                                      RouteManagement.goToContactListScreen();
-                                    },
-                                    child: Column(
-                                      children: [
-                                        SvgPicture.asset(
-                                          AssetConstants.ic_contact_list,
-                                        ),
-                                        Dimens.boxHeight5,
-                                        Text(
-                                          "Network list",
-                                          style: Styles.greyColor888850012,
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: InkWell(
-                                    onTap: () {
-                                      RouteManagement.goToBroadcastListScreen();
-                                    },
-                                    child: Column(
-                                      children: [
-                                        Image.asset(
-                                          AssetConstants.ic_broadcast,
-                                          height: Dimens.twentyFour,
-                                          width: Dimens.twentyFour,
-                                        ),
-                                        Dimens.boxHeight5,
-                                        Text(
-                                          "Broadcast",
-                                          style: Styles.greyColor888850012,
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: InkWell(
-                                    onTap: () {
-                                      RouteManagement.goToMeetingScreen();
-                                    },
-                                    child: Column(
-                                      children: [
-                                        SvgPicture.asset(
-                                          AssetConstants.ic_meeting,
-                                        ),
-                                        Dimens.boxHeight5,
-                                        Text(
-                                          "Sessions",
-                                          style: Styles.greyColor888850012,
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: InkWell(
-                                    onTap: () {
-                                      var profileController =
-                                          Get.find<ProfileController>();
-                                      if (profileController
-                                          .businessList.isNotEmpty) {
-                                        RouteManagement
-                                            .goTobusinessProductScreen(
-                                                profileController
-                                                        .businessList[0].id ??
-                                                    "");
-                                      } else {
-                                        RouteManagement.goToProductScreen();
-                                      }
-                                    },
-                                    child: Column(
-                                      children: [
-                                        SvgPicture.asset(
-                                          AssetConstants.ic_products,
-                                        ),
-                                        Dimens.boxHeight5,
-                                        Text(
-                                          "Marketplace",
-                                          style: Styles.greyColor888850012,
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Dimens.boxHeight15,
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: InkWell(
-                                    onTap: () {
-                                      if (Utility.profileData?.recoveryEmail
-                                              ?.isEmpty ??
-                                          false) {
-                                        RouteManagement.goToRecoveryEmailScreen(
-                                            "Lock");
-                                      } else {
-                                        if (Utility.profileData?.chatlockpin
-                                                ?.isEmpty ??
-                                            (false ||
-                                                Utility.profileData
-                                                        ?.chatlockpin ==
-                                                    null)) {
-                                          Utility.snacBar(
-                                              "no_secure_chat_info".tr,
-                                              ColorsValue.appColor);
-                                        } else {
-                                          RouteManagement
-                                              .goToChatLockVerifyScreen();
-                                        }
-                                      }
-                                    },
-                                    child: Column(
-                                      children: [
-                                        SvgPicture.asset(
-                                          AssetConstants.ic_chat_lock,
-                                        ),
-                                        Dimens.boxHeight5,
-                                        Text(
-                                          "Secure chat",
-                                          style: Styles.greyColor888850012,
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: InkWell(
-                                    onTap: () {
-                                      RouteManagement.goToSettingScreen();
-                                    },
-                                    child: Column(
-                                      children: [
-                                        SvgPicture.asset(
-                                          AssetConstants.ic_setting,
-                                        ),
-                                        Dimens.boxHeight5,
-                                        Text(
-                                          "Controls",
-                                          style: Styles.greyColor888850012,
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                const Expanded(child: SizedBox()),
-                                const Expanded(child: SizedBox()),
-                              ],
-                            ),
+                            ..._buildDrawerRows(controller),
                             Dimens.boxHeight10,
                           ],
                         ),
@@ -699,7 +542,7 @@ class _HomeScreenScreenState extends State<HomeScreenScreen>
                   ),
                 ),
               ),
-              //  Dimens.boxHeight5,
+              _buildOngoingMeetingBanner(context),
               Expanded(
                 child: TabBarView(
                   physics: const NeverScrollableScrollPhysics(),
@@ -715,6 +558,251 @@ class _HomeScreenScreenState extends State<HomeScreenScreen>
             ],
           ),
         ),
+      ),
+    );
+  }
+
+
+  Widget _buildDrawerItem({
+    required Widget icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        children: [
+          icon,
+          Dimens.boxHeight5,
+          Text(
+            title,
+            style: Styles.greyColor888850012,
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildDrawerRows(HomeScreenController controller) {
+    List<Widget> items = [];
+
+    // 1. Network list (always available)
+    items.add(_buildDrawerItem(
+      icon: SvgPicture.asset(AssetConstants.ic_contact_list),
+      title: "Network list",
+      onTap: () => RouteManagement.goToContactListScreen(),
+    ));
+
+    // 2. Broadcast (if allowed)
+    if (controller.canAccess('Broadcast')) {
+      items.add(_buildDrawerItem(
+        icon: Image.asset(
+          AssetConstants.ic_broadcast,
+          height: Dimens.twentyFour,
+          width: Dimens.twentyFour,
+        ),
+        title: "Broadcast",
+        onTap: () => RouteManagement.goToBroadcastListScreen(),
+      ));
+    }
+
+    // 3. Sessions (if allowed)
+    if (controller.canAccess('Session')) {
+      items.add(_buildDrawerItem(
+        icon: SvgPicture.asset(AssetConstants.ic_meeting),
+        title: "Sessions",
+        onTap: () => RouteManagement.goToMeetingScreen(),
+      ));
+    }
+
+    // 4. Marketplace (if allowed)
+    if (controller.canAccess('Marketplace')) {
+      items.add(_buildDrawerItem(
+        icon: SvgPicture.asset(AssetConstants.ic_products),
+        title: "Marketplace",
+        onTap: () {
+          var profileController = Get.find<ProfileController>();
+          if (profileController.businessList.isNotEmpty) {
+            RouteManagement.goTobusinessProductScreen(
+                profileController.businessList[0].id ?? "");
+          } else {
+            RouteManagement.goToProductScreen();
+          }
+        },
+      ));
+    }
+
+    // 5. Secure chat (if allowed)
+    if (controller.canAccess('Chat')) {
+      items.add(_buildDrawerItem(
+        icon: SvgPicture.asset(AssetConstants.ic_chat_lock),
+        title: "Secure chat",
+        onTap: () {
+          if (Utility.profileData?.recoveryEmail?.isEmpty ?? false) {
+            RouteManagement.goToRecoveryEmailScreen("Lock");
+          } else {
+            if (Utility.profileData?.chatlockpin?.isEmpty ??
+                (false || Utility.profileData?.chatlockpin == null)) {
+              Utility.snacBar("no_secure_chat_info".tr, ColorsValue.appColor);
+            } else {
+              RouteManagement.goToChatLockVerifyScreen();
+            }
+          }
+        },
+      ));
+    }
+
+    // 6. Controls (always available)
+    items.add(_buildDrawerItem(
+      icon: SvgPicture.asset(AssetConstants.ic_setting),
+      title: "Controls",
+      onTap: () => RouteManagement.goToSettingScreen(),
+    ));
+
+    // Partition items into rows of 4 columns
+    List<Widget> rowWidgets = [];
+    for (int i = 0; i < items.length; i += 4) {
+      int end = (i + 4 < items.length) ? i + 4 : items.length;
+      List<Widget> rowCells =
+          items.sublist(i, end).map((w) => Expanded(child: w)).toList();
+      while (rowCells.length < 4) {
+        rowCells.add(const Expanded(child: SizedBox()));
+      }
+      if (rowWidgets.isNotEmpty) {
+        rowWidgets.add(Dimens.boxHeight15);
+      }
+      rowWidgets.add(Row(children: rowCells));
+    }
+
+    return rowWidgets;
+  }
+
+  Widget _buildOngoingMeetingBanner(BuildContext context) {
+    if (!Get.find<HomeScreenController>().canAccess('Session')) {
+      return const SizedBox.shrink();
+    }
+    final repo = Get.find<Repository>();
+    final meetingId = repo.getStringValue(LocalKeys.lastActiveMeetingId);
+    if (meetingId.isEmpty) return const SizedBox.shrink();
+    final title = repo.getStringValue(LocalKeys.lastActiveMeetingTitle);
+    final displayTitle = title.isNotEmpty ? title : "Ongoing Session";
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE8F5E9),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.green.shade400, width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.green.withOpacity(0.12),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: Colors.green.shade600,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.videocam_rounded,
+              color: Colors.white,
+              size: 18,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 7,
+                      height: 7,
+                      decoration: const BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    const Text(
+                      "LIVE SESSION",
+                      style: TextStyle(
+                        color: Colors.green,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  displayTitle,
+                  style: const TextStyle(
+                    color: Colors.black87,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          ElevatedButton.icon(
+            onPressed: () {
+              RouteManagement.goToMeetingScreen();
+            },
+            icon: const Icon(Icons.login_rounded, size: 16, color: Colors.white),
+            label: const Text(
+              "REJOIN",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.teal,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              elevation: 0,
+            ),
+          ),
+          const SizedBox(width: 6),
+          InkWell(
+            onTap: () {
+              repo.clearData(LocalKeys.lastActiveMeetingId);
+              repo.clearData(LocalKeys.lastActiveMeetingTitle);
+              repo.clearData(LocalKeys.lastActiveMeetingChannel);
+              repo.clearData(LocalKeys.lastActiveMeetingToken);
+              repo.clearData(LocalKeys.lastActiveMeetingIsHost);
+              setState(() {});
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: Icon(
+                Icons.close,
+                size: 18,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

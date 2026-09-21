@@ -10,6 +10,7 @@ import 'package:http_parser/src/media_type.dart' as media_type;
 import 'package:http/http.dart' as http;
 
 import 'package:get/get.dart';
+import 'package:chatnest/app/navigators/app_pages.dart';
 import '../../app/navigators/routes_management.dart';
 import '../../app/utils/utility.dart';
 import '../../device/repositories/device_repositories.dart';
@@ -19,6 +20,7 @@ import '../repositories/data_repositories.dart';
 /// API WRAPPER to call all the APIs and handle the error status codes
 class ApiWrapper {
   static bool isHandlingUnauthorized = false;
+  static bool isLoggingOut = false;
   // Override in build/run:
   // --dart-define=API_BASE_ORIGIN=https://your-api-host
   static final String _apiOrigin = _resolveApiOrigin();
@@ -397,16 +399,52 @@ class ApiWrapper {
       case 401:
 
         /// unauthorized
-        if (!isHandlingUnauthorized) {
+        if (!isHandlingUnauthorized && !isLoggingOut) {
           isHandlingUnauthorized = true;
-          Get.find<Repository>().deleteAllSecuredValues();
-          RouteManagement.goToLoginView();
-          Utility.showMessage(
-            "Session expired or logged in from another device".tr,
-            MessageType.error,
-            () => null,
-            '',
-          );
+          try {
+            SocketConnection.socketDisconnect();
+          } catch (_) {}
+          try {
+            Get.find<Repository>().clearAllUserData();
+          } catch (_) {}
+
+          final currentRoute = Get.currentRoute;
+          final isAlreadyAuthRoute = currentRoute == Routes.logingScreen ||
+              currentRoute == Routes.otpScreen ||
+              currentRoute == Routes.splashScreen ||
+              currentRoute == Routes.eulaScreen ||
+              currentRoute.isEmpty;
+
+          if (!isAlreadyAuthRoute) {
+            RouteManagement.goToLoginView();
+          }
+
+          String logoutMsg = "Session expired. Please log in again.".tr;
+          try {
+            if (response.body != null && response.body.isNotEmpty) {
+              final decoded = jsonDecode(response.body);
+              if (decoded is Map) {
+                final rawMsg = (decoded['Message'] ?? decoded['message'] ?? '').toString();
+                final lower = rawMsg.toLowerCase();
+                if (lower.contains('plan') || lower.contains('membership') || lower.contains('expired')) {
+                  logoutMsg = rawMsg;
+                } else if (lower.contains('logged_in_from_another_device') || lower.contains('another device')) {
+                  logoutMsg = "Session expired or logged in from another device".tr;
+                } else if (rawMsg.isNotEmpty) {
+                  logoutMsg = rawMsg;
+                }
+              }
+            }
+          } catch (_) {}
+
+          if (!isAlreadyAuthRoute) {
+            Utility.showMessage(
+              logoutMsg,
+              MessageType.error,
+              () => null,
+              '',
+            );
+          }
           Future.delayed(const Duration(seconds: 4), () {
             isHandlingUnauthorized = false;
           });

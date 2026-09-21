@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:chatnest/app/app.dart';
 import 'package:chatnest/app/navigators/navigators.dart';
+import 'package:chatnest/data/helpers/api_wrapper.dart';
 import 'package:chatnest/device/device.dart';
 import 'package:chatnest/domain/domain.dart';
 import 'package:flutter/material.dart';
@@ -65,14 +66,24 @@ class SettingController extends GetxController
   }
 
   Future<void> postLogout() async {
+    ApiWrapper.isLoggingOut = true;
     try {
       await settingPresenter.postLogout(
         isLoading: false,
       );
     } catch (_) {}
     SocketConnection.socketDisconnect();
-    Get.find<DeviceRepository>().deleteBox();
+    Get.find<Repository>().clearAllUserData();
     RouteManagement.goToLoginView();
+    Utility.showMessage(
+      "Logged out successfully".tr,
+      MessageType.success,
+      () => null,
+      '',
+    );
+    Future.delayed(const Duration(seconds: 2), () {
+      ApiWrapper.isLoggingOut = false;
+    });
   }
 
   ProfileData profileData = ProfileData();
@@ -96,26 +107,34 @@ class SettingController extends GetxController
   ////=============================================== MyAccount =================================================///
 
   Future<void> postDisableAccount() async {
+    ApiWrapper.isLoggingOut = true;
     try {
       await settingPresenter.postDisableAccount(
         isLoading: true,
       );
     } catch (_) {}
     SocketConnection.socketDisconnect();
-    Get.find<DeviceRepository>().deleteBox();
+    Get.find<Repository>().clearAllUserData();
     RouteManagement.goToLoginView();
+    Future.delayed(const Duration(seconds: 2), () {
+      ApiWrapper.isLoggingOut = false;
+    });
     update();
   }
 
   Future<void> postDeleteAccount() async {
+    ApiWrapper.isLoggingOut = true;
     try {
       await settingPresenter.postDeleteAccount(
         isLoading: true,
       );
     } catch (_) {}
     SocketConnection.socketDisconnect();
-    Get.find<DeviceRepository>().deleteBox();
+    Get.find<Repository>().clearAllUserData();
     RouteManagement.goToLoginView();
+    Future.delayed(const Duration(seconds: 2), () {
+      ApiWrapper.isLoggingOut = false;
+    });
     update();
   }
 

@@ -167,7 +167,9 @@ class _ChatScreenState extends State<ChatScreen> {
           },
           child: Padding(
             padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).size.height * 0.034),
+                bottom: MediaQuery.of(context).viewPadding.bottom > 0
+                    ? MediaQuery.of(context).viewPadding.bottom
+                    : 0),
             child: Scaffold(
               appBar: GradientAppBar(
                 //     shadowColor: ColorsValue.greyAAAAAA,
@@ -363,7 +365,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
                   ],
                   Dimens.boxWidth10,
-                  if ((((controller
+                  if (Get.find<Repository>().canAccessFeature('Video') && (((controller
                               .getOneFriendsData?.usersPermissions?.videocall ??
                           controller
                               .getOneFriendsData?.yourPermissions?.videocall) ??
@@ -392,7 +394,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
                     Dimens.boxWidth10,
                   ],
-                  if ((((controller
+                  if (Get.find<Repository>().canAccessFeature('Audio') && (((controller
                               .getOneFriendsData?.usersPermissions?.audiocall ??
                           controller
                               .getOneFriendsData?.yourPermissions?.audiocall) ??

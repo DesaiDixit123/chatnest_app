@@ -676,6 +676,25 @@ class ProfileController extends GetxController
             .add(catagories.id ?? '');
       }
     }
+    if (editBusinessId == null || editBusinessId!.isEmpty) {
+      if (businessList.isNotEmpty) {
+        editBusinessId = businessList[0].id;
+      } else {
+        try {
+          var infoResponse =
+              await Get.find<ConnectHelper>().getBusinessInfo(isLoading: false);
+          if (infoResponse.hasError == false && infoResponse.data != null) {
+            final resData = jsonDecode(infoResponse.data);
+            final bId = (resData['Data']?['_id'] ?? '').toString();
+            if (bId.isNotEmpty) {
+              editBusinessId = bId;
+            }
+          }
+        } catch (e) {
+          debugPrint("Error fetching business info before submit: $e");
+        }
+      }
+    }
     var response = await profilePresenter.setBusinessProfile(
       businessid: editBusinessId ?? '',
       profileimage: businessProfilePic,
@@ -1295,12 +1314,31 @@ class ProfileController extends GetxController
       isLoading: isLoading,
     );
     businessList.clear();
-    if (response != null) {
-      if (response.data.isNotEmpty) {
-        businessList.addAll(response.data);
-        Get.find<Repository>()
-            .saveValue(LocalKeys.productId, businessList[businessIndex].id);
-        await getOneBusiness(businessList[businessIndex].id ?? "", false);
+    if (response != null && response.data.isNotEmpty) {
+      businessList.addAll(response.data);
+      Get.find<Repository>()
+          .saveValue(LocalKeys.productId, businessList[businessIndex].id);
+      await getOneBusiness(businessList[businessIndex].id ?? "", false);
+    } else {
+      try {
+        var infoResponse =
+            await Get.find<ConnectHelper>().getBusinessInfo(isLoading: false);
+        if (infoResponse.hasError == false && infoResponse.data != null) {
+          final resData = jsonDecode(infoResponse.data);
+          final bId = (resData['Data']?['_id'] ?? '').toString();
+          if (bId.isNotEmpty) {
+            editBusinessId = bId;
+            Get.find<Repository>().saveValue(LocalKeys.productId, bId);
+            await getOneBusiness(bId, false);
+            businessList.add(GetBusinessDatum(
+              id: bId,
+              name: resData['Data']['name'] ?? "",
+              profileimage: resData['Data']['profileimage'] ?? "",
+            ));
+          }
+        }
+      } catch (e) {
+        debugPrint("Error getting business info: $e");
       }
     }
     update();

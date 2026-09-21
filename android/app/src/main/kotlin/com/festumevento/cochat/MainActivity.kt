@@ -22,6 +22,7 @@ import android.view.WindowManager
 class MainActivity : FlutterActivity() {
     private var initialCallData: HashMap<String, Any?>? = null
     private var helloWorldChannel: MethodChannel? = null
+    private val acceptedCallIds = HashSet<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,6 +55,12 @@ class MainActivity : FlutterActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(true)
+            setTurnScreenOn(true)
+            val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
+            keyguardManager?.requestDismissKeyguard(this, null)
+        }
         handleIntent(intent)
     }
 
@@ -104,12 +111,25 @@ class MainActivity : FlutterActivity() {
             val extras = intent.extras
             if (extras != null) {
                 val callData = fromBundle(extras)
+                val callId = (callData["callId"] ?: callData["callid"] ?: callData["id"] ?: "").toString().trim()
                 if (intent.action == "com.hiennv.flutter_callkit_incoming.ACTION_CALL_ACCEPT") {
+                    if (callId.isNotEmpty()) {
+                        acceptedCallIds.add(callId)
+                    }
                     initialCallData = callData
                     helloWorldChannel?.invokeMethod("CALL_ACCEPTED_INTENT", callData)
-                } else if (intent.action == "com.hiennv.flutter_callkit_incoming.ACTION_CALL_DECLINE" ||
-                           intent.action == "com.hiennv.flutter_callkit_incoming.ACTION_CALL_ENDED") {
-                    helloWorldChannel?.invokeMethod("CALL_DECLINED_INTENT", callData)
+                } else if (intent.action == "com.hiennv.flutter_callkit_incoming.ACTION_CALL_DECLINE") {
+                    if (callId.isEmpty() || !acceptedCallIds.contains(callId)) {
+                        helloWorldChannel?.invokeMethod("CALL_DECLINED_INTENT", callData)
+                    }
+                } else if (intent.action == "com.hiennv.flutter_callkit_incoming.ACTION_CALL_ENDED") {
+                    // ACTION_CALL_ENDED fires whenever CallKit activity/notification closes (including after accept).
+                    // NEVER send CALL_DECLINED_INTENT for an accepted call!
+                    if (callId.isNotEmpty() && acceptedCallIds.contains(callId)) {
+                        android.util.Log.d("MainActivity", "Ignoring ACTION_CALL_ENDED for already accepted call: $callId")
+                    } else {
+                        helloWorldChannel?.invokeMethod("CALL_DECLINED_INTENT", callData)
+                    }
                 }
             }
         }

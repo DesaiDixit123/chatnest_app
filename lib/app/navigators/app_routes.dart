@@ -119,6 +119,8 @@ abstract class Routes {
   static const chatProductDetailsScreen = _Paths.chatProductDetailsScreen;
   static const screenDemo = _Paths.screenDemo;
   static const clearChatSelectScreen = _Paths.clearChatSelectScreen;
+  static const membershipPlansScreen = _Paths.membershipPlansScreen;
+  static const invoicesScreen = _Paths.invoicesScreen;
 }
 
 abstract class _Paths {
@@ -237,4 +239,6 @@ static const passwordForHideChat = '/setpasswordforhideChat';
   static const chatProductDetailsScreen = '/chatProductDetailsScreen';
   static const screenDemo = '/screenDemo';
   static const clearChatSelectScreen = '/clearChatSelectScreen';
+  static const membershipPlansScreen = '/membershipPlansScreen';
+  static const invoicesScreen = '/invoicesScreen';
 }

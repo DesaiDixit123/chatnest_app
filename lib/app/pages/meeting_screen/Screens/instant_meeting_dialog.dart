@@ -68,63 +68,177 @@ class InstantMeetingDialog extends StatelessWidget {
               // Add members button
               InkWell(
                 onTap: () async {
-                  // Load friends list for selection
-                  await controller.myFriendsWithoutPaginationList();
+                  controller.searchMemberController.clear();
+                  // Load friends and device contacts list for selection
+                  controller.myFriendsWithoutPaginationList();
 
                   // Show member selection dialog
                   Get.dialog(
                     GetBuilder<MeetingController>(
                       builder: (ctrl) => Dialog(
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(Dimens.fifteen),
+                        ),
                         child: Container(
-                          height: Get.height * 0.7,
+                          height: Get.height * 0.75,
                           padding: Dimens.edgeInsets20,
                           child: Column(
                             children: [
-                              Text(
-                                'add_members'.tr,
-                                style: Styles.black70018,
-                              ),
-                              Dimens.boxHeight20,
-                              Expanded(
-                                child: ListView.builder(
-                                  itemCount: ctrl.memberLists.length,
-                                  itemBuilder: (context, index) {
-                                    final member = ctrl.memberLists[index];
-                                    final isSelected = ctrl.selectedMemberList
-                                        .any((e) => e.userid == member.userid);
-
-                                    return ListTile(
-                                      onTap: () {
-                                        if (isSelected) {
-                                          ctrl.selectedMemberList.removeWhere(
-                                              (e) => e.userid == member.userid);
-                                        } else {
-                                          ctrl.selectedMemberList.add(member);
-                                        }
-                                        ctrl.update();
-                                      },
-                                      leading: CircleAvatar(
-                                        backgroundImage: member.profileimage !=
-                                                null
-                                            ? NetworkImage(
-                                                '${ApiWrapper.imageUrl}${member.profileimage}')
-                                            : null,
-                                        child: member.profileimage == null
-                                            ? Text(member.fullname?[0] ?? 'U')
-                                            : null,
-                                      ),
-                                      title: Text(member.fullname ?? ''),
-                                      trailing: isSelected
-                                          ? Icon(Icons.check_circle,
-                                              color: ColorsValue.maincolor1)
-                                          : Icon(Icons.circle_outlined),
-                                    );
-                                  },
-                                ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'add_members'.tr,
+                                    style: Styles.black70018,
+                                  ),
+                                  InkWell(
+                                    onTap: () => Get.back(),
+                                    child: Icon(
+                                      Icons.close,
+                                      size: Dimens.twentyFour,
+                                      color: ColorsValue.greyColor8888,
+                                    ),
+                                  ),
+                                ],
                               ),
                               Dimens.boxHeight10,
+                              CustomTextFormField(
+                                controller: ctrl.searchMemberController,
+                                hintText: 'search'.tr,
+                                fillColor: ColorsValue.textfildbackcolor,
+                                prefixIcon: Icon(
+                                  Icons.search,
+                                  size: Dimens.twenty,
+                                  color: ColorsValue.hookupHeaderGreyColor,
+                                ),
+                                onChanged: (val) {
+                                  ctrl.filterMembers(val);
+                                },
+                              ),
+                              Dimens.boxHeight15,
+                              Expanded(
+                                child: ctrl.isLoadingMembers
+                                    ? const Center(
+                                        child: CircularProgressIndicator())
+                                    : ctrl.memberLists.isEmpty
+                                        ? Center(
+                                            child: Text(
+                                              'no_data_found'.tr,
+                                              style:
+                                                  Styles.greyColor888840014,
+                                            ),
+                                          )
+                                        : ListView.separated(
+                                            itemCount: ctrl.memberLists.length,
+                                            separatorBuilder:
+                                                (context, index) => Divider(
+                                              color: ColorsValue.greyColor8888
+                                                  .withOpacity(0.2),
+                                              height: 1,
+                                            ),
+                                            itemBuilder: (context, index) {
+                                              final member =
+                                                  ctrl.memberLists[index];
+                                              final isSelected = ctrl
+                                                  .selectedMemberList
+                                                  .any((e) =>
+                                                      e.userid == member.userid);
+                                              final displayName =
+                                                  member.displayName;
+                                              final mobile =
+                                                  (member.mobile ?? "").trim();
+
+                                              return ListTile(
+                                                contentPadding:
+                                                    Dimens.edgeInsets5_0_5_0,
+                                                onTap: () {
+                                                  if (isSelected) {
+                                                    ctrl.selectedMemberList
+                                                        .removeWhere((e) =>
+                                                            e.userid ==
+                                                            member.userid);
+                                                  } else {
+                                                    ctrl.selectedMemberList
+                                                        .add(member);
+                                                  }
+                                                  ctrl.update();
+                                                },
+                                                leading: CircleAvatar(
+                                                  radius: Dimens.twenty,
+                                                  backgroundColor: ColorsValue
+                                                      .maincolor1
+                                                      .withOpacity(0.15),
+                                                  backgroundImage: (member
+                                                                  .profileimage !=
+                                                              null &&
+                                                          member.profileimage!
+                                                              .trim()
+                                                              .isNotEmpty)
+                                                      ? NetworkImage(
+                                                          '${ApiWrapper.imageUrl}${member.profileimage}')
+                                                      : null,
+                                                  child: (member.profileimage ==
+                                                              null ||
+                                                          member.profileimage!
+                                                              .trim()
+                                                              .isEmpty)
+                                                      ? Text(
+                                                          displayName.isNotEmpty
+                                                              ? displayName[0]
+                                                                  .toUpperCase()
+                                                              : 'U',
+                                                          style: TextStyle(
+                                                            color: ColorsValue
+                                                                .maincolor1,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontSize:
+                                                                Dimens.sixteen,
+                                                          ),
+                                                        )
+                                                      : null,
+                                                ),
+                                                title: Text(
+                                                  displayName,
+                                                  style: Styles.black50016,
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                                subtitle: mobile.isNotEmpty
+                                                    ? Text(
+                                                        mobile,
+                                                        style: Styles
+                                                            .greyColor888840012,
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      )
+                                                    : null,
+                                                trailing: isSelected
+                                                    ? Icon(
+                                                        Icons.check_circle,
+                                                        color: ColorsValue
+                                                            .maincolor1,
+                                                        size: Dimens.twentyFour,
+                                                      )
+                                                    : Icon(
+                                                        Icons.circle_outlined,
+                                                        color: ColorsValue
+                                                            .greyColor8888,
+                                                        size: Dimens.twentyFour,
+                                                      ),
+                                              );
+                                            },
+                                          ),
+                              ),
+                              Dimens.boxHeight15,
                               CustomButton(
-                                text: 'done'.tr.toUpperCase(),
+                                text: ctrl.selectedMemberList.isNotEmpty
+                                    ? '${'done'.tr.toUpperCase()} (${ctrl.selectedMemberList.length})'
+                                    : 'done'.tr.toUpperCase(),
                                 height: Dimens.fifty,
                                 onTap: () => Get.back(),
                               ),

@@ -836,6 +836,20 @@ class ConnectHelper {
     return response;
   }
 
+  /// Get Business Info (even if status is false/inactive)
+  Future<ResponseModel> getBusinessInfo({
+    bool isLoading = false,
+  }) async {
+    var response = await apiWrapper.makeRequest(
+      "business/info",
+      Request.post,
+      {},
+      isLoading,
+      Utility.commonHeader(),
+    );
+    return response;
+  }
+
   /// Get One Business API call
   Future<ResponseModel> getOneBusiness({
     bool isLoading = false,
@@ -4113,6 +4127,139 @@ class ConnectHelper {
       EndPoints.updateFcmToken,
       Request.post,
       data,
+      isLoading,
+      Utility.commonHeader(),
+    );
+    return response;
+  }
+
+  Future<ResponseModel> getPlansList({
+    bool isLoading = false,
+  }) async {
+    var response = await apiWrapper.makeRequest(
+      EndPoints.getPlansList,
+      Request.post,
+      {},
+      isLoading,
+      Utility.commonHeader(),
+    );
+    return response;
+  }
+
+  Future<ResponseModel> subscribePlan({
+    bool isLoading = true,
+    required String planId,
+    required int durationDays,
+    required String durationLabel,
+    required double price,
+    String? paymentId,
+    String? orderId,
+    String? paymentMethod,
+  }) async {
+    var data = {
+      'planId': planId,
+      'durationDays': durationDays,
+      'durationLabel': durationLabel,
+      'price': price,
+      if (paymentId != null && paymentId.isNotEmpty) 'paymentId': paymentId,
+      if (orderId != null && orderId.isNotEmpty) 'orderId': orderId,
+      'paymentMethod': paymentMethod ?? 'razorpay',
+    };
+    var response = await apiWrapper.makeRequest(
+      EndPoints.subscribePlan,
+      Request.post,
+      data,
+      isLoading,
+      Utility.commonHeader(),
+    );
+    return response;
+  }
+
+  Future<ResponseModel> createPaymentOrder({
+    bool isLoading = true,
+    required String planId,
+    required int durationDays,
+    required String durationLabel,
+    required double price,
+  }) async {
+    var data = {
+      'planId': planId,
+      'durationDays': durationDays,
+      'durationLabel': durationLabel,
+      'price': price,
+    };
+    var response = await apiWrapper.makeRequest(
+      EndPoints.createOrder,
+      Request.post,
+      data,
+      isLoading,
+      Utility.commonHeader(),
+    );
+    return response;
+  }
+
+  Future<ResponseModel> verifyPlanPayment({
+    bool isLoading = true,
+    required String planId,
+    required int durationDays,
+    required String durationLabel,
+    required double price,
+    required String paymentId,
+    String? orderId,
+    String? signature,
+  }) async {
+    var data = {
+      'planId': planId,
+      'durationDays': durationDays,
+      'durationLabel': durationLabel,
+      'price': price,
+      'razorpayPaymentId': paymentId,
+      'razorpayOrderId': orderId ?? '',
+      'razorpaySignature': signature ?? '',
+    };
+    var response = await apiWrapper.makeRequest(
+      EndPoints.verifyPayment,
+      Request.post,
+      data,
+      isLoading,
+      Utility.commonHeader(),
+    );
+    return response;
+  }
+
+  Future<ResponseModel> getMySubscription({
+    bool isLoading = false,
+  }) async {
+    var response = await apiWrapper.makeRequest(
+      EndPoints.getMySubscription,
+      Request.post,
+      {},
+      isLoading,
+      Utility.commonHeader(),
+    );
+    return response;
+  }
+
+  Future<ResponseModel> getGst({
+    bool isLoading = false,
+  }) async {
+    var response = await apiWrapper.makeRequest(
+      EndPoints.getGst,
+      Request.get,
+      {},
+      isLoading,
+      Utility.commonHeader(),
+    );
+    return response;
+  }
+
+  Future<ResponseModel> getMyInvoices({
+    bool isLoading = false,
+  }) async {
+    var response = await apiWrapper.makeRequest(
+      EndPoints.getMyInvoices,
+      Request.post,
+      {},
       isLoading,
       Utility.commonHeader(),
     );

@@ -54,27 +54,70 @@ abstract class Utility {
 
   static String? getContactNameForPhone(String? phone) {
     if (phone == null || phone.trim().isEmpty) return null;
+    final digits = phone.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.isEmpty) return null;
+
     final normalized = normalizePhoneNumber(phone);
-    if (normalized.isEmpty) return null;
-    return deviceContactsMap[normalized];
+    if (deviceContactsMap.containsKey(normalized) &&
+        deviceContactsMap[normalized]!.trim().isNotEmpty) {
+      return deviceContactsMap[normalized];
+    }
+    if (deviceContactsMap.containsKey(digits) &&
+        deviceContactsMap[digits]!.trim().isNotEmpty) {
+      return deviceContactsMap[digits];
+    }
+
+    if (Get.isRegistered<CallController>()) {
+      final callCtrl = Get.find<CallController>();
+      final match = callCtrl.contactsList.firstWhereOrNull((c) {
+        final cPhone =
+            c.contactNumber ?? c.mobile ?? c.chatNestUser?.mobile ?? "";
+        final cNorm = normalizePhoneNumber(cPhone);
+        return (cNorm.isNotEmpty && cNorm == normalized) ||
+            (cPhone.isNotEmpty && cPhone.contains(digits));
+      });
+      if (match != null) {
+        final name = (match.contactName ?? match.name ?? "").trim();
+        if (name.isNotEmpty &&
+            name != match.contactNumber &&
+            name != match.mobile &&
+            !RegExp(r'^[+0-9\s()-]+$').hasMatch(name)) {
+          deviceContactsMap[normalized] = name;
+          return name;
+        }
+      }
+    }
+    return null;
   }
 
   static Future<void> loadDeviceContacts() async {
     try {
-      final hasPermission = await Permission.contacts.isGranted;
+      var hasPermission = await Permission.contacts.isGranted;
+      if (!hasPermission) {
+        final req = await Permission.contacts.request();
+        hasPermission = req.isGranted;
+      }
       if (hasPermission) {
-        final contacts = await FlutterContacts.getContacts(withProperties: true);
+        final contacts =
+            await FlutterContacts.getContacts(withProperties: true);
         for (var contact in contacts) {
           final name = contact.displayName.trim();
           if (name.isNotEmpty) {
             for (var phone in contact.phones) {
               final norm = normalizePhoneNumber(phone.number);
+              final digits =
+                  phone.number.replaceAll(RegExp(r'[^0-9]'), '');
               if (norm.isNotEmpty) {
                 deviceContactsMap[norm] = name;
+              }
+              if (digits.isNotEmpty) {
+                deviceContactsMap[digits] = name;
               }
             }
           }
         }
+        debugPrint(
+            "📱 Utility.loadDeviceContacts loaded ${deviceContactsMap.length} contact mappings");
       }
     } catch (e) {
       debugPrint("Error loading device contacts into map: $e");

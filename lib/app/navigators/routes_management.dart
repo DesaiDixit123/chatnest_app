@@ -57,10 +57,30 @@ abstract class RouteManagement {
         Routes.callInfoScreen,
         arguments: [targetId, isGroup, isConference, callId],
       );
+  static bool _verifyFeatureAccess(String featureName, String featureDisplayName) {
+    try {
+      final repo = Get.find<Repository>();
+      if (repo.currentSubscription != null && !repo.canAccessFeature(featureName)) {
+        Utility.showMessage(
+          "$featureDisplayName is not included in your current plan. Please upgrade your plan.",
+          MessageType.information,
+          () => null,
+          '',
+        );
+        Get.toNamed<void>(Routes.membershipPlansScreen);
+        return false;
+      }
+    } catch (_) {}
+    return true;
+  }
+
   static void goToContactListScreen() =>
       Get.toNamed<void>(Routes.contactListScreen);
   static void goToBookmarkScreen() => Get.toNamed<void>(Routes.bookmarkScreen);
-  static void goToProductScreen() => Get.toNamed<void>(Routes.productScreen);
+  static void goToProductScreen() {
+    if (!_verifyFeatureAccess('Marketplace', 'Marketplace')) return;
+    Get.toNamed<void>(Routes.productScreen);
+  }
   static void goToCreatePinChatScreen() =>
       Get.toNamed<void>(Routes.createpinChatlock);
   static void goToProductDetailsScreen(String id) =>
@@ -73,8 +93,10 @@ abstract class RouteManagement {
 
   static void goToProfileScreen() =>
       Get.toNamed<void>(Routes.userProfileScreen);
-  static void goTobusinessProductScreen(String businessId) =>
-      Get.toNamed<void>(Routes.businessProductScreen, arguments: businessId);
+  static void goTobusinessProductScreen(String businessId) {
+    if (!_verifyFeatureAccess('Marketplace', 'Marketplace')) return;
+    Get.toNamed<void>(Routes.businessProductScreen, arguments: businessId);
+  }
   static void goToaddbusinessProductScreen(String id) =>
       Get.toNamed<void>(Routes.addbusinessProductScreen, arguments: id);
   static void goTobusinessProductdetailScreen(String? productId) =>
@@ -85,8 +107,10 @@ abstract class RouteManagement {
       Get.toNamed<void>(Routes.createGroupScreen, arguments: isAddMember);
   static void goToCreateGroupTitleScreen(bool isAddMember) =>
       Get.toNamed<void>(Routes.createGroupTitleScreen, arguments: isAddMember);
-  static void goToBroadcastListScreen() =>
-      Get.toNamed<void>(Routes.broadCastListScreen);
+  static void goToBroadcastListScreen() {
+    if (!_verifyFeatureAccess('Broadcast', 'Broadcast')) return;
+    Get.toNamed<void>(Routes.broadCastListScreen);
+  }
   static void goToaddBroadcastTitleScreen(bool isEdit) =>
       Get.toNamed<void>(Routes.addBordCastTitleScreen, arguments: isEdit);
   static void goToAddBroadcastScreen(bool isEdit) =>
@@ -102,7 +126,10 @@ abstract class RouteManagement {
       Get.toNamed<void>(Routes.groupProfileDetailsScreen, arguments: groupId);
   static void goToBroadCastProfileScreen(String brodcastId) =>
       Get.toNamed<void>(Routes.broadCastProfileScreen, arguments: brodcastId);
-  static void goToMeetingScreen() => Get.toNamed<void>(Routes.meetingScreen);
+  static void goToMeetingScreen() {
+    if (!_verifyFeatureAccess('Session', 'Sessions')) return;
+    Get.toNamed<void>(Routes.meetingScreen);
+  }
   static void goToAddMeetingScreen(bool isEdit) =>
       Get.toNamed<void>(Routes.addMeetingScreen, arguments: isEdit);
   static void goToHostMeetingDetailScreen(String meetingId, String subTitle) =>
@@ -163,19 +190,34 @@ abstract class RouteManagement {
     String banner,
     String userName,
     bool isCall,
-  ) async =>
-      await Get.toNamed<void>(
-        Routes.videoCallScreen,
-        arguments: [
-          agorachannelName,
-          agoraToken,
-          callId,
-          isJoinCall,
-          banner,
-          userName,
-          isCall,
-        ],
-      );
+  ) async {
+    if (Get.isRegistered<VideoCallController>()) {
+      final oldCtrl = Get.find<VideoCallController>();
+      if (oldCtrl.callId.isEmpty || oldCtrl.callId != callId || oldCtrl.isCallEnded) {
+        await oldCtrl.disposeAgora();
+        Get.delete<VideoCallController>(force: true);
+      }
+    }
+    if (Get.isRegistered<CallManagerService>()) {
+      final cm = Get.find<CallManagerService>();
+      if (cm.activeCallId.value != callId) {
+        cm.activeParticipantNames.clear();
+      }
+    }
+    return await Get.toNamed<void>(
+      Routes.videoCallScreen,
+      arguments: [
+        agorachannelName,
+        agoraToken,
+        callId,
+        isJoinCall,
+        banner,
+        userName,
+        isCall,
+      ],
+    );
+  }
+
   static Future<void> goToAudioCallScreen(
     String agorachannelName,
     String agoraToken,
@@ -185,6 +227,19 @@ abstract class RouteManagement {
     String userName,
     bool isHost, // ✅ HOST FLAG
   ) async {
+    if (Get.isRegistered<AudioCallController>()) {
+      final oldCtrl = Get.find<AudioCallController>();
+      if (oldCtrl.callId.isEmpty || oldCtrl.callId != hostMeetingId || oldCtrl.isCallEnded) {
+        await oldCtrl.disposeAgora();
+        Get.delete<AudioCallController>(force: true);
+      }
+    }
+    if (Get.isRegistered<CallManagerService>()) {
+      final cm = Get.find<CallManagerService>();
+      if (cm.activeCallId.value != hostMeetingId) {
+        cm.activeParticipantNames.clear();
+      }
+    }
     return await Get.toNamed<void>(
       Routes.audioCallScreen,
       arguments: [
@@ -297,4 +352,6 @@ abstract class RouteManagement {
       Get.toNamed<void>(Routes.chatProductDetailsScreen, arguments: productId);
   static void goToScreenDemo() => Get.toNamed<void>(Routes.screenDemo);
   static void goToClearChatSelectScreen() => Get.toNamed<void>(Routes.clearChatSelectScreen);
+  static void goToMembershipPlansScreen() => Get.toNamed<void>(Routes.membershipPlansScreen);
+  static void goToInvoicesScreen() => Get.toNamed<void>(Routes.invoicesScreen);
 }

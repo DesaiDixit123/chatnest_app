@@ -94,7 +94,11 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
   @override
   void dispose() {
     final controller = Get.isRegistered<VideoCallController>() ? Get.find<VideoCallController>() : null;
-    if (controller == null || !controller.isCallEnded) {
+    if (controller != null && controller.isCallEnded) {
+      if (Get.isRegistered<CallManagerService>()) {
+        Get.find<CallManagerService>().endCall();
+      }
+    } else if (controller != null) {
       if (Get.isRegistered<CallManagerService>()) {
         Get.find<CallManagerService>().minimizeCall();
       }
@@ -109,7 +113,11 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
       onPopInvoked: (didPop) {
         if (didPop) {
           final controller = Get.isRegistered<VideoCallController>() ? Get.find<VideoCallController>() : null;
-          if (controller == null || !controller.isCallEnded) {
+          if (controller != null && controller.isCallEnded) {
+            if (Get.isRegistered<CallManagerService>()) {
+              Get.find<CallManagerService>().endCall();
+            }
+          } else if (controller != null) {
             if (Get.isRegistered<CallManagerService>()) {
               Get.find<CallManagerService>().minimizeCall();
             }
@@ -118,6 +126,20 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
       },
       child: GetBuilder<VideoCallController>(initState: (state) async {
       var controller = Get.find<VideoCallController>();
+      final args = Get.arguments;
+      final targetCallId = (args is List && args.length > 2) ? (args[2] ?? "").toString() : "";
+      final isNewCallSession = controller.callId.isNotEmpty && targetCallId.isNotEmpty && controller.callId != targetCallId;
+      if (isNewCallSession || controller.isCallEnded) {
+        await controller.disposeAgora();
+        controller.resetSession(
+          newCallId: targetCallId,
+          newChannelName: (args is List && args.isNotEmpty) ? (args[0] ?? "") : "",
+          newToken: (args is List && args.length > 1) ? (args[1] ?? "") : "",
+          newUserImage: (args is List && args.length > 4) ? (args[4] ?? "").toString() : "",
+          newUserName: (args is List && args.length > 5) ? (args[5] ?? "User").toString() : "User",
+          newIsSelfCall: (args is List && args.length > 6) ? (args[6] ?? false) : false,
+        );
+      }
       Future.delayed(Duration.zero, () async {
         if (!controller.isInitialized) {
           if (await Utility.cameraPermissionCheack(context) &&

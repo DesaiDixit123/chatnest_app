@@ -22,6 +22,16 @@ abstract class LocalKeys {
   static const notificationToken = 'notificationToken';
   static const fcmToken = 'fcmToken';
   static const isContactsSyncConsented = 'isContactsSyncConsented';
+  static const lastActiveMeetingId = 'last_active_meeting_id';
+  static const lastActiveMeetingTitle = 'last_active_meeting_title';
+  static const lastActiveMeetingChannel = 'last_active_meeting_channel';
+  static const lastActiveMeetingToken = 'last_active_meeting_token';
+  static const lastActiveMeetingIsHost = 'last_active_meeting_is_host';
+  static const hasSeenSubscriptionPopup = 'hasSeenSubscriptionPopup';
+  static const userSubscription = 'userSubscription';
+  static const userInvoices = 'userInvoices';
+  static const adminGstPercentage = 'adminGstPercentage';
+  static const adminGstLabel = 'adminGstLabel';
 }
 
 class Global {

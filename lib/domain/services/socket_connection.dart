@@ -6,6 +6,7 @@ import 'package:chatnest/data/data.dart';
 import 'package:chatnest/domain/domain.dart';
 import 'package:chatnest/domain/services/call_ringtone_manager.dart';
 import 'firebase_api.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
@@ -322,18 +323,104 @@ abstract class SocketConnection {
 
   static void _handleChannelData(dynamic data) async {
     print("channel data: $data");
-      if (data != null && (data['event'] == 'forcelogout' || data['event'] == 'userlogout')) {
-        if (!ApiWrapper.isHandlingUnauthorized) {
+
+      // ─── Account Suspended (admin deleted user) ───────────────────────────
+      if (data != null && data['event'] == 'accountSuspended') {
+        if (!ApiWrapper.isHandlingUnauthorized && !ApiWrapper.isLoggingOut) {
           ApiWrapper.isHandlingUnauthorized = true;
           socketDisconnect();
-          Get.find<Repository>().deleteAllSecuredValues();
-          RouteManagement.goToLoginView();
-          Utility.showMessage(
-            "Session expired or logged in from another device".tr,
-            MessageType.error,
-            () => null,
-            '',
-          );
+          try {
+            Get.find<Repository>().clearAllUserData();
+          } catch (_) {}
+
+          final currentRoute = Get.currentRoute;
+          final isAlreadyAuthRoute = currentRoute == Routes.logingScreen ||
+              currentRoute == Routes.otpScreen ||
+              currentRoute == Routes.splashScreen ||
+              currentRoute == Routes.eulaScreen ||
+              currentRoute.isEmpty;
+
+          if (!isAlreadyAuthRoute) {
+            // Close all open dialogs/snackbars first
+            try { Get.closeAllSnackbars(); } catch (_) {}
+            try { if (Get.isDialogOpen == true) Get.back(); } catch (_) {}
+
+            // Show suspended dialog before navigating away
+            await Future.delayed(const Duration(milliseconds: 200));
+            try {
+              await Get.dialog<void>(
+                PopScope(
+                  canPop: false,
+                  child: AlertDialog(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    title: Row(
+                      children: [
+                        const Icon(Icons.block, color: Colors.red, size: 28),
+                        const SizedBox(width: 10),
+                        Text('account_suspended_title'.tr),
+                      ],
+                    ),
+                    content: Text('account_suspended'.tr),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Get.back();
+                          RouteManagement.goToLoginView();
+                        },
+                        child: const Text(
+                          'OK',
+                          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                barrierDismissible: false,
+              );
+            } catch (_) {
+              // Fallback: navigate directly if dialog fails
+              RouteManagement.goToLoginView();
+            }
+          }
+
+          Future.delayed(const Duration(seconds: 4), () {
+            ApiWrapper.isHandlingUnauthorized = false;
+          });
+        }
+        return;
+      }
+
+      // ─── Force Logout (session expired / logged in from another device) ────
+      if (data != null && (data['event'] == 'forcelogout' || data['event'] == 'userlogout')) {
+        if (!ApiWrapper.isHandlingUnauthorized && !ApiWrapper.isLoggingOut) {
+          ApiWrapper.isHandlingUnauthorized = true;
+          socketDisconnect();
+          try {
+            Get.find<Repository>().clearAllUserData();
+          } catch (_) {}
+
+          final currentRoute = Get.currentRoute;
+          final isAlreadyAuthRoute = currentRoute == Routes.logingScreen ||
+              currentRoute == Routes.otpScreen ||
+              currentRoute == Routes.splashScreen ||
+              currentRoute == Routes.eulaScreen ||
+              currentRoute.isEmpty;
+
+          if (!isAlreadyAuthRoute) {
+            RouteManagement.goToLoginView();
+          }
+
+          if (data['event'] == 'forcelogout' && !isAlreadyAuthRoute) {
+            final customMsg = (data['message'] ?? data['data']?['message'] ?? '').toString();
+            Utility.showMessage(
+              customMsg.isNotEmpty ? customMsg : "Session expired or logged in from another device".tr,
+              MessageType.error,
+              () => null,
+              '',
+            );
+          }
           Future.delayed(const Duration(seconds: 4), () {
             ApiWrapper.isHandlingUnauthorized = false;
           });
@@ -852,11 +939,61 @@ abstract class SocketConnection {
         );
 
         Get.forceAppUpdate();
+      } else if (data['event'] == "onmeetingmemberadded") {
+        if (Get.isRegistered<MeetingController>()) {
+          Get.find<MeetingController>().joinPagingController.refresh();
+        }
+        final msg = data['data'] != null ? (data['data']['message'] ?? data['data']['title']) : null;
+        if (msg != null && msg.toString().isNotEmpty) {
+          Utility.showMessage(msg.toString(), MessageType.information, () => null, "OK");
+        }
+        Get.forceAppUpdate();
       } else if (data['event'] == "onmeetingcallleave") {
         if (Get.isRegistered<MeetingController>()) {
           var meetingdata =
               HostMeetingDoc.fromJson(data['data']['meetingdata']);
           Get.find<MeetingController>().hostMeetingDoc = meetingdata;
+        }
+        Get.forceAppUpdate();
+      } else if (data['event'] == "onmeetingcanceled") {
+        print("[MEETING] onmeetingcanceled event received: $data");
+        Utility.audioPlayer.stop();
+        await CallingKitService.endAllCalls();
+
+        try {
+          final repo = Get.find<Repository>();
+          repo.clearData(LocalKeys.lastActiveMeetingId);
+          repo.clearData(LocalKeys.lastActiveMeetingTitle);
+          repo.clearData(LocalKeys.lastActiveMeetingChannel);
+          repo.clearData(LocalKeys.lastActiveMeetingToken);
+          repo.clearData(LocalKeys.lastActiveMeetingIsHost);
+        } catch (_) {}
+
+        if (Get.isRegistered<MeetingCallController>()) {
+          final meetingCtrl = Get.find<MeetingCallController>();
+          meetingCtrl.isCallEnded = true;
+          await meetingCtrl.disposeAgora();
+        }
+
+        if (Get.isRegistered<CallManagerService>()) {
+          await Get.find<CallManagerService>().endCall();
+        }
+
+        if (Get.currentRoute == Routes.meetingCallScreen) {
+          Get.back();
+        }
+
+        Utility.showMessage(
+          "Session was ended by the host.",
+          MessageType.information,
+          () => null,
+          "OK",
+        );
+
+        if (Get.isRegistered<MeetingController>()) {
+          Get.find<MeetingController>().joinPagingController.refresh();
+          Get.find<MeetingController>().hostPagingController.refresh();
+          Get.find<MeetingController>().pastPagingController.refresh();
         }
         Get.forceAppUpdate();
       } else if (data['event'] == "onincomingindividualcall") {

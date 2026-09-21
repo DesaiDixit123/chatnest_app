@@ -253,41 +253,54 @@ class HostMeetingScreen extends StatelessWidget {
                               ],
                             ),
                             trailing: item.status != "cancel"
-                                ? InkWell(
-                                    onTap: controller.isBtnVisible ?? false
-                                        ? () async {
-                                            if (await Utility
-                                                    .cameraPermissionCheack(
-                                                        context) &&
-                                                await Utility
-                                                    .microphonePermissionCheack(
-                                                        context)) {
-                                              controller.postHostMeetingStart(
-                                                  item.id ?? "");
-                                            }
-                                          }
-                                        : null,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(
-                                          Dimens.four,
+                                ? Builder(
+                                    builder: (context) {
+                                      final bool isAlreadyLive =
+                                          item.agorameta?.token?.isNotEmpty == true;
+                                      final bool canHostOrRejoin = isAlreadyLive ||
+                                          (controller.isBtnVisible ?? false);
+                                      return InkWell(
+                                        onTap: canHostOrRejoin
+                                            ? () async {
+                                                if (await Utility
+                                                        .cameraPermissionCheack(
+                                                            context) &&
+                                                    await Utility
+                                                        .microphonePermissionCheack(
+                                                            context)) {
+                                                  controller.postHostMeetingStart(
+                                                      item.id ?? "");
+                                                }
+                                              }
+                                            : null,
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              Dimens.four,
+                                            ),
+                                            color: isAlreadyLive
+                                                ? Colors.teal
+                                                : (canHostOrRejoin
+                                                    ? ColorsValue.maincolor1
+                                                    : ColorsValue.maincolor1
+                                                        .withOpacity(0.6)),
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8, vertical: 4),
+                                            child: Text(
+                                              isAlreadyLive
+                                                  ? 'REJOIN'
+                                                  : 'host_meeting'.tr.toUpperCase(),
+                                              style: Styles.white50012,
+                                            ),
+                                          ),
                                         ),
-                                        color: controller.isBtnVisible ?? false
-                                            ? ColorsValue.maincolor1
-                                            : ColorsValue.maincolor1
-                                                .withOpacity(0.6),
-                                      ),
-                                      child: Padding(
-                                        padding: Dimens.edgeInsets4,
-                                        child: Text(
-                                          'host_meeting'.tr.toUpperCase(),
-                                          style: Styles.white50012,
-                                        ),
-                                      ),
-                                    ),
+                                      );
+                                    },
                                   )
                                 : Text(
-                                    'Cancel Session',
+                                    'Cancelled',
                                     style: Styles.redColor50014,
                                   ),
                             contentPadding: Dimens.edgeInsets0,

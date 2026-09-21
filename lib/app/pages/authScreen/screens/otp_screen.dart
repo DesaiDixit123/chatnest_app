@@ -2,6 +2,7 @@ import 'package:chatnest/app/app.dart';
 import 'package:chatnest/domain/domain.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
@@ -38,6 +39,11 @@ class OtpScreen extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: ColorsValue.whiteColor,
           elevation: Dimens.zero,
+          systemOverlayStyle: const SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.dark,
+            statusBarBrightness: Brightness.light,
+          ),
           leading: Container(
             margin: Dimens.edgeInsets20_0_0_0,
             child: IconButton(

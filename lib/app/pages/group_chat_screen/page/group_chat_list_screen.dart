@@ -339,8 +339,8 @@ class GroupChatListScreen extends StatelessWidget {
                                                    item.profileimage)
                                                ? CachedNetworkImage(
                                                    imageUrl:
-                                                       ApiWrapper.imageUrl +
-                                                           item.profileimage!,
+                                                       ApiWrapper.getFullImageUrl(
+                                                           item.profileimage),
                                                    fit: BoxFit.cover,
                                                    maxHeightDiskCache: 90,
                                                    maxWidthDiskCache: 90,
@@ -391,8 +391,8 @@ class GroupChatListScreen extends StatelessWidget {
                                       child: ApiWrapper.isValidImageUrl(
                                               item.profileimage)
                                           ? CachedNetworkImage(
-                                              imageUrl: ApiWrapper.imageUrl +
-                                                  item.profileimage!,
+                                               imageUrl: ApiWrapper.getFullImageUrl(
+                                                   item.profileimage),
                                               fit: BoxFit.cover,
                                               maxHeightDiskCache: 90,
                                               maxWidthDiskCache: 90,

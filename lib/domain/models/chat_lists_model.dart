@@ -255,13 +255,13 @@ class ChatListsDoc {
 
   Map<String, dynamic> toJson() => {
         "_id": id,
-        "from": from!.toJson(),
-        "to": to!.toJson(),
+        "from": from?.toJson(),
+        "to": to?.toJson(),
         "subuser": subuser?.toJson(),
         "status": status,
-        "context": context!.toJson(),
+        "context": context?.toJson(),
         "contentType": contentType,
-        "content": content!.toJson(),
+        "content": content?.toJson(),
         "callid": callid?.toJson(),
         "isforwarded": isforwarded,
         "favorites": favorites == null
@@ -1107,13 +1107,13 @@ class ChatConatextDoc {
 
   Map<String, dynamic> toJson() => {
         "_id": id,
-        "from": from!.toJson(),
-        "to": to!.toJson(),
+        "from": from?.toJson(),
+        "to": to?.toJson(),
         "subuser": subuser?.toJson(),
         "status": status,
-        "context": context!.toJson(),
+        "context": context?.toJson(),
         "contentType": contentType,
-        "content": content!.toJson(),
+        "content": content?.toJson(),
         "callid": callid?.toJson(),
         "isforwarded": isforwarded,
         "favorites": favorites == null

@@ -32,8 +32,46 @@ class AudioCallController extends GetxController {
   bool? isSelfCall;
   bool isCallEnded = false;
 
+  void resetSession({
+    required String newCallId,
+    required String newChannelName,
+    required String newToken,
+    String newUserName = "User",
+    String newUserImage = "",
+    bool newIsSelfCall = false,
+  }) {
+    callId = newCallId;
+    channelName = newChannelName;
+    token = newToken;
+    userName = newUserName;
+    userImage = newUserImage;
+    isSelfCall = newIsSelfCall;
+    isCall = newIsSelfCall;
+    isCallEnded = false;
+    _isEnding = false;
+    isCallConnected = false;
+    callDuration = Duration.zero;
+    isInitialized = false;
+    _isAutoEndingCall = false;
+    endReasonText = null;
+    counter = 30;
+    users.clear();
+    pendingInvitees.clear();
+    queuedRemoteMembersById.clear();
+    queuedRemoteMemberOrder.clear();
+    callMembersMap.clear();
+    _updateCallManagerParticipantNames();
+    update();
+  }
+
   @override
   void onInit() {
+    users.clear();
+    pendingInvitees.clear();
+    queuedRemoteMembersById.clear();
+    queuedRemoteMemberOrder.clear();
+    callMembersMap.clear();
+
     final args = Get.arguments;
     if (args is List) {
       userImage = args.length > 4 ? (args[4] ?? "").toString() : "";
@@ -76,6 +114,12 @@ class AudioCallController extends GetxController {
     Utility.audioPlayer.stop();
     timer?.cancel();
     callDurationTimer?.cancel();
+    users.clear();
+    pendingInvitees.clear();
+    queuedRemoteMembersById.clear();
+    queuedRemoteMemberOrder.clear();
+    callMembersMap.clear();
+    _updateCallManagerParticipantNames();
     super.onClose();
   }
 
@@ -139,8 +183,13 @@ class AudioCallController extends GetxController {
   }
 
   bool get isMultiPartyConference {
-    final totalRemoteCount = remoteParticipantsCount + pendingInvitees.length;
-    return totalRemoteCount > 1 || users.length > 2 || callMembersMap.length > 2;
+    final activeRemoteCount = users.where((u) => u.uid != currentUid).length;
+    final activePendingCount = pendingInvitees.length;
+    final activeMembersCount = callMembersMap.values.where((m) {
+      final s = (m['status'] ?? '').toString().toLowerCase();
+      return s == 'connected' || s == 'started' || s == 'ringing' || s == 'connecting';
+    }).length;
+    return (activeRemoteCount + activePendingCount) > 1 || activeMembersCount > 2;
   }
 
   void _onCallRejected(dynamic data) {
@@ -163,6 +212,10 @@ class AudioCallController extends GetxController {
       print("[CALL] Multi-party conference active: ignoring call-rejected and handling participant left: $fromUserId");
       if (fromUserId.isNotEmpty && fromUserId != currentUserId) {
         handleParticipantLeft(fromUserId, callId: id);
+      }
+      final remainingRemote = remoteParticipantsCount + pendingInvitees.length;
+      if (remainingRemote == 0) {
+        handleRemoteCallTermination(reason: "Call declined");
       }
       return;
     }
@@ -188,6 +241,10 @@ class AudioCallController extends GetxController {
       if (fromUserId.isNotEmpty && fromUserId != currentUserId) {
         handleParticipantLeft(fromUserId, callId: id);
       }
+      final remainingRemote = remoteParticipantsCount + pendingInvitees.length;
+      if (remainingRemote == 0) {
+        handleRemoteCallTermination(reason: "Call cancelled");
+      }
       return;
     }
     handleRemoteCallTermination(reason: "Call cancelled");
@@ -211,6 +268,10 @@ class AudioCallController extends GetxController {
       if (fromUserId.isNotEmpty && fromUserId != currentUserId) {
         handleParticipantLeft(fromUserId, callId: id);
       }
+      final remainingRemote = remoteParticipantsCount + pendingInvitees.length;
+      if (remainingRemote == 0) {
+        handleRemoteCallTermination(reason: isCallConnected ? "Call ended" : "Call declined");
+      }
       return;
     }
     handleRemoteCallTermination(reason: "Call ended");
@@ -221,8 +282,9 @@ class AudioCallController extends GetxController {
   }
 
   void _onCallAccepted(dynamic data) {
-    final id = (data is Map ? (data['callId'] ?? data['callid']) : data).toString();
-    if (id.isNotEmpty && id != callId) return;
+    final id = (data is Map ? (data['callId'] ?? data['callid']) : data)?.toString() ?? "";
+    if (callId.isNotEmpty && id.isNotEmpty && id != callId) return;
+    if (callId.isNotEmpty && id.isEmpty) return;
     handleRemoteUserJoined();
   }
 
@@ -414,7 +476,6 @@ class AudioCallController extends GetxController {
       final canonicalDate = DateTime.fromMillisecondsSinceEpoch(earliestStartMs);
       if (canonicalDate.isBefore(DateTime.now().add(const Duration(seconds: 10)))) {
         callManager.callStartedAt.value = canonicalDate;
-        callManager.connectedAt.value = canonicalDate;
       }
     }
   }
@@ -485,6 +546,8 @@ class AudioCallController extends GetxController {
     pendingInvitees.clear();
     queuedRemoteMembersById.clear();
     queuedRemoteMemberOrder.clear();
+    callMembersMap.clear();
+    _updateCallManagerParticipantNames();
   }
 
   Future<void> _endCallGlobally() async {
@@ -493,6 +556,11 @@ class AudioCallController extends GetxController {
     timer?.cancel();
     _stopCallDurationTimer(reset: true);
     users.clear();
+    pendingInvitees.clear();
+    queuedRemoteMembersById.clear();
+    queuedRemoteMemberOrder.clear();
+    callMembersMap.clear();
+    _updateCallManagerParticipantNames();
     
     if (callId.isNotEmpty) {
       await postChatLeaveCall(callId);
@@ -512,6 +580,7 @@ class AudioCallController extends GetxController {
       }
       CallingKitService.endAllCalls();
       _safeNavigateBack();
+      await disposeAgora();
       await Get.find<CallManagerService>().endCall();
     } finally {
       _isAutoEndingCall = false;
@@ -825,8 +894,12 @@ class AudioCallController extends GetxController {
       print("[ANTIGRAVITY_DEBUG] Re-attaching to existing active audio call session");
       _syncUsersWithCallMembers();
       _updateCallManagerParticipantNames();
-      if (callManager.callStartedAt.value != null || callManager.connectedAt.value != null) {
+      if (remoteParticipantsCount > 0 && callManager.connectedAt.value != null) {
         _startCallDurationTimer();
+      } else {
+        isCallConnected = false;
+        callDuration = Duration.zero;
+        _stopCallDurationTimer(reset: true);
       }
       logCallTimerDebug();
       update();
@@ -859,18 +932,13 @@ class AudioCallController extends GetxController {
       startTime: callManager.callStartedAt.value,
     );
 
-    // If caller, start in Ringing... state until remote user joins or accepts
-    if (isSelfCall == true) {
-      if (remoteParticipantsCount > 0) {
-        _startCallDurationTimer();
-      } else {
-        isCallConnected = false;
-        callDuration = Duration.zero;
-      }
+    // Start countdown ONLY if remote participant has actually joined
+    if (remoteParticipantsCount > 0) {
+      _startCallDurationTimer();
     } else {
-      if (remoteParticipantsCount > 0 || callManager.connectedAt.value != null) {
-        _startCallDurationTimer();
-      }
+      isCallConnected = false;
+      callDuration = Duration.zero;
+      _stopCallDurationTimer(reset: true);
     }
     _updateCallManagerParticipantNames();
     logCallTimerDebug();
@@ -1400,6 +1468,7 @@ class AudioCallController extends GetxController {
                   builder: (audioController) {
                     return GetBuilder<ChatController>(
                       builder: (chatController) {
+                        // Always trigger friends load if empty
                         if (chatController.allFriends.isEmpty) {
                           chatController.myFriendsList(1);
                         }
@@ -1407,15 +1476,60 @@ class AudioCallController extends GetxController {
                         final currentUserId = Get.find<Repository>().getStringValue(LocalKeys.userIds);
                         final activeParticipantIds = audioController.getActiveAndPendingParticipantUserIds();
 
-                        final availableFriends = chatController.allFriends.where((friend) {
-                          final friendId = friend.userid ?? "";
-                          if (friendId.isEmpty) return false;
-                          if (friendId == currentUserId) return false;
-                          if (activeParticipantIds.contains(friendId)) return false;
-                          return true;
-                        }).toList();
+                        // Combine allFriends + device contacts who are ChatNest app users
+                        final Map<String, MyFriendDatum> combinedMap = {};
+
+                        // Add existing friends
+                        for (final friend in chatController.allFriends) {
+                          final fId = friend.userid ?? "";
+                          if (fId.isNotEmpty && fId != currentUserId && !activeParticipantIds.contains(fId)) {
+                            combinedMap[fId] = friend;
+                          }
+                        }
+
+                        // Also add device contacts who are app users
+                        if (Get.isRegistered<CallController>()) {
+                          final callCtrl = Get.find<CallController>();
+                          if (callCtrl.contactsList.isEmpty) {
+                            callCtrl.postSyncContacts();
+                          }
+                          for (final contact in callCtrl.contactsList) {
+                            if (contact.isChatNestUser == true) {
+                              final cId = contact.chatNestUser?.id ?? "";
+                              if (cId.isNotEmpty && cId != currentUserId && !activeParticipantIds.contains(cId)) {
+                                if (!combinedMap.containsKey(cId)) {
+                                  combinedMap[cId] = MyFriendDatum(
+                                    userid: cId,
+                                    fullname: contact.name,
+                                    nickname: contact.name,
+                                    mobile: contact.mobile,
+                                    profileimage: contact.chatNestUser?.profileImage,
+                                  );
+                                }
+                              }
+                            }
+                          }
+                        }
+
+                        final availableFriends = combinedMap.values.toList();
 
                         audioController.logAddParticipantDebug(availableFriends, activeParticipantIds, currentUserId);
+
+                        if (chatController.allFriends.isEmpty && combinedMap.isEmpty) {
+                          return Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const CircularProgressIndicator(),
+                                const SizedBox(height: 12),
+                                Text(
+                                  "Loading contacts...",
+                                  style: Styles.greyColor888840012,
+                                ),
+                              ],
+                            ),
+                          );
+                        }
 
                         if (availableFriends.isEmpty) {
                           return Center(

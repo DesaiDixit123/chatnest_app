@@ -803,5 +803,19 @@ class AppPages {
       binding: SettingBinding(),
       transition: Transition.fadeIn,
     ),
+    GetPage<MembershipPlansScreen>(
+      name: _Paths.membershipPlansScreen,
+      transitionDuration: transitionDuration,
+      page: MembershipPlansScreen.new,
+      binding: MembershipPlansBinding(),
+      transition: Transition.fadeIn,
+    ),
+    GetPage<InvoicesScreen>(
+      name: _Paths.invoicesScreen,
+      transitionDuration: transitionDuration,
+      page: InvoicesScreen.new,
+      binding: InvoicesBinding(),
+      transition: Transition.fadeIn,
+    ),
   ];
 }

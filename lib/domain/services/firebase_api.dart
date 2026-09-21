@@ -409,6 +409,7 @@ class FirebaseApi {
   }
 
   static bool _isAcceptingCall = false;
+  static bool get isAcceptingCall => _isAcceptingCall;
 
   static Future<void> ensureServicesInitialized() async {
     WidgetsFlutterBinding.ensureInitialized();
@@ -475,7 +476,10 @@ class FirebaseApi {
 
       final String agorachannelName = (callData['agorachannelName'] ?? "").toString();
       final String agoratoken = (callData['agoratoken'] ?? "").toString();
-      final String callId = (callData['callId'] ?? callData['callid'] ?? "").toString();
+      final String callId = (callData['callId'] ?? callData['callid'] ?? callData['id'] ?? "").toString();
+      if (callId.isNotEmpty) {
+        _acceptedCallIds.add(callId);
+      }
       final String rawCallType = (callData['callType'] ?? "").toString().toLowerCase();
       final String rawIsVideo = (callData['isvideocall'] ?? "").toString().toLowerCase();
       final String banner = (callData['banner'] ?? "").toString();
@@ -921,6 +925,12 @@ class FirebaseApi {
           print("[ANTIGRAVITY_DEBUG] Received CALL_DECLINED_INTENT from native: $data");
           final callId = (data['callId'] ?? data['callid'] ?? data['id'] ?? "").toString();
           if (callId.isNotEmpty) {
+            if (_acceptedCallIds.contains(callId) ||
+                _isActiveCallOpen(callId) ||
+                (Get.isRegistered<CallManagerService>() && Get.find<CallManagerService>().isCallActive)) {
+              print("[ANTIGRAVITY_DEBUG] Ignoring CALL_DECLINED_INTENT because call is already accepted/active: $callId");
+              return;
+            }
             await _leaveCallById(callId);
           }
         }

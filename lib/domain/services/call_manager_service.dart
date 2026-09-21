@@ -44,11 +44,11 @@ class CallManagerService extends GetxService {
     if (isNewCallSession) {
       connectedAt.value = null;
       callStartedAt.value = null;
+      activeParticipantNames.clear();
     }
 
     if (startTime != null) {
       callStartedAt.value = startTime;
-      connectedAt.value = startTime;
     }
 
     activeCallType.value = type;
@@ -65,9 +65,7 @@ class CallManagerService extends GetxService {
   }
 
   void updateParticipants(List<String> names) {
-    if (names.isNotEmpty) {
-      activeParticipantNames.assignAll(names);
-    }
+    activeParticipantNames.assignAll(names);
   }
 
   Future<void> endCall() async {

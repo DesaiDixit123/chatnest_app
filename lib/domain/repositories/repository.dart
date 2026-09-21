@@ -155,6 +155,17 @@ class Repository {
     }
   }
 
+  /// Clear all user data from local storage and secure storage.
+  void clearAllUserData() {
+    try {
+      _deviceRepository.deleteBox();
+    } catch (_) {}
+    try {
+      _deviceRepository.deleteAllSecuredValues();
+    } catch (_) {}
+    _cachedSubscription = null;
+  }
+
   /// API to login
   Future<SendOtpModel?> sendOtpApi({
     required String mobile,
@@ -4847,6 +4858,193 @@ class Repository {
       );
       return response;
     } catch (_) {
+      return null;
+    }
+  }
+
+  Future<PlanListResponseModel?> getPlansList({
+    bool isLoading = false,
+  }) async {
+    try {
+      var response = await _dataRepository.getPlansList(
+        isLoading: isLoading,
+      );
+      if (response.data != null) {
+        var model = planListResponseModelFromJson(response.data);
+        return model;
+      }
+      return null;
+    } catch (e) {
+      Utility.closeDialog();
+      return null;
+    }
+  }
+
+  Future<ResponseModel?> subscribePlan({
+    bool isLoading = true,
+    required String planId,
+    required int durationDays,
+    required String durationLabel,
+    required double price,
+    String? paymentId,
+    String? orderId,
+    String? paymentMethod,
+  }) async {
+    try {
+      var response = await _dataRepository.subscribePlan(
+        isLoading: isLoading,
+        planId: planId,
+        durationDays: durationDays,
+        durationLabel: durationLabel,
+        price: price,
+        paymentId: paymentId,
+        orderId: orderId,
+        paymentMethod: paymentMethod,
+      );
+      return response;
+    } catch (e) {
+      Utility.closeDialog();
+      return null;
+    }
+  }
+
+  Future<ResponseModel?> createPaymentOrder({
+    bool isLoading = true,
+    required String planId,
+    required int durationDays,
+    required String durationLabel,
+    required double price,
+  }) async {
+    try {
+      var response = await _dataRepository.createPaymentOrder(
+        isLoading: isLoading,
+        planId: planId,
+        durationDays: durationDays,
+        durationLabel: durationLabel,
+        price: price,
+      );
+      return response;
+    } catch (e) {
+      Utility.closeDialog();
+      return null;
+    }
+  }
+
+  Future<ResponseModel?> verifyPlanPayment({
+    bool isLoading = true,
+    required String planId,
+    required int durationDays,
+    required String durationLabel,
+    required double price,
+    required String paymentId,
+    String? orderId,
+    String? signature,
+  }) async {
+    try {
+      var response = await _dataRepository.verifyPlanPayment(
+        isLoading: isLoading,
+        planId: planId,
+        durationDays: durationDays,
+        durationLabel: durationLabel,
+        price: price,
+        paymentId: paymentId,
+        orderId: orderId,
+        signature: signature,
+      );
+      return response;
+    } catch (e) {
+      Utility.closeDialog();
+      return null;
+    }
+  }
+
+  UserSubscriptionModel? _cachedSubscription;
+
+  UserSubscriptionModel? get currentSubscription {
+    if (_cachedSubscription != null) return _cachedSubscription;
+    final jsonStr = getStringValue(LocalKeys.userSubscription);
+    if (jsonStr.isNotEmpty) {
+      try {
+        _cachedSubscription = UserSubscriptionModel.fromJson(jsonDecode(jsonStr));
+      } catch (_) {}
+    }
+    return _cachedSubscription;
+  }
+
+  void saveSubscription(UserSubscriptionModel? sub) {
+    _cachedSubscription = sub;
+    if (sub != null) {
+      saveValue(LocalKeys.userSubscription, jsonEncode(sub.toJson()));
+    } else {
+      clearData(LocalKeys.userSubscription);
+    }
+  }
+
+  bool canAccessFeature(String featureName) {
+    final sub = currentSubscription;
+    if (sub == null) return false;
+    return sub.hasFeature(featureName);
+  }
+
+  Future<ResponseModel?> getMySubscription({
+    bool isLoading = false,
+  }) async {
+    try {
+      var response = await _dataRepository.getMySubscription(
+        isLoading: isLoading,
+      );
+      if (response != null && response.data != null) {
+        dynamic decoded = response.data;
+        if (decoded is String && decoded.trim().startsWith('{')) {
+          decoded = jsonDecode(decoded);
+        }
+        if (decoded is Map<String, dynamic>) {
+          final data = decoded["Data"] ?? decoded["data"] ?? decoded;
+          if (data is Map<String, dynamic>) {
+            final sub = UserSubscriptionModel.fromJson(data);
+            saveSubscription(sub);
+          }
+        }
+      }
+      return response;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<GstModel?> getGst({
+    bool isLoading = false,
+  }) async {
+    try {
+      var response = await _dataRepository.getGst(
+        isLoading: isLoading,
+      );
+      if (response.data != null) {
+        dynamic decoded = response.data;
+        if (decoded is String) {
+          decoded = jsonDecode(decoded);
+        }
+        if (decoded is Map<String, dynamic> && decoded.containsKey("Data")) {
+          return GstModel.fromJson(decoded["Data"]);
+        } else if (decoded is Map<String, dynamic>) {
+          return GstModel.fromJson(decoded);
+        }
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<ResponseModel?> getMyInvoices({
+    bool isLoading = false,
+  }) async {
+    try {
+      var response = await _dataRepository.getMyInvoices(
+        isLoading: isLoading,
+      );
+      return response;
+    } catch (e) {
       return null;
     }
   }

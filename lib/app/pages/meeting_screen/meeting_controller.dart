@@ -52,34 +52,154 @@ class MeetingController extends GetxController
   TextEditingController startTimeController = TextEditingController();
   TextEditingController endTimeController = TextEditingController();
 
+  List<MyFriendDatum> allMemberList = [];
   List<MyFriendDatum> memberLists = [];
   List<MyFriendDatum> selectedMemberList = [];
-  Future<void> myFriendsWithoutPaginationList() async {
-    var response = await meetingPresenter.myFriendsWithoutPaginationList(
-      search: searchMemberController.text,
-      unreadMessages: false,
-      contactFriend: true,
-      fefieldFriend: true,
-      receiverFriend: true,
-      senderFriend: true,
-      isLoading: false,
-    );
-    memberLists.clear();
-    if (response != null) {
-      memberLists.addAll(response.data?.list ?? []);
+  bool isLoadingMembers = false;
 
+  Future<void> myFriendsWithoutPaginationList() async {
+    isLoadingMembers = true;
+    update();
+
+    try {
+      // 1. Ensure phone contacts are loaded into deviceContactsMap
+      await Utility.loadDeviceContacts();
+
+      // 2. Fetch friend list from backend
+      var response = await meetingPresenter.myFriendsWithoutPaginationList(
+        search: "",
+        unreadMessages: false,
+        contactFriend: true,
+        fefieldFriend: true,
+        receiverFriend: true,
+        senderFriend: true,
+        isLoading: false,
+      );
+
+      final currentUserId =
+          Get.find<Repository>().getStringValue(LocalKeys.userIds);
+      final List<MyFriendDatum> combined = [];
+      final Set<String> seenUserIds = {};
+      final Set<String> seenPhones = {};
+
+      if (currentUserId.isNotEmpty) {
+        seenUserIds.add(currentUserId);
+      }
+
+      if (response?.data?.list != null) {
+        for (var f in response!.data!.list!) {
+          final uid = f.userid ?? "";
+          if (uid.isNotEmpty && !seenUserIds.contains(uid)) {
+            seenUserIds.add(uid);
+            final phoneNorm = Utility.normalizePhoneNumber(f.mobile);
+            if (phoneNorm.isNotEmpty) {
+              seenPhones.add(phoneNorm);
+            }
+            combined.add(f);
+          }
+        }
+      }
+
+      // 3. Load registered contacts from CallController
+      if (Get.isRegistered<CallController>()) {
+        final callCtrl = Get.find<CallController>();
+        if (callCtrl.contactsList.isEmpty) {
+          await callCtrl.fetchContacts();
+          await callCtrl.postSyncContacts();
+        }
+
+        // Cache contact names into deviceContactsMap
+        for (var contact in callCtrl.contactsList) {
+          final phone = contact.contactNumber ??
+              contact.mobile ??
+              contact.chatNestUser?.mobile;
+          final norm = Utility.normalizePhoneNumber(phone);
+          final digits = (phone ?? "").replaceAll(RegExp(r'[^0-9]'), '');
+          final name = contact.contactName ?? contact.name;
+          if (name != null &&
+              name.trim().isNotEmpty &&
+              name != phone &&
+              !RegExp(r'^[+0-9\s()-]+$').hasMatch(name)) {
+            if (norm.isNotEmpty) Utility.deviceContactsMap[norm] = name.trim();
+            if (digits.isNotEmpty) {
+              Utility.deviceContactsMap[digits] = name.trim();
+            }
+          }
+
+          if (contact.isChatNestUser == true) {
+            final uid = contact.userid ?? contact.chatNestUser?.id ?? "";
+            final isSeenUser = uid.isNotEmpty && seenUserIds.contains(uid);
+            final isSeenPhone = norm.isNotEmpty && seenPhones.contains(norm);
+
+            if (!isSeenUser && !isSeenPhone && uid.isNotEmpty) {
+              seenUserIds.add(uid);
+              if (norm.isNotEmpty) seenPhones.add(norm);
+
+              combined.add(
+                MyFriendDatum(
+                  userid: uid,
+                  fullname: name ?? contact.chatNestUser?.fullName ?? "",
+                  nickname: name ?? contact.chatNestUser?.fullName ?? "",
+                  mobile: phone ?? "",
+                  profileimage: contact.chatNestUser?.profileImage ?? "",
+                  countryCode: "",
+                ),
+              );
+            }
+          }
+        }
+      }
+
+      // 4. Sort alphabetically by resolved contact display name
+      combined.sort((a, b) {
+        return a.displayName
+            .toLowerCase()
+            .compareTo(b.displayName.toLowerCase());
+      });
+
+      allMemberList = List.from(combined);
+
+      // 5. Restore edit selection if in edit mode
       if (isEdit) {
         selectedMemberList.clear();
         for (var data in hostMeetingDoc?.members ?? <Member>[]) {
           var index =
-              memberLists.indexWhere((e) => e.userid == data.userid?.id);
+              allMemberList.indexWhere((e) => e.userid == data.userid?.id);
           if (index.isNegative == false) {
-            selectedMemberList.add(memberLists[index]);
+            selectedMemberList.add(allMemberList[index]);
           }
         }
       }
+
+      // 6. Apply filter
+      filterMembers(searchMemberController.text);
+    } catch (e) {
+      debugPrint("❌ MeetingController.myFriendsWithoutPaginationList error: $e");
+    } finally {
+      isLoadingMembers = false;
       update();
     }
+  }
+
+  void filterMembers([String? query]) {
+    final q = (query ?? searchMemberController.text).trim().toLowerCase();
+    if (q.isEmpty) {
+      memberLists = List.from(allMemberList);
+    } else {
+      final qDigits = q.replaceAll(RegExp(r'[^0-9]'), '');
+      memberLists = allMemberList.where((m) {
+        final name = m.displayName.toLowerCase();
+        final rawFullname = (m.fullname ?? "").toLowerCase();
+        final phone = (m.mobile ?? "").toLowerCase();
+        final phoneDigits = phone.replaceAll(RegExp(r'[^0-9]'), '');
+
+        final nameMatches = name.contains(q) || rawFullname.contains(q);
+        final phoneMatches = phone.contains(q) ||
+            (qDigits.isNotEmpty && phoneDigits.contains(qDigits));
+        return nameMatches || phoneMatches;
+      }).toList();
+    }
+    update();
   }
 
   Future<void> postSaveMetting() async {
@@ -274,9 +394,46 @@ class MeetingController extends GetxController
     return token.isNotEmpty && channelName.isNotEmpty;
   }
 
+  bool get hasActiveMeetingSession {
+    final id =
+        Get.find<Repository>().getStringValue(LocalKeys.lastActiveMeetingId);
+    return id.isNotEmpty;
+  }
+
+  String get activeMeetingTitle {
+    final title =
+        Get.find<Repository>().getStringValue(LocalKeys.lastActiveMeetingTitle);
+    return title.isNotEmpty ? title : "Ongoing Session";
+  }
+
+  void dismissActiveMeetingBanner() {
+    final repo = Get.find<Repository>();
+    repo.clearData(LocalKeys.lastActiveMeetingId);
+    repo.clearData(LocalKeys.lastActiveMeetingTitle);
+    repo.clearData(LocalKeys.lastActiveMeetingChannel);
+    repo.clearData(LocalKeys.lastActiveMeetingToken);
+    repo.clearData(LocalKeys.lastActiveMeetingIsHost);
+    update();
+  }
+
+  Future<void> rejoinActiveMeetingSession() async {
+    final repo = Get.find<Repository>();
+    final meetingId = repo.getStringValue(LocalKeys.lastActiveMeetingId);
+    final isHost =
+        repo.getStringValue(LocalKeys.lastActiveMeetingIsHost) == "true";
+    if (meetingId.isEmpty) return;
+
+    if (isHost) {
+      await postHostMeetingStart(meetingId);
+    } else {
+      await postMeetingJoin(meetingId);
+    }
+  }
+
   void _showMeetingNotStartedDialog() {
+    dismissActiveMeetingBanner();
     Utility.showDialog(
-      "Session not started yet. Please wait for the host to start the session.",
+      "Session not started yet or has already ended.",
     );
   }
 
@@ -321,6 +478,8 @@ class MeetingController extends GetxController
       } else {
         _showMeetingNotStartedDialog();
       }
+    } else {
+      dismissActiveMeetingBanner();
     }
     update();
   }
@@ -341,6 +500,8 @@ class MeetingController extends GetxController
       } else {
         _showMeetingNotStartedDialog();
       }
+    } else {
+      dismissActiveMeetingBanner();
     }
     update();
   }
@@ -350,30 +511,20 @@ class MeetingController extends GetxController
     final now = DateTime.now();
     final endTime = now.add(const Duration(hours: 1));
 
-    final startDate = DateFormat("yyyy-dd-MM").format(now);
+    final startDate = DateFormat("dd-MM-yyyy").format(now);
     final startTime = DateFormat("HH:mm").format(now);
-    final endDate = DateFormat("yyyy-dd-MM").format(endTime);
+    final endDate = DateFormat("dd-MM-yyyy").format(endTime);
     final endTimeFormatted = DateFormat("HH:mm").format(endTime);
-
-    // Debug logging
-    print("=== Instant Meeting Debug ===");
-    print("Now: $now");
-    print("End Time: $endTime");
-    print("Start Date: $startDate");
-    print("Start Time: $startTime");
-    print("End Date: $endDate");
-    print("End Time Formatted: $endTimeFormatted");
-    print("Title: ${titleController.text}");
-    print("Description: ${desController.text}");
-    print("Members: ${selectedMemberList.map((e) => e.userid ?? "").toList()}");
-    print("============================");
 
     // Create the meeting
     var saveResponse = await meetingPresenter.postSaveMetting(
       meetingId: "",
-      title: titleController.text,
-      description:
-          desController.text.isEmpty ? "Instant Session" : desController.text,
+      title: titleController.text.trim().isEmpty
+          ? "Instant Session"
+          : titleController.text.trim(),
+      description: desController.text.trim().isEmpty
+          ? "Instant Session"
+          : desController.text.trim(),
       meetingstartdate: startDate,
       meetingstarttime: startTime,
       meetingenddate: endDate,
@@ -390,100 +541,32 @@ class MeetingController extends GetxController
       final meetingData = jsonDecode(saveResponse!.data);
       final createdMeetingId = meetingData['Data']['_id'] ?? "";
 
-      // Generate meeting link
-      // Using cochat.click as the web base URL based on API domain
-      final meetingLink = "https://cochat.click/meeting/join/$createdMeetingId";
-
-      // Small delay to ensure bottom sheet is closed
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      // Show success dialog with link and options
-      Get.defaultDialog(
-        title: "Session Created",
-        titleStyle: Styles.black70018,
-        content: Column(
-          children: [
-            Text(
-              "Share this link with others to join:",
-              style: Styles.greyColor888840014,
-              textAlign: TextAlign.center,
-            ),
-            Dimens.boxHeight10,
-            Container(
-              padding: Dimens.edgeInsets10,
-              decoration: BoxDecoration(
-                color: ColorsValue.textfildbackcolor,
-                borderRadius: BorderRadius.circular(Dimens.five),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      meetingLink,
-                      style: Styles.black50014,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () async {
-                      await Clipboard.setData(ClipboardData(text: meetingLink));
-                      Utility.errorMessage("Link copied to clipboard");
-                    },
-                    child: Icon(
-                      Icons.copy,
-                      color: ColorsValue.maincolor1,
-                      size: Dimens.twenty,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Dimens.boxHeight20,
-            CustomButton(
-              text: "Share with Friends",
-              height: Dimens.fifty,
-              onTap: () {
-                Get.back(); // Close dialog
-                Get.toNamed(Routes.forwardMessageScreen,
-                    arguments: meetingLink);
-              },
-            ),
-            Dimens.boxHeight10,
-            CustomButton(
-              text: "Join Session",
-              height: Dimens.fifty,
-              onTap: () async {
-                Get.back(); // Close dialog
-
-                // Immediately start the meeting
-                var startResponse = await meetingPresenter.postHostMeetingStart(
-                  meetingid: createdMeetingId,
-                  isLoading: true,
-                );
-
-                if (startResponse != null) {
-                  if (_hasValidAgoraMeta(startResponse.data?.agorameta)) {
-                    // Navigate to meeting call screen
-                    RouteManagement.goToMeetingCallScreen(
-                        startResponse.data?.agorameta?.channelName ?? "",
-                        startResponse.data?.agorameta?.token ?? "",
-                        createdMeetingId,
-                        true,
-                        true);
-
-                    // Refresh the host meeting list
-                    hostPagingController.refresh();
-                  } else {
-                    _showMeetingNotStartedDialog();
-                  }
-                }
-              },
-            ),
-          ],
-        ),
+      // Immediately start the meeting so members receive the incoming meeting call!
+      var startResponse = await meetingPresenter.postHostMeetingStart(
+        meetingid: createdMeetingId,
+        isLoading: true,
       );
+
+      if (startResponse != null) {
+        if (_hasValidAgoraMeta(startResponse.data?.agorameta)) {
+          // Navigate to meeting call screen
+          RouteManagement.goToMeetingCallScreen(
+              startResponse.data?.agorameta?.channelName ?? "",
+              startResponse.data?.agorameta?.token ?? "",
+              createdMeetingId,
+              true,
+              true);
+
+          // Refresh the host meeting list
+          hostPagingController.refresh();
+        } else {
+          _showMeetingNotStartedDialog();
+        }
+      }
     } else {
-      Utility.errorMessage(jsonDecode(saveResponse?.data ?? "{}"));
+      Utility.errorMessage(saveResponse?.data != null
+          ? jsonDecode(saveResponse!.data)['Message'] ?? "Failed to create session"
+          : "Failed to create session");
     }
     update();
   }
@@ -494,11 +577,15 @@ class MeetingController extends GetxController
       isLoading: true,
     );
     if (response?.data != null) {
+      Utility.showMessage(
+          "Session cancelled successfully", MessageType.success, () => null, "OK");
       hostPagingController.refresh();
+      joinPagingController.refresh();
+      pastPagingController.refresh();
       Get.back();
     } else {
       Utility.errorMessage(
-          jsonDecode(response?.data.toString() ?? "")['Message']);
+          jsonDecode(response?.data.toString() ?? "")['Message'] ?? "Failed to cancel session");
     }
     update();
   }

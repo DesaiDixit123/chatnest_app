@@ -6,6 +6,15 @@ import 'package:get/get.dart';
 class VideoCallBinding extends Bindings {
   @override
   void dependencies() {
+    final args = Get.arguments;
+    final targetCallId = (args is List && args.length > 2) ? (args[2] ?? "").toString() : "";
+    if (Get.isRegistered<VideoCallController>()) {
+      final existing = Get.find<VideoCallController>();
+      if (existing.isCallEnded || (existing.callId.isNotEmpty && targetCallId.isNotEmpty && existing.callId != targetCallId)) {
+        existing.disposeAgora();
+        Get.delete<VideoCallController>(force: true);
+      }
+    }
     if (!Get.isRegistered<VideoCallController>()) {
       Get.put<VideoCallController>(
         VideoCallController(

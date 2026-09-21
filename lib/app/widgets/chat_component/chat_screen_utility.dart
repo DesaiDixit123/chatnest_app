@@ -2,11 +2,13 @@ import 'package:chatnest/app/pages/chat_screen/chat_controller.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:chatnest/app/app.dart';
 import 'package:chatnest/app/navigators/navigators.dart';
+import 'package:chatnest/data/helpers/api_wrapper.dart';
 import 'package:chatnest/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:get/get.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ChatScreenUtility {
   static void infoMessageDialog(
@@ -168,6 +170,23 @@ class ChatScreenUtility {
               ],
             ),
           ),
+          PopupMenuItem(
+            value: 9,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Share",
+                  style: Styles.black50014,
+                ),
+                Icon(
+                  Icons.share_outlined,
+                  size: Dimens.twenty,
+                  color: ColorsValue.blackColor,
+                ),
+              ],
+            ),
+          ),
         ],
         if (!Get.find<Repository>().getBoolValue(LocalKeys.isSubUser)) ...[
           if (chatMessageList.contentType != "videocall" &&
@@ -260,6 +279,49 @@ class ChatScreenUtility {
           case 5:
             Get.find<ChatController>().forwardSelectedMemberList.clear();
             RouteManagement.goToForwardMessageScreen(chatMessageList.id ?? "");
+            break;
+          case 9:
+            {
+              // System share sheet - share to external apps (WhatsApp, Gmail, etc.)
+              final contentType = chatMessageList.contentType ?? "";
+              final text = chatMessageList.content?.text.message ?? "";
+              final mediaPath = chatMessageList.content?.media?.path ?? "";
+              final multimedias = chatMessageList.content?.multimedias ?? [];
+
+              if (contentType == "multimedia" ||
+                  contentType == "multimediawithtext" ||
+                  contentType == "multimediawithlinks") {
+                // Share media files via URL
+                final List<Uri> uris = [];
+                if (mediaPath.isNotEmpty) {
+                  final fullUrl = mediaPath.startsWith("http")
+                      ? mediaPath
+                      : "${ApiWrapper.imageUrl}$mediaPath";
+                  uris.add(Uri.parse(fullUrl));
+                }
+                for (final m in multimedias) {
+                  if (m.path.isNotEmpty) {
+                    final fullUrl = m.path.startsWith("http")
+                        ? m.path
+                        : "${ApiWrapper.imageUrl}${m.path}";
+                    uris.add(Uri.parse(fullUrl));
+                  }
+                }
+                final shareText = text.isNotEmpty ? text : "";
+                if (uris.isNotEmpty) {
+                  Share.shareUri(uris.first);
+                } else if (shareText.isNotEmpty) {
+                  Share.share(shareText);
+                }
+              } else if (contentType == "links" || contentType == "multimediawithlinks") {
+                Share.share(text.isNotEmpty ? text : mediaPath);
+              } else {
+                // text, phonecontact, etc.
+                if (text.isNotEmpty) {
+                  Share.share(text);
+                }
+              }
+            }
             break;
           case 6:
             Get.find<ChatController>()
@@ -721,6 +783,23 @@ class ChatScreenUtility {
             ],
           ),
         ),
+        PopupMenuItem(
+          value: 9,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Share",
+                style: Styles.black50014,
+              ),
+              Icon(
+                Icons.share_outlined,
+                size: Dimens.twenty,
+                color: ColorsValue.blackColor,
+              ),
+            ],
+          ),
+        ),
         if (!Get.find<Repository>().getBoolValue(LocalKeys.isSubUser)) ...[
           if (chatGroupMessageList.contentType != "videocall" &&
               chatGroupMessageList.contentType != "audiocall") ...[
@@ -809,6 +888,45 @@ class ChatScreenUtility {
             Get.find<ChatController>().forwardSelectedMemberList.clear();
             RouteManagement.goToForwardMessageGroupScreen(
                 chatGroupMessageList.id ?? "");
+            break;
+          case 9:
+            {
+              final contentType = chatGroupMessageList.contentType ?? "";
+              final text = chatGroupMessageList.content?.text.message ?? "";
+              final mediaPath = chatGroupMessageList.content?.media?.path ?? "";
+              final multimedias = chatGroupMessageList.content?.multimedias ?? [];
+
+              if (contentType == "multimedia" ||
+                  contentType == "multimediawithtext" ||
+                  contentType == "multimediawithlinks") {
+                final List<Uri> uris = [];
+                if (mediaPath.isNotEmpty) {
+                  final fullUrl = mediaPath.startsWith("http")
+                      ? mediaPath
+                      : "${ApiWrapper.imageUrl}$mediaPath";
+                  uris.add(Uri.parse(fullUrl));
+                }
+                for (final m in multimedias) {
+                  if (m.path.isNotEmpty) {
+                    final fullUrl = m.path.startsWith("http")
+                        ? m.path
+                        : "${ApiWrapper.imageUrl}${m.path}";
+                    uris.add(Uri.parse(fullUrl));
+                  }
+                }
+                if (uris.isNotEmpty) {
+                  Share.shareUri(uris.first);
+                } else if (text.isNotEmpty) {
+                  Share.share(text);
+                }
+              } else if (contentType == "links") {
+                Share.share(text.isNotEmpty ? text : mediaPath);
+              } else {
+                if (text.isNotEmpty) {
+                  Share.share(text);
+                }
+              }
+            }
             break;
           case 6:
             Get.find<ChatController>()
@@ -1653,6 +1771,23 @@ class ChatScreenUtility {
             ],
           ),
         ),
+        PopupMenuItem(
+          value: 9,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Share",
+                style: Styles.black50014,
+              ),
+              Icon(
+                Icons.share_outlined,
+                size: Dimens.twenty,
+                color: ColorsValue.blackColor,
+              ),
+            ],
+          ),
+        ),
         if (chatMessageList.contentType != "videocall" &&
             chatMessageList.contentType != "audiocall") ...[
           PopupMenuItem(
@@ -1710,6 +1845,40 @@ class ChatScreenUtility {
           case 5:
             Get.find<ChatController>().forwardSelectedMemberList.clear();
             RouteManagement.goToForwardMessageScreen(chatMessageList.id ?? "");
+            break;
+          case 9:
+            {
+              final contentType = chatMessageList.contentType ?? "";
+              final text = chatMessageList.content?.text.message ?? "";
+              final mediaPath = chatMessageList.content?.media?.path ?? "";
+              final multimedias = chatMessageList.content?.multimedias ?? [];
+              if (contentType == "multimedia" ||
+                  contentType == "multimediawithtext" ||
+                  contentType == "multimediawithlinks") {
+                final List<Uri> uris = [];
+                if (mediaPath.isNotEmpty) {
+                  final fullUrl = mediaPath.startsWith("http")
+                      ? mediaPath
+                      : "${ApiWrapper.imageUrl}$mediaPath";
+                  uris.add(Uri.parse(fullUrl));
+                }
+                for (final m in multimedias) {
+                  if (m.path.isNotEmpty) {
+                    final fullUrl = m.path.startsWith("http")
+                        ? m.path
+                        : "${ApiWrapper.imageUrl}${m.path}";
+                    uris.add(Uri.parse(fullUrl));
+                  }
+                }
+                if (uris.isNotEmpty) {
+                  Share.shareUri(uris.first);
+                } else if (text.isNotEmpty) {
+                  Share.share(text);
+                }
+              } else {
+                if (text.isNotEmpty) Share.share(text);
+              }
+            }
             break;
           case 6:
             Get.find<ChatController>()

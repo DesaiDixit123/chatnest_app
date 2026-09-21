@@ -17,6 +17,7 @@ import 'package:chatnest/data/data.dart';
 import 'package:chatnest/app/navigators/app_pages.dart';
 import 'package:chatnest/app/navigators/navigators.dart';
 import 'package:chatnest/app/widgets/floating_call_widget.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:chatnest/device/repositories/device_repositories.dart';
 
 Future<void> main() async {
@@ -100,7 +101,7 @@ Future<void> initServices() async {
   await Hive.initFlutter();
   // Open a dedicated Hive box for safety data (EULA acceptance, reports, blocks)
   var safetyBox = await Hive.openBox('safety');
-  // ==== Debug/Version migration ==== //
+  // ==== Debug/Version migration & Fresh install cleanup ==== //
   // Ensure the EULA screen appears after a fresh install or when the app version changes.
   const String currentAppVersion = '1.0.0'; // keep in sync with pubspec.yaml
   final storedVersion = safetyBox.get('appVersion');
@@ -108,6 +109,12 @@ Future<void> initServices() async {
     // Clear the acceptance flag so the guard will show the EULA again.
     await safetyBox.delete('eulaAccepted');
     await safetyBox.put('appVersion', currentAppVersion);
+    try {
+      if (Hive.isBoxOpen(StringConstants.appName)) {
+        await Hive.box<dynamic>(StringConstants.appName).clear();
+      }
+      const FlutterSecureStorage().deleteAll();
+    } catch (_) {}
   }
   // ===================================== //
   // Register the UserSafetyService as a singleton with the opened box

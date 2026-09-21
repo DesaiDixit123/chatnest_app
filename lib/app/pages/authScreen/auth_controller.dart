@@ -141,7 +141,7 @@ class LoginController extends GetxController
       );
       Get.closeAllSnackbars();
       if (response?.status == 200) {
-        RouteManagement.goToHomeScreenView();
+        RouteManagement.goToMembershipPlansScreen();
         update();
       } else {
         Utility.closeDialog();

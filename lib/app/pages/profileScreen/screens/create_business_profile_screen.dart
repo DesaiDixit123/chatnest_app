@@ -17,15 +17,25 @@ class CreateBusinessProfileScreen extends GetWidget<ProfileController> {
   Widget build(BuildContext context) {
     return GetBuilder<ProfileController>(
       initState: (state) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
           controller.businessprofileFormKey = GlobalKey<FormState>();
           controller.currentBusStep = 1;
           controller.isValid = true;
           controller.isValidForBusinessWAMobile = true;
           controller.getBusinessCategories(isLoading: true);
-          controller.editBusinessId = Get.arguments ?? "";
-          if (controller.editBusinessId != "") {
-            controller.getOneBusiness(controller.editBusinessId ?? '', true);
+          String passedId = (Get.arguments ?? "").toString();
+          if (passedId.isEmpty) {
+            if (controller.businessList.isEmpty) {
+              await controller.getBusinessList();
+            }
+            if (controller.businessList.isNotEmpty) {
+              passedId = controller.businessList[0].id ?? "";
+            }
+          }
+          controller.editBusinessId = passedId;
+          if (controller.editBusinessId != null &&
+              controller.editBusinessId!.isNotEmpty) {
+            controller.getOneBusiness(controller.editBusinessId!, true);
           } else {
             controller.clearBusinessProfileValues();
           }
@@ -42,7 +52,8 @@ class CreateBusinessProfileScreen extends GetWidget<ProfileController> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Text(
-                    Get.arguments != ""
+                    (controller.editBusinessId != null &&
+                            controller.editBusinessId!.isNotEmpty)
                         ? "edit_business_profile".tr
                         : "createBusinessProfile".tr,
                     style: Styles.black70018,

@@ -485,18 +485,18 @@ class CallScreen extends StatelessWidget {
       final String id = user?.id ?? "";
       if (id.isEmpty || id == currentUserId || seenIds.contains(id)) continue;
       seenIds.add(id);
-      result.add(user!);
+      if (user != null) result.add(user);
     }
 
-    if (item.from != null && (item.from!.id ?? "").isNotEmpty && item.from!.id != currentUserId && !seenIds.contains(item.from!.id)) {
+    if (item.from?.id != null && (item.from?.id ?? "").isNotEmpty && item.from?.id != currentUserId && !seenIds.contains(item.from?.id)) {
       seenIds.add(item.from!.id!);
       result.add(item.from!);
     }
-    if (item.touser != null && (item.touser!.id ?? "").isNotEmpty && item.touser!.id != currentUserId && !seenIds.contains(item.touser!.id)) {
+    if (item.touser?.id != null && (item.touser?.id ?? "").isNotEmpty && item.touser?.id != currentUserId && !seenIds.contains(item.touser?.id)) {
       seenIds.add(item.touser!.id!);
       result.add(item.touser!);
     }
-    if (item.initiatedby != null && (item.initiatedby!.id ?? "").isNotEmpty && item.initiatedby!.id != currentUserId && !seenIds.contains(item.initiatedby!.id)) {
+    if (item.initiatedby?.id != null && (item.initiatedby?.id ?? "").isNotEmpty && item.initiatedby?.id != currentUserId && !seenIds.contains(item.initiatedby?.id)) {
       seenIds.add(item.initiatedby!.id!);
       result.add(item.initiatedby!);
     }

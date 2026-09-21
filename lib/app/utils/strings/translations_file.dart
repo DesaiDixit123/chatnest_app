@@ -441,6 +441,8 @@ class TranslationsFile extends Translations {
           'no': 'No',
           'come_back_soon': 'Come back soon!',
           'are_you_logout': 'Are you sure want to Logout?',
+          'Logged out successfully': 'Logged out successfully',
+          'logout_successful': 'Logged out successfully',
           'old_mobile_number': 'Old Phone Number',
           'enter_old_mobile_number': 'Enter old phone number',
           'enter_valid_old_mobile_number': 'Enter valid old phone number',
@@ -614,6 +616,8 @@ class TranslationsFile extends Translations {
           'links_empty': 'Link data empty...!',
           'media_empty': 'Media data empty...!',
           'h': 'h',
+          'account_suspended': 'Your account has been suspended by the administrator.',
+          'account_suspended_title': 'Account Suspended',
           '': '',
         },
       };

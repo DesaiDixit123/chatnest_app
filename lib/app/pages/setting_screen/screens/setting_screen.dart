@@ -72,6 +72,54 @@ class SettingScreen extends StatelessWidget {
             Dimens.boxHeight5,
             ListTile(
               onTap: () {
+                RouteManagement.goToMembershipPlansScreen();
+              },
+              contentPadding: Dimens.edgeInsets20_0_20_0,
+              leading: const Icon(
+                Icons.workspace_premium_rounded,
+                color: ColorsValue.maincolor1,
+                size: 24,
+              ),
+              title: Text(
+                'Membership Plans'.tr,
+                style: Styles.black50016,
+              ),
+              trailing: SvgPicture.asset(
+                AssetConstants.setting_right_arrow,
+              ),
+            ),
+            Dimens.boxHeight5,
+            Divider(
+              height: Dimens.one,
+              color: ColorsValue.greyE4E4E4,
+            ),
+            Dimens.boxHeight5,
+            ListTile(
+              onTap: () {
+                RouteManagement.goToInvoicesScreen();
+              },
+              contentPadding: Dimens.edgeInsets20_0_20_0,
+              leading: const Icon(
+                Icons.receipt_long_rounded,
+                color: ColorsValue.maincolor1,
+                size: 24,
+              ),
+              title: Text(
+                'Invoices'.tr,
+                style: Styles.black50016,
+              ),
+              trailing: SvgPicture.asset(
+                AssetConstants.setting_right_arrow,
+              ),
+            ),
+            Dimens.boxHeight5,
+            Divider(
+              height: Dimens.one,
+              color: ColorsValue.greyE4E4E4,
+            ),
+            Dimens.boxHeight5,
+            ListTile(
+              onTap: () {
                 RouteManagement.goToPrivacySecurityScreen();
               },
               contentPadding: Dimens.edgeInsets20_0_20_0,

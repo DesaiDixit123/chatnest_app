@@ -1,11 +1,16 @@
 import 'package:chatnest/data/helpers/api_wrapper.dart';
-import 'package:chatnest/device/repositories/device_repositories.dart';
 import 'package:chatnest/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:chatnest/app/app.dart';
 import 'package:chatnest/app/navigators/navigators.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+
+enum HomeTabType {
+  chat,
+  groupChat,
+  status,
+  calls,
+}
 
 class HomeScreenController extends GetxController
     with GetSingleTickerProviderStateMixin {
@@ -16,12 +21,34 @@ class HomeScreenController extends GetxController
   late TabController tabController;
   bool? isProfile;
 
+  bool canAccess(String featureName) {
+    try {
+      final repo = Get.find<Repository>();
+      final sub = repo.currentSubscription;
+      if (sub == null) return false;
+      return sub.hasFeature(featureName);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> fetchSubscription() async {
+    try {
+      await Get.find<Repository>().getMySubscription(isLoading: false);
+      update();
+    } catch (e) {
+      debugPrint("Error fetching subscription in HomeScreen: $e");
+    }
+  }
+
   @override
   void onInit() async {
     tabController = TabController(
-        vsync: this,
-        length: 4);
+      vsync: this,
+      length: 4,
+    );
     tabController.addListener(update);
+    fetchSubscription();
     selectedChateData = null;
     selectedGroupChatData = null;
     fetchDataFromNative();
@@ -35,20 +62,18 @@ class HomeScreenController extends GetxController
     super.onInit();
   }
 
+  @override
+  void onClose() {
+    try {
+      tabController.removeListener(update);
+      tabController.dispose();
+    } catch (_) {}
+    super.onClose();
+  }
+
   void fetchDataFromNative() async {
     try {
-      const MethodChannel('HelloWorld').setMethodCallHandler(
-        (call) async {
-          if (call.method == 'CALL_ACCEPTED_INTENT') {
-            final data = await call.arguments;
-            if (data != null && data is Map) {
-              await FirebaseApi.handleAcceptedCallData(data);
-            } else {
-              print("[ANTIGRAVITY_DEBUG] CALL_ACCEPTED_INTENT received null or invalid data");
-            }
-          }
-        },
-      );
+      await FirebaseApi.checkAndHandlePendingAcceptedCall();
     } catch (e) {
       print("[ANTIGRAVITY_DEBUG] fetchDataFromNative error: $e");
     }
@@ -156,7 +181,7 @@ class HomeScreenController extends GetxController
     var response = await homeScreenPresenter.getProfile(
       isLoading: false,
     );
-    if (response != null) {
+    if (response != null && response.data != null) {
       Utility.profileData = response.data!;
       Get.find<Repository>().saveValue(
           LocalKeys.authorizationlockpin, response.data?.chatlockpin ?? "");
@@ -165,7 +190,7 @@ class HomeScreenController extends GetxController
 
       profileData = response.data!;
       isProfile = response.data?.isprofilecompleted ?? false;
-      fullName = (isProfile == true) ? (response.data!.fullname ?? '') : '';
+      fullName = (isProfile == true) ? (response.data?.fullname ?? '') : '';
       profilePic =
           (isProfile == true) ? (response.data?.profileimage ?? "") : "";
 
@@ -206,13 +231,23 @@ class HomeScreenController extends GetxController
   }
 
   Future<void> postLogout() async {
-    var response = await homeScreenPresenter.postLogout(
-      isLoading: false,
+    ApiWrapper.isLoggingOut = true;
+    try {
+      await homeScreenPresenter.postLogout(
+        isLoading: false,
+      );
+    } catch (_) {}
+    SocketConnection.socketDisconnect();
+    Get.find<Repository>().clearAllUserData();
+    RouteManagement.goToLoginView();
+    Utility.showMessage(
+      "Logged out successfully".tr,
+      MessageType.success,
+      () => null,
+      '',
     );
-    if (response?.statusCode == 200) {
-      SocketConnection.socketDisconnect();
-      Get.find<DeviceRepository>().deleteBox();
-      RouteManagement.goToLoginView();
-    }
+    Future.delayed(const Duration(seconds: 2), () {
+      ApiWrapper.isLoggingOut = false;
+    });
   }
 }

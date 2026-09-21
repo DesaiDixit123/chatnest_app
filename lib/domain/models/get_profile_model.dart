@@ -31,7 +31,7 @@ class GetProfileModel {
 
   Map<String, dynamic> toJson() => {
         "Message": message,
-        "Data": data!.toJson(),
+        "Data": data?.toJson(),
         "Status": status,
         "IsSuccess": isSuccess,
       };

@@ -9,3 +9,5 @@ class ApiConstants {
   static const String reportEndpoint = '/apis/v2/safety/report';
   static const String blockEndpoint = '/apis/v2/safety/block';
 }
+
+

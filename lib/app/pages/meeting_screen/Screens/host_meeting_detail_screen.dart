@@ -194,7 +194,7 @@ class HostMettingDetailScreen extends StatelessWidget {
                                     ),
                                   ),
                                   child: Text(
-                                    'Cancel Session',
+                                    'Cancelled',
                                     style: Styles.redColor50014,
                                   ),
                                 ),
@@ -322,42 +322,66 @@ class HostMettingDetailScreen extends StatelessWidget {
                           child: Row(
                             children: [
                               Expanded(
-                                child: CustomButton(
-                                  text: 'host_meeting'.tr.toUpperCase(),
-                                  onTap: controller.isBtnVisible ?? false
-                                      ? () async {
-                                          if (await Utility
-                                                  .cameraPermissionCheack(
-                                                      context) &&
-                                              await Utility
-                                                  .microphonePermissionCheack(
-                                                      context)) {
-                                            controller.postHostMeetingStart(
-                                                controller.hostMeetingDoc?.id ??
-                                                    "");
-                                          }
-                                        }
-                                      : null,
-                                  height: Dimens.fifty,
-                                  backgroundColor: controller.isBtnVisible ??
-                                          false
-                                      ? ColorsValue.maincolor1
-                                      : ColorsValue.maincolor1.withOpacity(0.6),
-                                  style: Styles.white50014,
+                                child: Builder(
+                                  builder: (context) {
+                                    final bool isAlreadyLive = controller.hostMeetingDoc?.agorameta?.token?.isNotEmpty == true;
+                                    final bool canHostOrRejoin = isAlreadyLive ||
+                                        (controller.isBtnVisible ?? false);
+                                    return CustomButton(
+                                      text: isAlreadyLive
+                                          ? 'REJOIN SESSION'
+                                          : 'host_meeting'.tr.toUpperCase(),
+                                      onTap: canHostOrRejoin
+                                          ? () async {
+                                              if (await Utility
+                                                      .cameraPermissionCheack(
+                                                          context) &&
+                                                  await Utility
+                                                      .microphonePermissionCheack(
+                                                          context)) {
+                                                controller.postHostMeetingStart(
+                                                    controller.hostMeetingDoc?.id ??
+                                                        "");
+                                              }
+                                            }
+                                          : null,
+                                      height: Dimens.fifty,
+                                      backgroundColor: isAlreadyLive
+                                          ? Colors.teal
+                                          : (canHostOrRejoin
+                                              ? ColorsValue.maincolor1
+                                              : ColorsValue.maincolor1.withOpacity(0.6)),
+                                      style: Styles.white50014,
+                                    );
+                                  },
                                 ),
                               ),
                               Dimens.boxWidth10,
                               Expanded(
-                                child: CustomButton(
-                                  text: 'CANCEL SESSION',
-                                  onTap: () async {
-                                    controller.postMeetingCancle(
-                                        controller.hostMeetingDoc?.id ?? "");
-                                  },
-                                  height: Dimens.fifty,
-                                  backgroundColor: ColorsValue.redColor,
-                                  style: Styles.white50014,
-                                ),
+                                  child: CustomButton(
+                                    text: 'CANCEL SESSION',
+                                    onTap: () async {
+                                      Get.defaultDialog(
+                                        title: "Cancel Session",
+                                        titleStyle: Styles.black70018,
+                                        middleText:
+                                            "Are you sure you want to cancel this session?",
+                                        textConfirm: "Yes, Cancel",
+                                        textCancel: "No",
+                                        confirmTextColor: Colors.white,
+                                        buttonColor: ColorsValue.redColor,
+                                        onConfirm: () {
+                                          Get.back();
+                                          controller.postMeetingCancle(
+                                              controller.hostMeetingDoc?.id ??
+                                                  "");
+                                        },
+                                      );
+                                    },
+                                    height: Dimens.fifty,
+                                    backgroundColor: ColorsValue.redColor,
+                                    style: Styles.white50014,
+                                  ),
                               ),
                             ],
                           ),

@@ -182,13 +182,15 @@ class MyFriendDatum {
         "nickname": nickname,
         "hashtag": hashtag,
         "aboutme": aboutme,
-        "hobbies": List<dynamic>.from(hobbies!.map((x) => x)),
-        "location": location!.toJson(),
+        "hobbies": hobbies == null ? null : List<dynamic>.from(hobbies!.map((x) => x)),
+        "location": location?.toJson(),
         "is_pinned": isPinned,
-        "lastchatmessage": lastchatmessage!.toJson(),
+        "lastchatmessage": lastchatmessage?.toJson(),
         "users_permissions": usersPermissions?.toJson(),
         "your_permissions": yourPermissions?.toJson(),
-        "businessprofiles": List<dynamic>.from(businessprofiles!.map((x) => x)),
+        "businessprofiles": businessprofiles == null
+            ? null
+            : List<dynamic>.from(businessprofiles!.map((x) => x)),
         "unreadmessage_count": unreadmessageCount,
         "channelID": channelID,
         "fullname": fullname,
@@ -197,8 +199,9 @@ class MyFriendDatum {
         "email": email,
         "dob": dob,
         "gender": gender,
-        "socialmedialinks":
-            List<dynamic>.from(socialmedialinks!.map((x) => x.toJson())),
+        "socialmedialinks": socialmedialinks == null
+            ? null
+            : List<dynamic>.from(socialmedialinks!.map((x) => x.toJson())),
         "lastseen": lastseen,
         "ismarkedasunread": ismarkedasunread,
         "isBlocked": isBlocked,
@@ -226,38 +229,57 @@ class MyFriendDatum {
         otherUserMobile = lastchatmessage?.to?.mobile;
       }
     }
+    final rawFn = (fullname ?? "").trim();
+    if ((otherUserMobile == null || otherUserMobile.trim().isEmpty) &&
+        rawFn.isNotEmpty &&
+        RegExp(r'^[+0-9\s()-]+$').hasMatch(rawFn)) {
+      otherUserMobile = rawFn;
+    }
 
     // 2. Saved device contact name
     if (otherUserMobile != null && otherUserMobile.trim().isNotEmpty) {
       final contactName = Utility.getContactNameForPhone(otherUserMobile);
-      if (contactName != null && contactName.trim().isNotEmpty) {
+      if (contactName != null &&
+          contactName.trim().isNotEmpty &&
+          !RegExp(r'^[+0-9\s()-]+$').hasMatch(contactName.trim())) {
         return contactName.trim();
       }
     }
 
-    // 3. Registered ChatNest user full name
-    final fn = (fullname ?? "").trim();
-    if (fn.isNotEmpty) return fn;
+    // 3. Registered ChatNest user full name (if not a raw phone number)
+    if (rawFn.isNotEmpty && !RegExp(r'^[+0-9\s()-]+$').hasMatch(rawFn)) {
+      return rawFn;
+    }
 
-    // 4. Registered ChatNest user nickname
+    // 4. Registered ChatNest user nickname (if not a raw phone number)
     final nn = (nickname ?? "").trim();
-    if (nn.isNotEmpty) return nn;
+    if (nn.isNotEmpty && !RegExp(r'^[+0-9\s()-]+$').hasMatch(nn)) {
+      return nn;
+    }
 
     // 5. Name from last chat message matching other participant's userid
     if (lastchatmessage != null) {
       if (lastchatmessage?.from != null &&
           lastchatmessage?.from?.id == userid) {
         final ffn = (lastchatmessage?.from?.fullname ?? "").trim();
-        if (ffn.isNotEmpty) return ffn;
+        if (ffn.isNotEmpty && !RegExp(r'^[+0-9\s()-]+$').hasMatch(ffn)) {
+          return ffn;
+        }
         final fnn = (lastchatmessage?.from?.nickname ?? "").trim();
-        if (fnn.isNotEmpty) return fnn;
+        if (fnn.isNotEmpty && !RegExp(r'^[+0-9\s()-]+$').hasMatch(fnn)) {
+          return fnn;
+        }
       }
       if (lastchatmessage?.to != null &&
           lastchatmessage?.to?.id == userid) {
         final tfn = (lastchatmessage?.to?.fullname ?? "").trim();
-        if (tfn.isNotEmpty) return tfn;
+        if (tfn.isNotEmpty && !RegExp(r'^[+0-9\s()-]+$').hasMatch(tfn)) {
+          return tfn;
+        }
         final tnn = (lastchatmessage?.to?.nickname ?? "").trim();
-        if (tnn.isNotEmpty) return tnn;
+        if (tnn.isNotEmpty && !RegExp(r'^[+0-9\s()-]+$').hasMatch(tnn)) {
+          return tnn;
+        }
       }
     }
 
@@ -268,12 +290,16 @@ class MyFriendDatum {
       if (contact != null &&
           contact.name != null &&
           contact.name!.trim().isNotEmpty &&
-          contact.name != contact.mobile) {
+          contact.name != contact.mobile &&
+          !RegExp(r'^[+0-9\s()-]+$').hasMatch(contact.name!.trim())) {
         return contact.name!.trim();
       }
     }
 
-    // 7. Formatted mobile number
+    // 7. Formatted mobile number or raw name
+    if (rawFn.isNotEmpty) return rawFn;
+    if (nn.isNotEmpty) return nn;
+
     final mob = (otherUserMobile ?? mobile ?? "").trim();
     if (mob.isNotEmpty) {
       final code = (countryCode ?? "").trim();

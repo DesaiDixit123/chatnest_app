@@ -3,6 +3,7 @@ import 'package:chatnest/app/app.dart';
 import 'package:chatnest/app/navigators/navigators.dart';
 import 'package:chatnest/app/theme/gradient_app_bar.dart';
 import 'package:chatnest/data/data.dart';
+import 'package:chatnest/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_svg/svg.dart';
@@ -19,12 +20,13 @@ class ProductScreen extends StatelessWidget {
     return GetBuilder<ProductController>(initState: (state) {
       var controller = Get.find<ProductController>();
       controller.postfriendsproducts();
+      if (Get.isRegistered<ProfileController>()) {
+        Get.find<ProfileController>().getBusinessList();
+      }
     }, builder: (controller) {
       return Scaffold(
         backgroundColor: ColorsValue.white,
         appBar: GradientAppBar(
-         // shadowColor: ColorsValue.greyAAAAAA,
-        //  backgroundColor: ColorsValue.white,
           elevation: Dimens.two,
           centerTitle: false,
           leading: InkWell(
@@ -45,6 +47,57 @@ class ProductScreen extends StatelessWidget {
           title: Text(
             'products'.tr,
             style: Styles.black70018,
+          ),
+          actions: [
+            InkWell(
+              onTap: () {
+                if (Get.isRegistered<ProfileController>()) {
+                  var profileController = Get.find<ProfileController>();
+                  if (profileController.businessList.isNotEmpty) {
+                    RouteManagement.goTobusinessProductScreen(
+                        profileController.businessList[0].id ?? "");
+                    return;
+                  }
+                }
+                RouteManagement.goToBusinessProfileScreen("");
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: Row(
+                  children: [
+                    const Icon(Icons.storefront_outlined, color: Colors.black, size: 20),
+                    const SizedBox(width: 4),
+                    Text(
+                      "My Store",
+                      style: Styles.black70014,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () {
+            if (Get.isRegistered<ProfileController>()) {
+              var profileController = Get.find<ProfileController>();
+              if (profileController.businessList.isNotEmpty) {
+                RouteManagement.goToaddbusinessProductScreen("");
+                return;
+              }
+            }
+            Utility.showMessage(
+              "Please create a business profile first to add products.",
+              MessageType.information,
+              () => RouteManagement.goToBusinessProfileScreen(""),
+              "CREATE",
+            );
+          },
+          backgroundColor: ColorsValue.maincolor1,
+          icon: const Icon(Icons.add, color: Colors.white),
+          label: const Text(
+            "Add Product",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
         ),
         // bottomNavigationBar: SafeArea(
