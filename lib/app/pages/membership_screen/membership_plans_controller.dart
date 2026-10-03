@@ -455,7 +455,7 @@ class MembershipPlansController extends GetxController {
     final totalPayable = getTotalPrice(basePrice);
     final amountInPaise = (totalPayable * 100).round();
     String? orderId;
-    const razorpayKeyId = "rzp_test_TbPA2cXw0tTa91";
+    const razorpayKeyId = "rzp_live_TizoH6DpiW0jl7";
 
     try {
       // 1. Create order on backend (no blocking loader dialog)

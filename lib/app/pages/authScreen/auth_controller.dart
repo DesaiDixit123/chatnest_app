@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:chatnest/app/app.dart';
 import 'package:chatnest/app/navigators/navigators.dart';
 import 'package:chatnest/domain/domain.dart';
@@ -141,6 +142,20 @@ class LoginController extends GetxController
       );
       Get.closeAllSnackbars();
       if (response?.status == 200) {
+        try {
+          final subRes = await Get.find<Repository>().getMySubscription(isLoading: false);
+          if (subRes != null && !subRes.hasError && subRes.data.isNotEmpty) {
+            final decoded = jsonDecode(subRes.data);
+            if (decoded is Map && decoded['Data'] != null) {
+              final sub = UserSubscriptionModel.fromJson(decoded['Data']);
+              if (sub.isActive) {
+                RouteManagement.goToHomeScreenView();
+                update();
+                return;
+              }
+            }
+          }
+        } catch (_) {}
         RouteManagement.goToMembershipPlansScreen();
         update();
       } else {

